@@ -4,6 +4,7 @@ import { useAuthStore } from "@/hooks/useAuth";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 
+import Link from "next/link";
 import DarkModeSwitcher from "../ui/DarkModeSwitcher";
 
 const Navbar = () => {
@@ -49,9 +50,11 @@ const Navbar = () => {
           <div className="flex items-center justify-between ">
             {/* Right side - Logo */}
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
-                <img src="images/logo-bg.png" alt="" />
-              </div>
+              <Link href="/">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
+                  <img src="images/logo-bg.png" alt="" />
+                </div>
+              </Link>
               <div className="hidden lg:flex items-center">
                 <DarkModeSwitcher />
               </div>
@@ -88,14 +91,20 @@ const Navbar = () => {
               ) : (
                 /* Auth Buttons for non-authenticated users */
                 <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-2 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth font-medium border border-gray-200 dark:border-gray-700">
+                  <Link
+                    href={"/login"}
+                    className="flex items-center gap-2 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth font-medium border border-gray-200 dark:border-gray-700"
+                  >
                     <Icon icon="solar:login-3-bold" className="w-4 h-4" />
                     تسجيل الدخول
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white hover:bg-blue-600 rounded-xl smooth font-medium">
+                  </Link>
+                  <Link
+                    href={"/register"}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white hover:bg-blue-600 rounded-xl smooth font-medium"
+                  >
                     <Icon icon="solar:user-plus-bold" className="w-4 h-4" />
                     إنشاء حساب
-                  </button>
+                  </Link>
                 </div>
               )}
 
@@ -244,14 +253,20 @@ const Navbar = () => {
                 ) : (
                   /* Mobile Auth Buttons */
                   <div className="space-y-3">
-                    <button className="flex items-center justify-center gap-2 w-full p-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth font-medium border border-gray-200 dark:border-gray-700">
+                    <Link
+                      href={"/login"}
+                      className="flex items-center justify-center gap-2 w-full p-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth font-medium border border-gray-200 dark:border-gray-700"
+                    >
                       <Icon icon="solar:login-3-bold" className="w-4 h-4" />
                       تسجيل الدخول
-                    </button>
-                    <button className="flex items-center justify-center gap-2 w-full p-3 bg-blue-500 text-white hover:bg-blue-600 rounded-xl smooth font-medium">
+                    </Link>
+                    <Link
+                      href={"/register"}
+                      className="flex items-center justify-center gap-2 w-full p-3 bg-blue-500 text-white hover:bg-blue-600 rounded-xl smooth font-medium"
+                    >
                       <Icon icon="solar:user-plus-bold" className="w-4 h-4" />
                       إنشاء حساب
-                    </button>
+                    </Link>
                   </div>
                 )}
               </div>

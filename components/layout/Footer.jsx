@@ -47,11 +47,8 @@ const Footer = () => {
           {/* Brand and Description */}
           <div className="mb-6">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                <Icon
-                  icon="solar:graduation-bold"
-                  className="w-6 h-6 text-white"
-                />
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
+                <img src="images/logo-bg.png" alt="" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white">
@@ -101,7 +98,7 @@ const Footer = () => {
                 />
                 <Link
                   href={"https://yousseif.xyz"}
-                  className="text-gray-700 dark:text-gray-300 font-medium bg-gray-200 smooth dark:bg-gray-800 p-2 px-4 rounded-md"
+                  className="text-gray-700 dark:text-gray-300 font-medium bg-gray-200 smooth dark:bg-gray-800 p-2 px-4 rounded-md hover:bg-opacity-60"
                 >
                   يوسف محمد
                 </Link>

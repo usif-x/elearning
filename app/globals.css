@@ -2,9 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-
+@layer base {
+  :root {
+    --color-primary: #00a6f4;
+    --color-secondary: #024a70;
+    --color-sky: #63d2f1;
+    --color-red: #ef4444;
+    --color-green: #22c55e;
+    --color-yellow: #f59e0b;
+  }
+}
 
 :root {
   --color-primary: #3b82f6; /* blue-500 */
   --color-secondary: #004d7d; /* purple-500 */
+}
+
+
+html {
+  scroll-behavior: smooth;
 }
