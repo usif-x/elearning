@@ -1,0 +1,49 @@
+
+:root {
+  --btn-bg-light: var(--color-primary);  /* equivalent to bg-blue-500/20 */
+  --btn-bg-dark: var(--color-secondary);   /* equivalent to dark:bg-purple-500/30 */
+  
+  /* Icon colors */
+  --icon-sun: #ffffff;        /* white for the outer icons */
+  --icon-inner-sun: var(--color-primary);   /* blue-500 for the sun inside the circle */
+  --icon-inner-moon: var(--color-secondary);  /* purple-500 for the moon inside the circle */
+  
+  /* Slider (circle) background */
+  --slider-bg: rgb(255, 255, 255); /* white/90 */
+  
+  /* Glow effect for button */
+  --glow-light-start: rgba(59, 131, 246, 0);
+  --glow-light-end: rgba(59, 130, 246, 0);
+  --glow-dark-start: rgba(85, 153, 247, 0);
+  --glow-dark-end: rgba(85, 153, 247, 0);
+}
+.dark-mode-btn {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark-mode-btn::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 9999px;
+  z-index: -1;
+  background: radial-gradient(circle, var(--glow-light-start) 0%, var(--glow-light-end) 70%);
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.dark-mode-btn.dark::after {
+  background: radial-gradient(circle, var(--glow-dark-start) 0%, var(--glow-dark-end) 70%);
+}
+
+.dark-mode-btn {
+  background-color: var(--btn-bg-light);
+}
+
+.dark-mode-btn.dark {
+  background-color: var(--btn-bg-dark);
+}
+
