@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import Link from "next/link";
 
 const Footer = () => {
@@ -39,7 +40,7 @@ const Footer = () => {
 
   return (
     <footer
-      className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 smooth"
+      className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 smooth"
       dir="rtl"
     >
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
@@ -48,7 +49,12 @@ const Footer = () => {
           <div className="mb-6">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
-                <img src="images/logo-bg.png" alt="" />
+                <Image
+                  src="/images/logo-bg.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white">

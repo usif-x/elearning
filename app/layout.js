@@ -2,23 +2,26 @@ import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { Zain } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 
-const ZainSans = Zain({
-  subsets: ["latin"],
-  variable: "--font-zain-sans",
-  weight: ["200", "300", "400", "700", "800", "900"],
+const IBMSans = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic", "latin"], // 👈 مهم تضيف "arabic"
+  weight: ["100", "200", "300", "400", "500", "600", "700"], // 👈 من غير backticks
 });
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${ZainSans.className} dark:bg-slate-950 smooth`}>
+      <body
+        className={`${IBMSans.className} bg-gray-50 dark:bg-gray-900 smooth`}
+      >
         <ThemeProvider>
-          <Navbar />
-          {children}
-          <Footer />
+          <Navbar>
+            {children}
+            <Footer />
+          </Navbar>
+
           <ToastContainerWrapper />
         </ThemeProvider>
       </body>

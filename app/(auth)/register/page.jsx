@@ -2,6 +2,7 @@
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -323,7 +324,12 @@ export default function TelegramRegisterPage() {
             {/* Logo/Header */}
             <div className="text-center mb-8 flex flex-col items-center">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
-                <img src="images/logo-bg.png" alt="" />
+                <Image
+                  src="/images/logo-bg.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 transition-colors duration-200">
                 إنشاء حساب جديد
@@ -372,15 +378,6 @@ export default function TelegramRegisterPage() {
                       id="telegram-widget"
                       className="flex justify-center mb-4"
                     ></div>
-
-                    {/* Demo Button for testing */}
-                    <button
-                      onClick={handleMockTelegramAuth}
-                      className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-                    >
-                      <Icon icon="logos:telegram" className="mr-2" />
-                      تسجيل الدخول بتليجرام (تجريبي)
-                    </button>
                   </div>
                 </div>
               </div>
