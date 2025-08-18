@@ -21,7 +21,7 @@ module.exports = {
     function ({ addUtilities }) {
       addUtilities({
         ".smooth": {
-          transition: "all 0.3s ease-in-out",
+          transitionDuration: "300ms",
         },
       });
     },

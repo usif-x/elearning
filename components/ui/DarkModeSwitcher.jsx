@@ -1,41 +1,8 @@
 "use client";
+import { useTheme } from "@/context/ThemeProvider";
 import "@/styles/darkmode.css";
-import { useEffect, useState } from "react";
 export default function DarkModeSwitcher() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check localStorage on initial load
-    const savedTheme = localStorage.getItem("theme");
-    const html = document.documentElement;
-
-    if (
-      savedTheme === "dark" ||
-      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    ) {
-      html.classList.add("dark");
-      setIsDarkMode(true);
-    } else {
-      html.classList.remove("dark");
-      setIsDarkMode(false);
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    const html = document.documentElement;
-
-    if (html.classList.contains("dark")) {
-      // Switch to light mode
-      html.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-      setIsDarkMode(false);
-    } else {
-      // Switch to dark mode
-      html.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-      setIsDarkMode(true);
-    }
-  };
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   return (
     <div id="darkModeContainer" dir="ltr">

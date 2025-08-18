@@ -2,9 +2,9 @@
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { Icon } from "@iconify/react";
-import { useEffect, useState } from "react";
-
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 // Main Register Component
 export default function TelegramRegisterPage() {
@@ -86,18 +86,48 @@ export default function TelegramRegisterPage() {
       }
     }
 
-    window.onTelegramAuth = (user) => {
-      console.log("Telegram auth successful:", user);
-      setTelegramData({
+    window.onTelegramAuth = async (user) => {
+      toast.success("تم التحقق من حساب تليجرام بنجاح!");
+      const authData = {
         id: user.id,
-        username: user.username,
         first_name: user.first_name,
         last_name: user.last_name,
+        username: user.username,
         photo_url: user.photo_url,
         auth_date: user.auth_date,
         hash: user.hash,
-      });
-      setStep(2);
+      };
+
+      // Update state with Telegram data
+      setTelegramData(authData);
+
+      // Send verification to backend
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/telegram/verify`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ telegram_auth: authData }),
+          }
+        );
+
+        const data = await res.json();
+        if (!res.ok) {
+          console.error("Telegram verification error:", data);
+          toast.error(data.detail || "خطأ في التحقق من تليجرام");
+          setErrors((prev) => ({ ...prev, telegram: data.message }));
+          return;
+        }
+
+        console.log("Telegram verified:", data);
+        setStep(2);
+      } catch (err) {
+        console.error("Error sending telegram verification:", err);
+        setErrors((prev) => ({ ...prev, telegram: "خطأ في توصيل التحقق" }));
+      }
     };
 
     return () => {
@@ -266,7 +296,7 @@ export default function TelegramRegisterPage() {
 
   return (
     <div
-      className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+      className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors smooth"
       dir="rtl"
     >
       <div className="flex min-h-screen">

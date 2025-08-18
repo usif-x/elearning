@@ -4,6 +4,7 @@ import Input from "@/components/ui/Input";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 // Main Login Component
 export default function TelegramLoginPage() {
@@ -38,22 +39,44 @@ export default function TelegramLoginPage() {
       }
     }
 
-    window.onTelegramAuth = (user) => {
-      console.log("Telegram auth successful:", user);
-      setTelegramData({
+    window.onTelegramAuth = async (user) => {
+      toast.success("تم التحقق من حساب تليجرام بنجاح!");
+      setStep(2); // Move to step 2 after successful auth
+      const authData = {
         id: user.id,
-        username: user.username,
         first_name: user.first_name,
         last_name: user.last_name,
+        username: user.username,
         photo_url: user.photo_url,
         auth_date: user.auth_date,
         hash: user.hash,
-      });
-      setStep(2);
-    };
+      };
 
-    return () => {
-      delete window.onTelegramAuth;
+      // Update state with Telegram data
+      setTelegramData(authData);
+
+      // Send verification to backend
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/telegram/verify`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ telegram_auth: authData }),
+          }
+        );
+
+        const data = await res.json();
+        if (!res.ok) {
+          toast.error(data.detail);
+          return;
+        }
+      } catch (err) {
+        console.error("Error sending telegram verification:", err);
+        setErrors((prev) => ({ ...prev, telegram: "خطأ في توصيل التحقق" }));
+      }
     };
   }, [step]);
 

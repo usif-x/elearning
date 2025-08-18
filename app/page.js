@@ -9,7 +9,7 @@ export default function Home() {
         <p className="mt-4 text-lg">
           Explore our courses and enhance your skills!
         </p>
-        <Button text="اضغط هنا" outline={true} color="red" shade={600} />
+        <Button text="اضغط هنا" color="red" shade={600} />
       </main>
     </>
   );
