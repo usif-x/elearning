@@ -23,7 +23,7 @@ const Input = ({
   placeholder,
   error,
   textarea = false,
-  dir = "ltr",
+  dir = "rtl",
   color = "sky",
   validate,
   onFocus: propOnFocus,

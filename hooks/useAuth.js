@@ -27,23 +27,26 @@ export const useAuthStore = create(
       user: null,
       admin: null,
       token: null,
+      refresh_token: null,
       userType: null,
 
-      login: ({ user, token }) => {
+      login: ({ user, token, refresh_token }) => {
         set({
           isAuthenticated: true,
           user,
           token,
+          refresh_token,
           userType: "user",
           admin: null,
         });
       },
 
-      adminLogin: ({ admin, token }) => {
+      adminLogin: ({ admin, token, refresh_token }) => {
         set({
           isAuthenticated: true,
           admin,
           token,
+          refresh_token,
           userType: "admin",
           user: null,
         });
@@ -55,6 +58,7 @@ export const useAuthStore = create(
           user: null,
           admin: null,
           token: null,
+          refresh_token: null,
           userType: null,
         });
       },
@@ -87,6 +91,7 @@ export const useAuthStore = create(
         user: state.user,
         admin: state.admin,
         token: state.token,
+        refresh_token: state.refresh_token,
         userType: state.userType,
       }),
     }

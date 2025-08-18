@@ -1,18 +1,24 @@
 "use client";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { useAuthStore } from "@/hooks/useAuth";
+import { postData } from "@/libs/axios";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 // Main Login Component
 export default function TelegramLoginPage() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [loginMethod, setLoginMethod] = useState(null); // 'phone' or 'email'
   const [telegramData, setTelegramData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [telegram_hash, setTelegramHash] = useState(null);
+  const login = useAuthStore((state) => state.login);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -57,20 +63,18 @@ export default function TelegramLoginPage() {
 
       // Send verification to backend
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/telegram/verify`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ telegram_auth: authData }),
-          }
-        );
+        const res = postData("/auth/telegram/verify", {
+          telegram_auth: authData,
+        });
 
-        const data = await res.json();
-        if (!res.ok) {
-          toast.error(data.detail);
+        const data = await res;
+        if (data.next_step === "register") {
+          toast.info("لا يوجد حساب مرتبط. يمكنك التسجيل الآن.");
+          router.push("/register");
+          return;
+        } else if (data.next_step === "login") {
+          setStep(2);
+          setTelegramHash(data.telegram_hash);
           return;
         }
       } catch (err) {
@@ -121,21 +125,68 @@ export default function TelegramLoginPage() {
       }
 
       const loginData = {
-        telegram_id: telegramData.id,
-        telegram_username: telegramData.username,
-        telegram_hash: telegramData.hash,
-        auth_date: telegramData.auth_date,
         ...(loginMethod === "phone"
-          ? { phone_number: formData.phoneNumber }
-          : { email: formData.email, password: formData.password }),
+          ? {
+              telegram_hash: telegram_hash,
+              login_method: "phone",
+              phone_number: formData.phoneNumber,
+            }
+          : {
+              telegram_hash: telegram_hash,
+              login_method: "email",
+              email: formData.email,
+              password: formData.password,
+            }),
       };
+      const loginResponse = await postData("/auth/login", loginData);
+      if (loginResponse.error) {
+        throw new Error(loginResponse.error);
+      }
+      toast.success("تم تسجيل الدخول بنجاح!");
+      login({
+        user: loginResponse.user,
+        token: loginResponse.access_token,
+        refresh_token: loginResponse.refresh_token,
+      });
+      router.push("/");
+      /* 
+      
+      {
+        "success": true,
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidGVsZWdyYW1faWQiOiI3NTk1NDc5MjM2IiwidXNlcl9pZCI6MSwicm9sZSI6InN0dWRlbnQiLCJlbWFpbCI6InlvdXNzZWlmQGdtYWlsLmNvbSIsInBob25lIjoiMDEwNzA0NDA4NjEiLCJ2ZXJpZmllZCI6ZmFsc2UsImV4cCI6MTc1NjEzNTIyNiwiaWF0IjoxNzU1NTMwNDI2LCJpc3MiOiJFLUxlYXJuaW5nIFBsYXRmb3JtIiwidHlwZSI6ImFjY2VzcyIsInVzZXJfdXBkYXRlZCI6MTc1NTUzMDMyNH0.-cdU5IOgHswV6A0Q5nA9tnsuIo3P6AeobzEhMsF2brk",
+        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidGVsZWdyYW1faWQiOiI3NTk1NDc5MjM2IiwidXNlcl9pZCI6MSwiZXhwIjoxNzU4MTIyNDI2LCJpYXQiOjE3NTU1MzA0MjYsImlzcyI6IkUtTGVhcm5pbmcgUGxhdGZvcm0iLCJ0eXBlIjoicmVmcmVzaCIsInVzZXJfdXBkYXRlZCI6MTc1NTUzMDMyNH0.fA2mi42ESEqa9p9OLrnnO5FyXlZ8srwApcUXbXjxhck",
+        "token_type": "bearer",
+        "expires_in": 420,
+        "user": {
+            "id": 1,
+            "email": "yousseif@gmail.com",
+            "full_name": "Yousseif Muhammed",
+            "display_name": "Yousseif Muhammed",
+            "phone_number": "01070440861",
+            "parent_phone_number": "01070440862",
+            "profile_picture": "https://t.me/i/userpic/320/adhbY7GrEIGqLgiI0mqLgAsvn-guKv2odE4kTitRkIX59HNSRyqCmHApbJeyy0Xd.jpg",
+            "is_active": true,
+            "is_verified": false,
+            "status": "student",
+            "telegram_id": "7595479236",
+            "telegram_username": "YousseifMuhammed",
+            "telegram_first_name": "Yousseif Muhammed",
+            "telegram_last_name": null,
+            "telegram_verified": true,
+            "created_at": "2025-08-18T16:51:25",
+            "updated_at": "2025-08-18T18:20:26",
+            "last_login": "2025-08-18T15:20:26",
+            "identifier": "YousseifMuhammed",
+            "login_methods": [
+                "email",
+                "phone",
+                "telegram"
+            ]
+        },
+        "message": "Login successful via email"
+    }
+      */
 
-      console.log("Login data:", loginData);
-
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      alert("تم تسجيل الدخول بنجاح!");
       // Here you would typically redirect to dashboard or home page
     } catch (error) {
       console.error("Login error:", error);

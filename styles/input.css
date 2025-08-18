@@ -186,6 +186,10 @@
   padding: 0.15rem 0.5rem;
 }
 
+.dark .modern-input {
+  color: white;
+}
+
 /* Focus effects */
 .focus-highlight {
   position: absolute;

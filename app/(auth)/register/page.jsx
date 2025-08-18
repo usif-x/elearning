@@ -3,11 +3,13 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 // Main Register Component
 export default function TelegramRegisterPage() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [telegramData, setTelegramData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -121,9 +123,15 @@ export default function TelegramRegisterPage() {
           setErrors((prev) => ({ ...prev, telegram: data.message }));
           return;
         }
+        if (data.next_step === "register") {
+          setStep(2); // Move to step 2 after successful auth
+        } else if (data.next_step === "login") {
+          toast.info("لديك حساب بالفعل. تسجيل الدخول الآن.");
+          router.push("/login");
+          return;
+        }
 
         console.log("Telegram verified:", data);
-        setStep(2);
       } catch (err) {
         console.error("Error sending telegram verification:", err);
         setErrors((prev) => ({ ...prev, telegram: "خطأ في توصيل التحقق" }));

@@ -16,10 +16,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${ZainSans.className} dark:bg-slate-950 smooth`}>
         <ThemeProvider>
-          <ToastContainerWrapper />
           <Navbar />
           {children}
           <Footer />
+          <ToastContainerWrapper />
         </ThemeProvider>
       </body>
     </html>

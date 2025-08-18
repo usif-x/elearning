@@ -5,7 +5,9 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 
 import Link from "next/link";
+import Button from "../ui/Button";
 import DarkModeSwitcher from "../ui/DarkModeSwitcher";
+import Input from "../ui/Input";
 
 const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -16,7 +18,7 @@ const Navbar = () => {
   const [activeItem, setActiveItem] = useState("profile");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const { isAuthenticated, user, isUser } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -75,7 +77,7 @@ const Navbar = () => {
                         الرصيد
                       </span>
                       <span className="text-sm font-bold text-gray-800 dark:text-white leading-none">
-                        {user?.balance || 0} ريال
+                        {user?.wallet_balance || 0} ريال
                       </span>
                     </div>
                   </div>
@@ -150,10 +152,10 @@ const Navbar = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-800 dark:text-white text-sm">
-                          {user?.name}
+                          {user?.full_name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          عضو مميز
+                          {user?.email || "غير متوفر"}
                         </p>
                       </div>
                     </div>
@@ -169,7 +171,7 @@ const Navbar = () => {
                           الرصيد
                         </span>
                         <span className="text-sm font-bold text-gray-800 dark:text-white leading-none">
-                          {user?.balance || 0} ريال
+                          {user?.wallet_balance || 0} ريال
                         </span>
                       </div>
                     </div>
@@ -280,78 +282,36 @@ const Navbar = () => {
         {/* Search Modal */}
         {isSearchOpen && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-24">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-4xl mx-4 smooth">
-              <div className="p-6 lg:p-8">
-                <div className="flex items-center gap-4 mb-6 lg:mb-8">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-500 rounded-xl lg:rounded-2xl flex items-center justify-center">
-                    <Icon
-                      icon="solar:magnifer-bold"
-                      className="w-5 h-5 lg:w-6 lg:h-6 text-white"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="ابحث عن الدورات والمحتوى التعليمي..."
-                    className="flex-1 text-lg lg:text-xl border-none outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-medium"
-                    autoFocus
+            {/* Modal Content */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 w-full max-w-lg mx-4">
+              {/* Search Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  🔎 البحث
+                </h2>
+                <button
+                  onClick={toggleSearch}
+                  className="w-8 h-8 lg:w-10 lg:h-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center"
+                >
+                  <Icon
+                    icon="solar:close-circle-bold"
+                    className="w-5 h-5 lg:w-6 lg:h-6"
                   />
-                  <button
-                    onClick={toggleSearch}
-                    className="w-8 h-8 lg:w-10 lg:h-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center"
-                  >
-                    <Icon
-                      icon="solar:close-circle-bold"
-                      className="w-5 h-5 lg:w-6 lg:h-6"
-                    />
-                  </button>
-                </div>
+                </button>
+              </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-                  <div className="p-4 lg:p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl lg:rounded-2xl border border-blue-200/50 dark:border-blue-700/50 hover:shadow-lg smooth cursor-pointer">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-500 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                      <Icon
-                        icon="solar:book-bold"
-                        className="w-5 h-5 lg:w-6 lg:h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-base lg:text-lg font-bold text-blue-700 dark:text-blue-300 mb-2">
-                      الدورات
-                    </h3>
-                    <p className="text-sm text-blue-600/80 dark:text-blue-400/80">
-                      ابحث في جميع الدورات المتاحة
-                    </p>
-                  </div>
+              {/* Search Input */}
+              <Input
+                type="text"
+                placeholder="ابحث في كورسات الموقع"
+                icon={"solar:magnifer-bold"}
+                className="w-full"
+                dir="rtl"
+              />
 
-                  <div className="p-4 lg:p-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl lg:rounded-2xl border border-purple-200/50 dark:border-purple-700/50 hover:shadow-lg smooth cursor-pointer">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-purple-500 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                      <Icon
-                        icon="solar:users-group-rounded-bold"
-                        className="w-5 h-5 lg:w-6 lg:h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-base lg:text-lg font-bold text-purple-700 dark:text-purple-300 mb-2">
-                      المدربين
-                    </h3>
-                    <p className="text-sm text-purple-600/80 dark:text-purple-400/80">
-                      اكتشف المدربين المتخصصين
-                    </p>
-                  </div>
-
-                  <div className="p-4 lg:p-6 bg-green-50 dark:bg-green-900/20 rounded-xl lg:rounded-2xl border border-green-200/50 dark:border-green-700/50 hover:shadow-lg smooth cursor-pointer">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-500 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                      <Icon
-                        icon="solar:library-bold"
-                        className="w-5 h-5 lg:w-6 lg:h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-base lg:text-lg font-bold text-green-700 dark:text-green-300 mb-2">
-                      المكتبة
-                    </h3>
-                    <p className="text-sm text-green-600/80 dark:text-green-400/80">
-                      موارد ومراجع تعليمية
-                    </p>
-                  </div>
-                </div>
+              {/* Search Button */}
+              <div className="mt-4 flex justify-center">
+                <Button onClick={() => console.log("بحث")} text="بحث" />
               </div>
             </div>
           </div>
@@ -400,10 +360,10 @@ const Navbar = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800 dark:text-white">
-                      {user?.name}
+                      {user?.full_name}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      عضو مميز
+                      {user?.email || "غير متوفر"}
                     </p>
                   </div>
                 </div>
