@@ -1,74 +1,78 @@
 "use client";
 
+import { useAuthStore } from "@/hooks/useAuth";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 
-const Footer = () => {
+const Footer = ({ isSidebarCollapsed }) => {
+  const { isAuthenticated } = useAuthStore();
+  const getContentMarginClass = () => {
+    if (!isAuthenticated) {
+      return "";
+    }
+    if (isSidebarCollapsed) {
+      return "lg:mr-20";
+    }
+    return "lg:mr-80";
+  };
+
   const socialLinks = [
     {
-      name: "تويتر",
-      href: "#",
-      icon: "solar:hashtag-bold",
-      color: "hover:text-blue-400",
-    },
-    {
-      name: "لينكد إن",
-      href: "#",
-      icon: "solar:linkedin-bold",
-      color: "hover:text-blue-600",
-    },
-    {
       name: "يوتيوب",
-      href: "#",
-      icon: "solar:video-library-bold",
+      href: "https://youtube.com/",
+      icon: "line-md:youtube-twotone",
       color: "hover:text-red-500",
     },
     {
       name: "إنستغرام",
-      href: "#",
-      icon: "solar:camera-bold",
+      href: "https://instagram.com/",
+      icon: "line-md:instagram",
       color: "hover:text-pink-500",
     },
     {
       name: "تيليجرام",
-      href: "#",
-      icon: "solar:chat-round-bold",
+      href: "https://facebook.com",
+      icon: "line-md:facebook",
       color: "hover:text-sky-500",
     },
   ];
 
   return (
+    // The footer element itself is full-width to ensure the background color and border span the entire page.
     <footer
-      className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 smooth"
+      className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 transition-all smooth shadow-xl"
       dir="rtl"
     >
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
+      {/* The inner div handles the max-width and dynamic margin based on the sidebar's state. */}
+      <div
+        className={`max-w-[1440px] mx-auto px-4 lg:px-6 py-8 transition-all duration-300 ease-in-out ${getContentMarginClass()}`}
+      >
         <div className="text-center">
           {/* Brand and Description */}
           <div className="mb-6">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
                 <Image
-                  src="/images/logo-bg.png"
+                  src="/images/logo.png"
                   alt="Logo"
                   width={40}
                   height={40}
+                  className="rounded-lg" // Added for consistency with Navbar logo
                 />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-                  أكاديمية التعلم
+                  منصة الاسطورة
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  منصة تعليمية متطورة
+                  في الكيمياء
                 </p>
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-              منصة تعليمية متطورة تقدم أفضل الدورات التدريبية والبرامج التعليمية
-              من خلال نخبة من المدربين المتخصصين لمساعدتك في تطوير مهاراتك
-              وتحقيق أهدافك المهنية والشخصية.
+              تم صنع هذه المنصة بهدف تهيئة الطالب لـ كامل جوانب الثانوية العامة
+              و ما بعدها
             </p>
           </div>
 
@@ -93,8 +97,7 @@ const Footer = () => {
           <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
               <p>
-                © {new Date().getFullYear()} أكاديمية التعلم. جميع الحقوق
-                محفوظة.
+                © {new Date().getFullYear()} منصة الاسطورة. جميع الحقوق محفوظة.
               </p>
               <div className="flex items-center gap-2">
                 <span>تطوير</span>

@@ -83,7 +83,7 @@ const ProfileOverview = ({ user, onNavigate }) => {
           onClick={() => onNavigate("profile_analytics")}
           className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all group"
         >
-          <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center group-hover:scale-110 transition-transform transition-colors">
             <Icon
               icon="solar:chart-bold"
               className="w-6 h-6 text-blue-600 dark:text-blue-400"
@@ -103,7 +103,7 @@ const ProfileOverview = ({ user, onNavigate }) => {
           onClick={() => onNavigate("profile_information")}
           className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all group"
         >
-          <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center group-hover:scale-110 transition-transform transition-colors">
             <Icon
               icon="solar:user-id-bold"
               className="w-6 h-6 text-green-600 dark:text-green-400"
@@ -123,7 +123,7 @@ const ProfileOverview = ({ user, onNavigate }) => {
           onClick={() => onNavigate("profile_security")}
           className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all group"
         >
-          <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900 flex items-center justify-center group-hover:scale-110 transition-transform transition-colors">
             <Icon
               icon="solar:shield-check-bold"
               className="w-6 h-6 text-red-600 dark:text-red-400"

@@ -325,7 +325,7 @@ export default function TelegramRegisterPage() {
             <div className="text-center mb-8 flex flex-col items-center">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center">
                 <Image
-                  src="/images/logo-bg.png"
+                  src="/images/logo.png"
                   alt="Logo"
                   width={40}
                   height={40}

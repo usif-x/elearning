@@ -13,9 +13,7 @@ const IBMSans = IBM_Plex_Sans_Arabic({
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${IBMSans.className} bg-gray-50 dark:bg-gray-900 smooth`}
-      >
+      <body className={`${IBMSans.className} bg-white dark:bg-zinc-950 smooth`}>
         <ThemeProvider>
           <Navbar>
             {children}

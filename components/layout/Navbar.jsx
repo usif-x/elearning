@@ -5,46 +5,10 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react"; // Import useRef and useEffect
+import { useEffect, useState } from "react"; // Import useRef and useEffect
 import Button from "../ui/Button";
 import DarkModeSwitcher from "../ui/DarkModeSwitcher";
 import Input from "../ui/Input";
-
-// Mock data for notifications - in a real app, this would come from an API
-const mockNotifications = [
-  {
-    id: 1,
-    icon: "solar:course-up-bold-duotone",
-    title: "تم إضافة درس جديد في كورس React",
-    time: "منذ 5 دقائق",
-    isRead: false,
-    link: "/courses/react/lesson/1",
-  },
-  {
-    id: 2,
-    icon: "solar:chat-round-like-bold-duotone",
-    title: "أحمد رد على منشورك في المنتدى",
-    time: "منذ 30 دقيقة",
-    isRead: false,
-    link: "/community/post/123",
-  },
-  {
-    id: 3,
-    icon: "solar:wallet-money-bold-duotone",
-    title: "تمت إضافة 50 ج.م إلى محفظتك",
-    time: "منذ ساعتين",
-    isRead: true,
-    link: "/profile/wallet",
-  },
-  {
-    id: 4,
-    icon: "solar:cup-first-bold-duotone",
-    title: "تهانينا! لقد أكملت كورس JavaScript بنجاح.",
-    time: "أمس",
-    isRead: true,
-    link: "/profile/certificates",
-  },
-];
 
 const Navbar = ({ children }) => {
   // Accept children to render inside the main content area
@@ -55,22 +19,14 @@ const Navbar = ({ children }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // State for notifications dropdown
 
   const { isAuthenticated, user } = useAuthStore();
   const pathname = usePathname(); // Get current route
-
-  const notificationsRef = useRef(null); // Ref for the notifications dropdown
 
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
-    setIsNotificationsOpen(false); // Close other dropdowns
-  };
-  const toggleNotifications = () => {
-    setIsNotificationsOpen(!isNotificationsOpen);
-    setIsSearchOpen(false); // Close other dropdowns
   };
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleSidebarCollapse = () => {
@@ -88,29 +44,35 @@ const Navbar = ({ children }) => {
     }
   };
 
+  const [isScroll, setIsScroll] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } =
         document.documentElement;
 
-      // Prevent division by zero
       if (scrollHeight - clientHeight === 0) {
-        setScrollProgress(100); // If no scrollbar, consider it complete
+        setScrollProgress(100);
+        setIsScroll(false); // no scrolling possible
         return;
       }
 
       const progress = (scrollTop / (scrollHeight - clientHeight)) * 100;
       setScrollProgress(progress);
+
+      // if user has scrolled from top
+      setIsScroll(scrollTop > 0);
     };
 
-    // Add event listener
     window.addEventListener("scroll", handleScroll);
 
-    // Clean up event listener on component unmount
+    // Run once on mount in case page is already scrolled
+    handleScroll();
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
   // --- NEW: Dynamic style for the conic gradient background ---
   const progressCircleStyle = {
@@ -129,22 +91,6 @@ const Navbar = ({ children }) => {
       setIsProfileDropdownOpen(false);
     }
   };
-
-  // Effect to handle clicks outside the notifications dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setIsNotificationsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [notificationsRef]);
 
   const getMainContentMarginClass = () => {
     if (!isAuthenticated) {
@@ -221,7 +167,12 @@ const Navbar = ({ children }) => {
   return (
     <div dir="rtl">
       {/* Navbar (Fixed Position) */}
-      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 smooth fixed top-0 left-0 right-0 z-30">
+      <nav
+        className={`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 smooth fixed top-0 left-0 right-0 z-30
+          ${
+            isAuthenticated ? "border-b" : "w-[95%] m-auto mt-4 rounded-lg"
+          } overflow-hidden`} // <-- CHANGE HERE
+      >
         <div className="max-w-[1440px] mx-auto">
           <div className="flex items-center justify-between ">
             {/* --- DESKTOP NAVBAR --- */}
@@ -229,18 +180,18 @@ const Navbar = ({ children }) => {
             {/* Right side - Logo & Dark Mode */}
             <div className="hidden lg:flex items-center gap-4">
               <div
-                style={progressCircleStyle}
-                className="w-12 h-12 rounded-full p-0.5 flex items-center justify-center transition-all duration-150"
+                style={isAuthenticated && isScroll ? progressCircleStyle : {}}
+                className="w-12 h-12 rounded-full p-0.5 flex items-center justify-center transition-all duration-300"
                 title={`Page scrolled: ${Math.round(scrollProgress)}%`}
               >
                 {/* This inner div provides a solid background to cover the center of the gradient */}
                 <div className="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center p-1">
                   <Link href="/">
                     <Image
-                      src="/images/logo-bg.png"
+                      src="/images/logo.png"
                       alt="Logo"
-                      width={40}
-                      height={40}
+                      width={50}
+                      height={50}
                       className="rounded-lg"
                     />
                   </Link>
@@ -276,73 +227,6 @@ const Navbar = ({ children }) => {
                       className="w-5 h-5"
                     />
                   </button>
-                  <div className="relative" ref={notificationsRef}>
-                    <button
-                      onClick={toggleNotifications}
-                      className="relative w-10 h-10 lg:w-12 lg:h-12 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center"
-                    >
-                      <Icon icon="solar:bell-bold" className="w-5 h-5" />
-                      {mockNotifications.some((n) => !n.isRead) && (
-                        <span className="absolute top-2.5 right-2.5 flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                        </span>
-                      )}
-                    </button>
-                    {isNotificationsOpen && (
-                      <div className="absolute left-0 top-full mt-2 w-80 lg:w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg z-50 overflow-hidden">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                          <h3 className="font-semibold text-gray-800 dark:text-white">
-                            الإشعارات
-                          </h3>
-                          <button className="text-xs text-blue-500 hover:underline">
-                            تحديد الكل كمقروء
-                          </button>
-                        </div>
-                        <div className="max-h-96 overflow-y-auto">
-                          {mockNotifications.map((notification) => (
-                            <Link
-                              href={notification.link}
-                              key={notification.id}
-                              className={`flex items-start gap-4 p-4 smooth hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
-                                !notification.isRead
-                                  ? "bg-blue-50 dark:bg-blue-900/20"
-                                  : ""
-                              }`}
-                              onClick={() => setIsNotificationsOpen(false)}
-                            >
-                              <div className="w-10 h-10 rounded-full flex-shrink-0 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                <Icon
-                                  icon={notification.icon}
-                                  className="w-5 h-5 text-gray-600 dark:text-gray-300"
-                                />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm text-gray-800 dark:text-gray-200 mb-1">
-                                  {notification.title}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {notification.time}
-                                </p>
-                              </div>
-                              {!notification.isRead && (
-                                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                              )}
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-                          <Link
-                            href="/notifications"
-                            className="w-full text-center text-sm font-medium text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700/50 p-2 rounded-lg smooth block"
-                            onClick={() => setIsNotificationsOpen(false)}
-                          >
-                            عرض جميع الإشعارات
-                          </Link>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </>
               ) : (
                 <div className="flex items-center gap-3">
@@ -365,7 +249,9 @@ const Navbar = ({ children }) => {
             </div>
 
             {/* --- MOBILE NAVBAR --- */}
-            <div className="lg:hidden flex items-center justify-between w-full">
+            <div
+              className={`lg:hidden flex items-center justify-between w-full`}
+            >
               {/* Left Side: Actions */}
               <div className="flex-1 flex justify-start items-center gap-1">
                 {isAuthenticated && (
@@ -379,21 +265,6 @@ const Navbar = ({ children }) => {
                         className="w-5 h-5"
                       />
                     </button>
-                    <div className="relative" ref={notificationsRef}>
-                      <button
-                        onClick={toggleNotifications}
-                        className="relative w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center"
-                      >
-                        <Icon icon="solar:bell-bold" className="w-5 h-5" />
-                        {mockNotifications.some((n) => !n.isRead) && (
-                          <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                          </span>
-                        )}
-                      </button>
-                      {/* Mobile notification dropdown can re-use the same state */}
-                    </div>
                   </>
                 )}
                 <button
@@ -407,7 +278,7 @@ const Navbar = ({ children }) => {
               {/* Center: Logo */}
               <div className="flex-shrink-0">
                 <div
-                  style={progressCircleStyle}
+                  style={isAuthenticated && isScroll ? progressCircleStyle : {}}
                   className="w-12 h-12 rounded-full p-0.5 flex items-center justify-center transition-all duration-150"
                   title={`Page scrolled: ${Math.round(scrollProgress)}%`}
                 >
@@ -415,7 +286,7 @@ const Navbar = ({ children }) => {
                   <div className="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center p-1">
                     <Link href="/">
                       <Image
-                        src="/images/logo-bg.png"
+                        src="/images/logo.png"
                         alt="Logo"
                         width={40}
                         height={40}
@@ -655,6 +526,22 @@ const Navbar = ({ children }) => {
             </div>
           )}
         </div>
+        {!isAuthenticated && (
+          <div
+            dir="ltr"
+            className={`
+      absolute bottom-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 z-50
+      transition-all duration-300 ease-out
+      transform
+      ${isScroll ? "translate-y-0" : "translate-y-full"}
+    `}
+          >
+            <div
+              className="h-1 bg-blue-500 transition-colors transition-transform duration-300 ease-out"
+              style={{ width: `${scrollProgress}%` }}
+            />
+          </div>
+        )}
       </nav>
 
       {/* Sidebar (Fixed Position) */}
@@ -663,7 +550,7 @@ const Navbar = ({ children }) => {
           className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 shadow-lg z-40 overflow-hidden transition-all smooth
               ${isSidebarCollapsed && !isHovering ? "lg:w-20" : "lg:w-80"}
               ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}
-              lg:top-20 lg:h-[calc(100vh-5rem)] w-80 lg:translate-x-0 lg:rounded-tr-2xl
+              lg:top-20 lg:h-[calc(100vh-5rem)] w-80 lg:translate-x-0
             `}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -678,13 +565,13 @@ const Navbar = ({ children }) => {
               )}
               <button
                 onClick={toggleSidebarCollapse}
-                className="w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth hidden lg:flex items-center justify-center"
+                className="w-10 h-10 text-gray-600 dark:text-gray-400 bg-gray-300 dark:bg-gray-800 rounded-xl smooth hidden lg:flex items-center justify-center"
               >
                 <Icon
                   icon={
                     isSidebarCollapsed
-                      ? "solar:alt-arrow-left-bold"
-                      : "solar:alt-arrow-right-bold"
+                      ? "ion:lock-open"
+                      : "famicons:lock-closed"
                   }
                   className="w-5 h-5"
                 />
@@ -902,9 +789,9 @@ const Navbar = ({ children }) => {
               {isCoursesDropdownOpen && shouldShowExpanded && (
                 <div className="mt-2 space-y-1 mr-6">
                   <Link
-                    href="/courses/my-courses"
+                    href="/courses/mine"
                     className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                      pathname === "/courses/my-courses"
+                      pathname === "/courses/mine"
                         ? "bg-blue-500 text-white"
                         : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
@@ -964,7 +851,7 @@ const Navbar = ({ children }) => {
 
       {/* Main Content Area */}
       <main
-        className={`pt-24 px-4 lg:px-6 transition-all duration-300 ease-in-out ${getMainContentMarginClass()}`}
+        className={` transition-all duration-300 ease-in-out ${getMainContentMarginClass()}`}
       >
         {/* All your page content (e.g., from page.js) will be rendered here */}
         {children}

@@ -91,7 +91,7 @@ export const Select = ({
         {/* Dropdown Indicator */}
         <div
           className={`
-            transition-transform duration-200
+            transition-transform transition-colors duration-200
             ${isOpen ? "rotate-180" : ""}
           `}
         >

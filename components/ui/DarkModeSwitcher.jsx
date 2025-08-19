@@ -23,7 +23,7 @@ export default function DarkModeSwitcher() {
           height="24"
           fill="none"
           aria-hidden="true"
-          className={`transform transition-transform duration-500 ${
+          className={`transform transition-transform transition-colors duration-500 ${
             isDarkMode ? "scale-100" : "scale-0"
           }`}
           style={{ color: "var(--icon-sun)" }}
@@ -51,7 +51,7 @@ export default function DarkModeSwitcher() {
           height="24"
           fill="none"
           aria-hidden="true"
-          className={`ml-3.5 transform transition-transform duration-500 ${
+          className={`ml-3.5 transform transition-transform transition-colors duration-500 ${
             !isDarkMode ? "scale-100" : "scale-0"
           }`}
           style={{ color: "var(--icon-sun)" }}

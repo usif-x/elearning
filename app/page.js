@@ -1,16 +1,32 @@
-import Button from "@/components/ui/Button";
+"use client";
+
+import Hero from "@/components/server/Hero";
+import OurFeatures from "@/components/server/OurFuture";
+import CTASection from "@/components/server/SuggestRegister";
+import { useAuthStore } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function Home() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
+  if (isAuthenticated) {
+    // Optionally render nothing while redirecting
+    return null;
+  }
+
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <h1 className="text-4xl font-bold">
-          Welcome to the E-Learning Platform
-        </h1>
-        <p className="mt-4 text-lg">
-          Explore our courses and enhance your skills!
-        </p>
-        <Button text="اضغط هنا" color="red" shade={600} />
-      </main>
+      <Hero />
+      <OurFeatures />
+      <CTASection />
     </>
   );
 }

@@ -1,13 +1,13 @@
 "use client";
 
-const MainDashboard = () => {
+const UserProfile = () => {
   return (
     <>
       <div className="flex items-center justify-center h-screen text-2xl font-bold min-h-screen text-gray-900 dark:text-white smooth">
-        Analytics
+        Profile
       </div>
     </>
   );
 };
 
-export default MainDashboard;
+export default UserProfile;
