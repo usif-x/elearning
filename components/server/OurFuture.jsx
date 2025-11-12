@@ -58,7 +58,7 @@ const PlatformFeatures = () => {
         </div>
 
         {/* Responsive Grid for Features */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 smooth">
           {features.map((feature, index) => (
             <div
               key={index}
@@ -76,11 +76,11 @@ const PlatformFeatures = () => {
               </div>
 
               {/* Text Content */}
-              <div className="mt-16 text-right">
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-white">
+              <div className="mt-16 text-right smooth">
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-white smooth">
                   {feature.title}
                 </h3>
-                <p className="mt-4 text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="mt-4 text-slate-500 dark:text-slate-400 leading-relaxed smooth">
                   {feature.description}
                 </p>
               </div>

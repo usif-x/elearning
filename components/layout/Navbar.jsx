@@ -192,7 +192,7 @@ const Navbar = ({ children }) => {
                       alt="Logo"
                       width={50}
                       height={50}
-                      className="rounded-lg"
+                      className="rounded-full"
                     />
                   </Link>
                 </div>
@@ -290,7 +290,7 @@ const Navbar = ({ children }) => {
                         alt="Logo"
                         width={40}
                         height={40}
-                        className="rounded-lg"
+                        className="rounded-full"
                       />
                     </Link>
                   </div>
@@ -388,96 +388,36 @@ const Navbar = ({ children }) => {
                     </div>
 
                     <div className="space-y-2">
-                      <div>
-                        <button
-                          onClick={() =>
-                            setIsProfileDropdownOpen(!isProfileDropdownOpen)
-                          }
-                          className={`flex items-center justify-between w-full p-3 rounded-xl smooth ${
-                            isProfileDropdownActive()
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Icon
-                              icon="solar:user-circle-bold"
-                              className="w-5 h-5"
-                            />
-                            <span>ملفي الشخصي</span>
-                          </div>
-                          <Icon
-                            icon="solar:alt-arrow-down-bold"
-                            className={`w-4 h-4 smooth ${
-                              isProfileDropdownOpen ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
-                        {isProfileDropdownOpen && (
-                          <div className="mt-2 space-y-1 mr-6">
-                            <Link
-                              href="/profile"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                                pathname === "/profile"
-                                  ? "bg-blue-500 text-white"
-                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                              }`}
-                            >
-                              <Icon
-                                icon="solar:user-id-bold"
-                                className="w-4 h-4"
-                              />
-                              <span>معلوماتي الشخصية</span>
-                            </Link>
-                            <Link
-                              href="/profile/analytics"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                                pathname === "/profile/analytics"
-                                  ? "bg-blue-500 text-white"
-                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                              }`}
-                            >
-                              <Icon
-                                icon="solar:chart-bold"
-                                className="w-4 h-4"
-                              />
-                              <span>إحصائيات الحساب</span>
-                            </Link>
-
-                            <Link
-                              href="/profile/settings"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                                pathname === "/profile/settings"
-                                  ? "bg-blue-500 text-white"
-                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                              }`}
-                            >
-                              <Icon
-                                icon="solar:settings-minimalistic-bold"
-                                className="w-4 h-4"
-                              />
-                              <span>إعدادات الحساب</span>
-                            </Link>
-                          </div>
-                        )}
-                      </div>
                       <Link
-                        href="/courses"
+                        href="/dashboard"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
-                          isCoursesDropdownActive()
+                          pathname === "/dashboard"
                             ? "bg-blue-500 text-white"
                             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                         }`}
                       >
                         <Icon
-                          icon="solar:book-bookmark-bold"
+                          icon="solar:home-smile-bold"
                           className="w-5 h-5"
                         />
-                        <span>الكورسات</span>
+                        <span>الصفحة الرئيسية</span>
+                      </Link>
+
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          isProfileDropdownActive()
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:user-circle-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>ملفي الشخصي</span>
                       </Link>
 
                       <Link
@@ -495,10 +435,26 @@ const Navbar = ({ children }) => {
                         />
                         <span>منتدى الطلاب</span>
                       </Link>
+
+                      <Link
+                        href="/courses"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          isCoursesDropdownActive()
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:book-bookmark-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>الكورسات</span>
+                      </Link>
                     </div>
                     <Link
                       href="/logout"
-                      className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-800`}
+                      className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-800`}
                     >
                       <Icon icon="solar:logout-bold" className="w-5 h-5" />
                       <span>تسجيل الخروج</span>
@@ -537,7 +493,7 @@ const Navbar = ({ children }) => {
     `}
           >
             <div
-              className="h-1 bg-blue-500 transition-colors transition-transform duration-300 ease-out"
+              className="h-1 bg-blue-500 transition-all duration-300 ease-out"
               style={{ width: `${scrollProgress}%` }}
             />
           </div>
@@ -560,7 +516,7 @@ const Navbar = ({ children }) => {
             <div className="flex items-center justify-between mb-4">
               {shouldShowExpanded && (
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white">
-                  القائمة الرئيسية
+                  لوحة التنقل
                 </h2>
               )}
               <button
@@ -670,87 +626,69 @@ const Navbar = ({ children }) => {
 
           {/* Sidebar Content */}
           <div className="p-4 space-y-2 overflow-y-auto h-full pb-32">
-            {/* My Profile with Dropdown */}
-            <div>
-              <button
-                onClick={() => {
-                  if (shouldShowExpanded) {
-                    setIsProfileDropdownOpen(!isProfileDropdownOpen);
-                  }
-                }}
-                className={`flex items-center justify-between w-full p-3 rounded-xl smooth ${
-                  !shouldShowExpanded ? "justify-center" : ""
-                } ${
-                  isProfileDropdownActive()
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
-                title={!shouldShowExpanded ? "ملفي الشخصي" : ""}
-              >
-                <div
-                  className={`flex items-center ${
-                    shouldShowExpanded ? "gap-3" : ""
-                  }`}
-                >
-                  <Icon icon="solar:user-circle-bold" className="w-6 h-6" />
-                  {shouldShowExpanded && (
-                    <span className="font-medium">ملفي الشخصي</span>
-                  )}
-                </div>
-                {shouldShowExpanded && (
-                  <Icon
-                    icon="solar:alt-arrow-down-bold"
-                    className={`w-4 h-4 smooth ${
-                      isProfileDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                )}
-              </button>
-
-              {isProfileDropdownOpen && shouldShowExpanded && (
-                <div className="mt-2 space-y-1 mr-6">
-                  <Link
-                    href="/profile"
-                    className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                      pathname === "/profile"
-                        ? "bg-blue-500 text-white"
-                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    <Icon icon="solar:user-id-bold" className="w-4 h-4" />
-                    <span>معلوماتي الشخصية</span>
-                  </Link>
-                  <Link
-                    href="/profile/analytics"
-                    className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                      pathname === "/profile/analytics"
-                        ? "bg-blue-500 text-white"
-                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    <Icon icon="solar:chart-bold" className="w-4 h-4" />
-                    <span>إحصائيات الحساب</span>
-                  </Link>
-                  <Link
-                    href="/profile/settings"
-                    className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                      pathname === "/profile/settings"
-                        ? "bg-blue-500 text-white"
-                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    <Icon
-                      icon="solar:settings-minimalistic-bold"
-                      className="w-4 h-4"
-                    />
-                    <span>إعدادات الحساب</span>
-                  </Link>
-                </div>
+            {/* Home Page */}
+            <Link
+              href="/dashboard"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/dashboard"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "الصفحة الرئيسية" : ""}
+            >
+              <Icon icon="solar:home-smile-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">الصفحة الرئيسية</span>
               )}
-            </div>
+            </Link>
+
+            {/* My Profile */}
+            <Link
+              href="/profile"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                isProfileDropdownActive()
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "ملفي الشخصي" : ""}
+            >
+              <Icon icon="solar:user-circle-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">ملفي الشخصي</span>
+              )}
+            </Link>
 
             {/* Courses with Dropdown */}
-            <div>
+
+            {/* Community */}
+            <Link
+              href="/community"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/community"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "منتدى الطلاب" : ""}
+            >
+              <Icon icon="solar:users-group-rounded-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">منتدى الطلاب</span>
+              )}
+            </Link>
+
+            <div
+              className={`${
+                isCoursesDropdownOpen && isCoursesDropdownActive()
+                  ? "bg-blue-500/15 dark:bg-blue-900/50"
+                  : ""
+              } rounded-xl p-1`}
+            >
               <button
                 onClick={() => {
                   if (shouldShowExpanded) {
@@ -789,9 +727,9 @@ const Navbar = ({ children }) => {
               {isCoursesDropdownOpen && shouldShowExpanded && (
                 <div className="mt-2 space-y-1 mr-6">
                   <Link
-                    href="/courses/mine"
+                    href="/courses/my"
                     className={`flex items-center gap-3 w-full p-3 rounded-xl smooth text-sm ${
-                      pathname === "/courses/mine"
+                      pathname === "/courses/my"
                         ? "bg-blue-500 text-white"
                         : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
@@ -813,31 +751,12 @@ const Navbar = ({ children }) => {
                 </div>
               )}
             </div>
-
-            {/* Community */}
-            <Link
-              href="/community"
-              className={`flex items-center w-full p-3 rounded-xl smooth ${
-                !shouldShowExpanded ? "justify-center" : "gap-3"
-              } ${
-                pathname === "/community"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-              title={!shouldShowExpanded ? "منتدى الطلاب" : ""}
-            >
-              <Icon icon="solar:users-group-rounded-bold" className="w-6 h-6" />
-              {shouldShowExpanded && (
-                <span className="font-medium">منتدى الطلاب</span>
-              )}
-            </Link>
-
             {/* Logout */}
             <Link
               href="/logout"
               className={`flex items-center w-full p-3 rounded-xl smooth ${
                 !shouldShowExpanded ? "justify-center" : "gap-3"
-              } text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-800`}
+              } text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-800`}
               title={!shouldShowExpanded ? "تسجيل الخروج" : ""}
             >
               <Icon icon="solar:logout-bold" className="w-6 h-6" />

@@ -58,21 +58,18 @@ const Footer = ({ isSidebarCollapsed }) => {
                   alt="Logo"
                   width={40}
                   height={40}
-                  className="rounded-lg" // Added for consistency with Navbar logo
+                  className="rounded-full" // Added for consistency with Navbar logo
                 />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-                  منصة الاسطورة
+                  دحيحة حلوان
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  في الكيمياء
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400"></p>
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-              تم صنع هذه المنصة بهدف تهيئة الطالب لـ كامل جوانب الثانوية العامة
-              و ما بعدها
+              منصه هدفها مساعدة الطلاب المحتاسين و مش فاهمين حاجه 🫣
             </p>
           </div>
 
@@ -97,7 +94,7 @@ const Footer = ({ isSidebarCollapsed }) => {
           <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
               <p>
-                © {new Date().getFullYear()} منصة الاسطورة. جميع الحقوق محفوظة.
+                © {new Date().getFullYear()} دحيحة حلوان. جميع الحقوق محفوظة.
               </p>
               <div className="flex items-center gap-2">
                 <span>تطوير</span>
