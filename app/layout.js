@@ -1,5 +1,3 @@
-import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
@@ -15,10 +13,7 @@ export default function RootLayout({ children }) {
     <html lang="ar">
       <body className={`${IBMSans.className} bg-white dark:bg-zinc-950 smooth`}>
         <ThemeProvider>
-          <Navbar>
-            {children}
-            <Footer />
-          </Navbar>
+          {children}
           <ToastContainerWrapper />
         </ThemeProvider>
       </body>

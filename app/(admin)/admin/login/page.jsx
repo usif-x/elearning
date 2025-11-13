@@ -6,16 +6,23 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
 // Admin Login Component
 export default function AdminLoginPage() {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const { adminLogin, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Check if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/admin/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -74,13 +81,12 @@ export default function AdminLoginPage() {
 
     try {
       const loginData = {
-        login_method: "email",
-        email: formData.email,
+        username_or_email: formData.email,
         password: formData.password,
         remember_me: formData.rememberMe,
       };
 
-      const loginResponse = await postData("/admin/auth/login", loginData);
+      const loginResponse = await postData("/auth/admin/login", loginData);
 
       if (loginResponse.error) {
         throw new Error(loginResponse.error);
@@ -94,8 +100,8 @@ export default function AdminLoginPage() {
         timer: 1500,
       });
 
-      login({
-        user: loginResponse.user,
+      adminLogin({
+        admin: loginResponse.user,
         token: loginResponse.access_token,
         refresh_token: loginResponse.refresh_token,
       });
@@ -120,6 +126,11 @@ export default function AdminLoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Don't render login form if already authenticated
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900" dir="rtl">
@@ -154,7 +165,7 @@ export default function AdminLoginPage() {
                   <div className="space-y-4">
                     <Input
                       icon="material-symbols:admin-panel-settings"
-                      placeholder="البريد الإلكتروني الإداري"
+                      placeholder="البريد الإلكتروني او اسم المستخدم"
                       value={formData.email}
                       onChange={handleInputChange("email")}
                       error={errors.email}
@@ -185,12 +196,6 @@ export default function AdminLoginPage() {
                         />
                         تذكرني
                       </label>
-                      <Link
-                        href="/admin/forgot-password"
-                        className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                      >
-                        نسيت كلمة المرور؟
-                      </Link>
                     </div>
                   </div>
                 </div>

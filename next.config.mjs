@@ -8,7 +8,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.khaled-sakr.com",
+        hostname: "example.com",
       },
       {
         protocol: "https",

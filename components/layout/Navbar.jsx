@@ -20,7 +20,7 @@ const Navbar = ({ children }) => {
   const [isHovering, setIsHovering] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, userType } = useAuthStore();
   const pathname = usePathname(); // Get current route
 
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -436,6 +436,20 @@ const Navbar = ({ children }) => {
                         <span>منتدى الطلاب</span>
                       </Link>
 
+                      {userType === "admin" && (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 w-full p-3 rounded-xl smooth bg-red-500 text-white hover:bg-red-600"
+                        >
+                          <Icon
+                            icon="solar:shield-user-bold"
+                            className="w-5 h-5"
+                          />
+                          <span>لوحة الإدارة</span>
+                        </Link>
+                      )}
+
                       <Link
                         href="/courses"
                         onClick={() => setIsMobileMenuOpen(false)}
@@ -681,6 +695,26 @@ const Navbar = ({ children }) => {
                 <span className="font-medium">منتدى الطلاب</span>
               )}
             </Link>
+
+            {/* Admin Panel - Only for admins */}
+            {userType === "admin" && (
+              <Link
+                href="/admin/dashboard"
+                className={`flex items-center w-full p-3 rounded-xl smooth ${
+                  !shouldShowExpanded ? "justify-center" : "gap-3"
+                } ${
+                  pathname.startsWith("/admin")
+                    ? "bg-red-500 text-white"
+                    : "text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700"
+                }`}
+                title={!shouldShowExpanded ? "لوحة الإدارة" : ""}
+              >
+                <Icon icon="solar:shield-user-bold" className="w-6 h-6" />
+                {shouldShowExpanded && (
+                  <span className="font-medium">لوحة الإدارة</span>
+                )}
+              </Link>
+            )}
 
             <div
               className={`${

@@ -2,8 +2,8 @@ import axios from "@/libs/axios";
 
 export const getFeaturedCourses = async () => {
   try {
-    const response = await axios.get("/api/courses/featured_courses");
-    return response.data;
+    const response = await axios.get("courses");
+    return response.data.courses || [];
   } catch (error) {
     console.error("Error fetching featured courses:", error);
     throw error;
@@ -12,7 +12,7 @@ export const getFeaturedCourses = async () => {
 
 export const getCourseById = async (id) => {
   try {
-    const response = await axios.get(`/api/sellables/${id}?with_content=1`);
+    const response = await axios.get(`courses/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching course details:", error);

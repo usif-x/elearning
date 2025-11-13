@@ -1,6 +1,8 @@
 "use client";
 
+import { useAuthStore } from "@/hooks/useAuth";
 import { Icon } from "@iconify/react";
+import Link from "next/link";
 import { useState } from "react";
 
 // Fake data for dashboard stats
@@ -50,6 +52,7 @@ const courseProgress = [
 
 export function UserDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const { userType } = useAuthStore();
 
   const getColorClasses = (color) => {
     const colors = {
@@ -70,12 +73,25 @@ export function UserDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            لوحة التحكم
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            تابع تقدمك الدراسي وإنجازاتك
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                لوحة التحكم
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                تابع تقدمك الدراسي وإنجازاتك
+              </p>
+            </div>
+            {userType === "admin" && (
+              <Link
+                href="/admin/dashboard"
+                className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors shadow-lg"
+              >
+                <Icon icon="solar:shield-user-bold" className="w-5 h-5" />
+                <span>لوحة الإدارة</span>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}

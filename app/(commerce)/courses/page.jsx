@@ -18,13 +18,13 @@ const CoursesPage = () => {
         const featuredCourses = await getFeaturedCourses();
         const formattedCourses = featuredCourses.map((course) => ({
           id: course.id,
-          title: course.name,
+          title: course.title,
           description: course.description,
-          image: `${process.env.NEXT_PUBLIC_API_URL}${course.picture}`,
+          image: course.image,
           price: course.price,
-          original_price: course.price_before_discount,
-          is_free: parseFloat(course.price) === 0,
-          is_subscribed: false, // This needs to be determined by user's subscriptions
+          original_price: course.discount || course.price,
+          is_free: course.is_free,
+          is_subscribed: course.is_subscribed,
           created_at: course.created_at,
         }));
         setCourses(formattedCourses);
@@ -47,13 +47,13 @@ const CoursesPage = () => {
         const featuredCourses = await getFeaturedCourses();
         const formattedCourses = featuredCourses.map((course) => ({
           id: course.id,
-          title: course.name,
+          title: course.title,
           description: course.description,
-          image: `${process.env.NEXT_PUBLIC_API_URL}${course.picture}`,
+          image: course.image,
           price: course.price,
-          original_price: course.price_before_discount,
-          is_free: parseFloat(course.price) === 0,
-          is_subscribed: false,
+          original_price: course.discount || course.price,
+          is_free: course.is_free,
+          is_subscribed: course.is_subscribed,
           created_at: course.created_at,
         }));
         setCourses(formattedCourses);
