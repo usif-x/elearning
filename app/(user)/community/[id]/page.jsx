@@ -37,6 +37,7 @@ const CommunityDetailPage = () => {
   const [loadingMorePosts, setLoadingMorePosts] = useState(false);
   const [playingAudio, setPlayingAudio] = useState(null);
   const [audioProgress, setAudioProgress] = useState({});
+  const [audioHover, setAudioHover] = useState({});
   const [expandedImage, setExpandedImage] = useState(null);
   const [imageRotation, setImageRotation] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -49,9 +50,14 @@ const CommunityDetailPage = () => {
   const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [showMyPosts, setShowMyPosts] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [recordedAudio, setRecordedAudio] = useState(null);
   const audioRefs = useRef({});
   const imageInputRef = useRef(null);
   const audioInputRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordingIntervalRef = useRef(null);
 
   useEffect(() => {
     if (communityId) {
@@ -281,6 +287,74 @@ const CommunityDetailPage = () => {
 
   const removeSelectedAudio = () => {
     setSelectedAudio(null);
+    setRecordedAudio(null);
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const audioFile = new File(
+          [audioBlob],
+          `recording-${Date.now()}.webm`,
+          {
+            type: "audio/webm",
+          }
+        );
+        setRecordedAudio(audioFile);
+        setSelectedAudio(audioFile);
+        setSelectedImages([]);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      // Start timer
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+
+      toast.success("بدأ التسجيل");
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast.error("فشل في بدء التسجيل. تأكد من السماح بالوصول للميكروفون");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+      }
+      toast.success("تم إيقاف التسجيل");
+    }
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stream
+        .getTracks()
+        .forEach((track) => track.stop());
+      setIsRecording(false);
+      setRecordingTime(0);
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+      }
+      toast.info("تم إلغاء التسجيل");
+    }
   };
 
   const formatActivityDate = (dateString) => {
@@ -479,8 +553,48 @@ const CommunityDetailPage = () => {
     if (!audio) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = percent * audio.duration;
+    let percent = (e.clientX - rect.left) / rect.width;
+    const dir = getComputedStyle(e.currentTarget).direction;
+    if (dir === "rtl") {
+      percent = 1 - percent;
+    }
+    percent = Math.max(0, Math.min(1, percent));
+    audio.currentTime = percent * (audio.duration || 0);
+  };
+
+  const handleHoverMove = (postId, e) => {
+    const audio = audioRefs.current[postId];
+    const container = e.currentTarget.getBoundingClientRect();
+    if (!audio || !container) return;
+
+    let percentPos = (e.clientX - container.left) / container.width;
+    percentPos = Math.max(0, Math.min(1, percentPos));
+
+    // Check RTL direction for time calculation
+    const dir = getComputedStyle(e.currentTarget).direction;
+    let timePercent = percentPos;
+    if (dir === "rtl") {
+      timePercent = 1 - percentPos;
+    }
+
+    // compute hovered time based on actual duration if available
+    const duration = audio.duration || 0;
+    const hoveredSec = timePercent * duration;
+    setAudioHover((prev) => ({
+      ...prev,
+      [postId]: {
+        visible: true,
+        time: formatTime(hoveredSec),
+        left: `${percentPos * 100}%`,
+      },
+    }));
+  };
+
+  const handleHoverLeave = (postId) => {
+    setAudioHover((prev) => ({
+      ...prev,
+      [postId]: { ...(prev[postId] || {}), visible: false },
+    }));
   };
 
   const handleImageClick = (image) => {
@@ -667,16 +781,63 @@ const CommunityDetailPage = () => {
                   </div>
                 )}
 
-                {selectedAudio && (
+                {isRecording && (
+                  <div className="mt-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border-2 border-red-200 dark:border-red-800 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                      <Icon
+                        icon="solar:microphone-3-bold-duotone"
+                        className="w-6 h-6 text-red-500 animate-pulse"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-red-700 dark:text-red-400">
+                          جاري التسجيل...
+                        </span>
+                        <span className="text-xs text-red-600 dark:text-red-500">
+                          {Math.floor(recordingTime / 60)}:
+                          {(recordingTime % 60).toString().padStart(2, "0")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={stopRecording}
+                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-1"
+                      >
+                        <Icon icon="solar:stop-bold" className="w-4 h-4" />
+                        <span>إيقاف</span>
+                      </button>
+                      <button
+                        onClick={cancelRecording}
+                        className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                      >
+                        <Icon
+                          icon="solar:close-circle-bold"
+                          className="w-5 h-5 text-red-500"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAudio && !isRecording && (
                   <div className="mt-3 p-4 bg-sky-50 dark:bg-sky-900/20 rounded-xl border-2 border-sky-200 dark:border-sky-800 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Icon
                         icon="solar:microphone-bold-duotone"
                         className="w-6 h-6 text-sky-500"
                       />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {selectedAudio.name}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {selectedAudio.name}
+                        </span>
+                        {recordedAudio && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            تسجيل صوتي • {Math.floor(recordingTime / 60)}:
+                            {(recordingTime % 60).toString().padStart(2, "0")}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={removeSelectedAudio}
@@ -702,8 +863,9 @@ const CommunityDetailPage = () => {
                     />
                     <button
                       onClick={() => imageInputRef.current?.click()}
-                      disabled={selectedAudio !== null}
+                      disabled={selectedAudio !== null || isRecording}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="إضافة صور"
                     >
                       <Icon
                         icon="solar:gallery-bold"
@@ -720,12 +882,37 @@ const CommunityDetailPage = () => {
                     />
                     <button
                       onClick={() => audioInputRef.current?.click()}
-                      disabled={selectedImages.length > 0}
+                      disabled={selectedImages.length > 0 || isRecording}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="تحميل ملف صوتي"
                     >
                       <Icon
-                        icon="solar:microphone-bold"
+                        icon="solar:file-smile-bold"
                         className="w-5 h-5 text-gray-600 dark:text-gray-400"
+                      />
+                    </button>
+
+                    <button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={selectedImages.length > 0}
+                      className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                        isRecording
+                          ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
+                      title={isRecording ? "إيقاف التسجيل" : "تسجيل صوتي"}
+                    >
+                      <Icon
+                        icon={
+                          isRecording
+                            ? "solar:stop-circle-bold"
+                            : "solar:microphone-bold"
+                        }
+                        className={`w-5 h-5 ${
+                          isRecording
+                            ? "text-white"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
                       />
                     </button>
                   </div>
@@ -905,18 +1092,32 @@ const CommunityDetailPage = () => {
                           />
                         </button>
                         <div className="flex-1">
-                          <div
-                            className="h-2 bg-sky-200 dark:bg-sky-800 rounded-full overflow-hidden cursor-pointer"
-                            onClick={(e) => handleSeekAudio(post.id, e)}
-                          >
+                          <div className="relative">
                             <div
-                              className="h-full bg-sky-500 rounded-full transition-all duration-150"
-                              style={{
-                                width: `${
-                                  audioProgress[post.id]?.progress || 0
-                                }%`,
-                              }}
-                            ></div>
+                              className="h-2 bg-sky-200 dark:bg-sky-800 rounded-full overflow-hidden cursor-pointer"
+                              onClick={(e) => handleSeekAudio(post.id, e)}
+                              onPointerMove={(e) => handleHoverMove(post.id, e)}
+                              onPointerLeave={() => handleHoverLeave(post.id)}
+                            >
+                              <div
+                                className="h-full bg-sky-500 rounded-full transition-all duration-150"
+                                style={{
+                                  width: `${
+                                    audioProgress[post.id]?.progress || 0
+                                  }%`,
+                                }}
+                              ></div>
+                            </div>
+
+                            {/* Hover tooltip */}
+                            {audioHover[post.id]?.visible && (
+                              <div
+                                className="absolute -top-7 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded-md pointer-events-none"
+                                style={{ left: audioHover[post.id].left }}
+                              >
+                                {audioHover[post.id].time}
+                              </div>
+                            )}
                           </div>
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-xs text-gray-600 dark:text-gray-400">

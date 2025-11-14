@@ -34,6 +34,11 @@ const PostDetailPage = () => {
     currentTime: "0:00",
     duration: "0:00",
   });
+  const [audioHover, setAudioHover] = useState({
+    visible: false,
+    time: "0:00",
+    left: "0%",
+  });
   const [expandedImage, setExpandedImage] = useState(null);
   const [imageRotation, setImageRotation] = useState(0);
   const audioRef = useRef(null);
@@ -234,8 +239,41 @@ const PostDetailPage = () => {
     if (!audio) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = percent * audio.duration;
+    let percent = (e.clientX - rect.left) / rect.width;
+    const dir = getComputedStyle(e.currentTarget).direction;
+    if (dir === "rtl") {
+      percent = 1 - percent;
+    }
+    percent = Math.max(0, Math.min(1, percent));
+    audio.currentTime = percent * (audio.duration || 0);
+  };
+
+  const handleHoverMove = (e) => {
+    const audio = audioRef.current;
+    const container = e.currentTarget.getBoundingClientRect();
+    if (!audio || !container) return;
+
+    let percentPos = (e.clientX - container.left) / container.width;
+    percentPos = Math.max(0, Math.min(1, percentPos));
+
+    // Check RTL direction for time calculation
+    const dir = getComputedStyle(e.currentTarget).direction;
+    let timePercent = percentPos;
+    if (dir === "rtl") {
+      timePercent = 1 - percentPos;
+    }
+
+    const duration = audio.duration || 0;
+    const hoveredSec = timePercent * duration;
+    setAudioHover({
+      visible: true,
+      time: formatTime(hoveredSec),
+      left: `${percentPos * 100}%`,
+    });
+  };
+
+  const handleHoverLeave = () => {
+    setAudioHover({ ...(audioHover || {}), visible: false });
   };
 
   const handleImageClick = (image) => {
@@ -410,14 +448,27 @@ const PostDetailPage = () => {
                   />
                 </button>
                 <div className="flex-1">
-                  <div
-                    className="h-2 bg-sky-200 dark:bg-sky-800 rounded-full overflow-hidden cursor-pointer"
-                    onClick={handleSeekAudio}
-                  >
+                  <div className="relative">
                     <div
-                      className="h-full bg-sky-500 rounded-full transition-all duration-150"
-                      style={{ width: `${audioProgress.progress}%` }}
-                    ></div>
+                      className="h-2 bg-sky-200 dark:bg-sky-800 rounded-full overflow-hidden cursor-pointer"
+                      onClick={handleSeekAudio}
+                      onPointerMove={handleHoverMove}
+                      onPointerLeave={handleHoverLeave}
+                    >
+                      <div
+                        className="h-full bg-sky-500 rounded-full transition-all duration-150"
+                        style={{ width: `${audioProgress.progress}%` }}
+                      ></div>
+                    </div>
+
+                    {audioHover.visible && (
+                      <div
+                        className="absolute -top-7 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded-md pointer-events-none"
+                        style={{ left: audioHover.left }}
+                      >
+                        {audioHover.time}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-gray-600 dark:text-gray-400">

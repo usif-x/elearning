@@ -20,17 +20,17 @@ const Switcher = ({
   const sizeStyles = {
     sm: {
       container: "h-8 w-16",
-      knob: "h-8 w-8",
+      knob: "h-7 w-7",
       translate: "translate-x-8 rtl:-translate-x-8",
     },
     md: {
       container: "h-10 w-20",
-      knob: "h-9 w-9",
+      knob: "h-8 w-8",
       translate: "translate-x-11 rtl:-translate-x-11",
     },
     lg: {
       container: "h-12 w-24",
-      knob: "h-11 w-11",
+      knob: "h-10 w-10",
       translate: "translate-x-13 rtl:-translate-x-13",
     },
   };
