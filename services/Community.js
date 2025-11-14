@@ -7,7 +7,7 @@ export const getCommunities = async (
   isPublic = null,
   search = null
 ) => {
-  let url = `/communities?page=${page}&size=${size}`;
+  let url = `/communities/?page=${page}&size=${size}`;
   if (isPublic !== null) url += `&is_public=${isPublic}`;
   if (search) url += `&search=${search}`;
 
