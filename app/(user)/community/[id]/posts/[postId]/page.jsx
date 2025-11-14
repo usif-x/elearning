@@ -310,19 +310,28 @@ const PostDetailPage = () => {
         {/* Community Info */}
         {community && (
           <div className="mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="solar:users-group-rounded-bold-duotone"
-                className="w-8 h-8 text-sky-500"
-              />
-              <div>
-                <h2 className="font-bold text-gray-900 dark:text-white">
-                  {community.name}
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {community.description}
-                </p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Icon
+                  icon="solar:users-group-rounded-bold-duotone"
+                  className="w-8 h-8 text-sky-500"
+                />
+                <div>
+                  <h2 className="font-bold text-gray-900 dark:text-white">
+                    {community.name}
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {community.description}
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => router.push(`/community/${communityId}`)}
+                className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold transition-colors flex items-center gap-2 shadow-lg flex-shrink-0"
+              >
+                <Icon icon="solar:login-3-bold" className="w-5 h-5" />
+                <span>فتح المجموعة</span>
+              </button>
             </div>
           </div>
         )}

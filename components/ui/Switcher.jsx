@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { useId, useState } from "react";
+import { useId } from "react";
 const Switcher = ({
   checked = false,
   onChange,
@@ -13,29 +13,31 @@ const Switcher = ({
   id,
   ...props
 }) => {
-  const [isChecked, setIsChecked] = useState(checked);
   const generatedId = useId();
   const switchId = id || `switcher-${generatedId}`;
 
   // Updated size configurations (slightly larger)
   const sizeStyles = {
-    sm: { container: "h-8 w-16", knob: "h-8 w-8", translate: "translate-x-10" },
+    sm: {
+      container: "h-8 w-16",
+      knob: "h-8 w-8",
+      translate: "translate-x-8 rtl:-translate-x-8",
+    },
     md: {
       container: "h-10 w-20",
       knob: "h-9 w-9",
-      translate: "translate-x-[42px]",
+      translate: "translate-x-11 rtl:-translate-x-11",
     },
     lg: {
       container: "h-12 w-24",
       knob: "h-11 w-11",
-      translate: "translate-x-12",
+      translate: "translate-x-13 rtl:-translate-x-13",
     },
   };
 
   const handleToggle = (e) => {
     if (disabled) return;
-    const newValue = !isChecked;
-    setIsChecked(newValue);
+    const newValue = !checked;
     onChange?.(newValue, e);
   };
 
@@ -62,7 +64,7 @@ const Switcher = ({
           className={`
             text-sm font-medium select-none transition-colors duration-150
             ${
-              isChecked
+              checked
                 ? "text-gray-900 dark:text-gray-100"
                 : "text-gray-600 dark:text-gray-400"
             }
@@ -76,7 +78,7 @@ const Switcher = ({
         role="switch"
         id={switchId}
         name={name}
-        aria-checked={isChecked}
+        aria-checked={checked}
         aria-disabled={disabled}
         tabIndex={disabled ? -1 : 0}
         onClick={handleToggle}
@@ -85,7 +87,7 @@ const Switcher = ({
           relative inline-flex items-center rounded-full
           transition-all duration-200 ease-in-out
           ${currentSize.container}
-          ${isChecked ? "bg-sky-900" : "bg-gray-200 dark:bg-gray-700"}
+          ${checked ? "bg-sky-900" : "bg-gray-200 dark:bg-gray-700"}
           ${disabled ? "cursor-not-allowed" : "cursor-pointer"}
           hover:shadow-md
         `}
@@ -96,8 +98,12 @@ const Switcher = ({
             inline-block transform rounded-full
             bg-white transition-all duration-200 ease-in-out
             ${currentSize.knob}
-            ${isChecked ? currentSize.translate : "translate-x-[1.5px]"}
-            ${isChecked ? "scale-100" : "scale-95"}
+            ${
+              checked
+                ? currentSize.translate
+                : "translate-x-0.5 rtl:-translate-x-0.5"
+            }
+            ${checked ? "scale-100" : "scale-95"}
             ${disabled ? "" : "group-hover:scale-105"}
           `}
         >
@@ -105,7 +111,7 @@ const Switcher = ({
             className={`
             absolute inset-0 m-auto flex items-center justify-center
             transition-opacity duration-150
-            ${isChecked ? "opacity-100" : "opacity-0"}
+            ${checked ? "opacity-100" : "opacity-0"}
           `}
           >
             <Icon
@@ -118,7 +124,7 @@ const Switcher = ({
           <div
             className={`
             absolute inset-0 rounded-full
-            ${isChecked ? "opacity-0" : "opacity-100"}
+            ${checked ? "opacity-0" : "opacity-100"}
             bg-gray-300/30 transition-opacity duration-150
           `}
           />
@@ -131,7 +137,7 @@ const Switcher = ({
           className={`
             text-sm font-medium select-none transition-colors duration-150
             ${
-              isChecked
+              checked
                 ? "text-gray-900 dark:text-gray-100"
                 : "text-gray-600 dark:text-gray-400"
             }

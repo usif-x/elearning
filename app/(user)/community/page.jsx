@@ -1,5 +1,6 @@
 "use client";
 
+import Switcher from "@/components/ui/Switcher";
 import { useAuthStore } from "@/hooks/useAuth";
 import {
   addPostMedia,
@@ -9,6 +10,7 @@ import {
   deletePost,
   getComments,
   getCommunities,
+  getMyPosts,
   getPosts,
   joinCommunity,
   leaveCommunity,
@@ -59,6 +61,7 @@ const Community = () => {
   const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [joiningCommunityId, setJoiningCommunityId] = useState(null);
+  const [showMyPosts, setShowMyPosts] = useState(false);
   const audioRefs = useRef({});
   const imageInputRef = useRef(null);
   const audioInputRef = useRef(null);
@@ -78,6 +81,16 @@ const Community = () => {
     }
   }, [selectedCommunity]);
 
+  // Refetch posts when showMyPosts changes
+  useEffect(() => {
+    if (selectedCommunity) {
+      setCurrentPage(1);
+      setPosts([]);
+      setHasMorePosts(true);
+      fetchPosts(selectedCommunity.id, 1);
+    }
+  }, [showMyPosts]);
+
   const fetchCommunities = async (search = "") => {
     try {
       setLoading(true);
@@ -91,9 +104,7 @@ const Community = () => {
           color: communityIcons[index % communityIcons.length].color,
         }));
         setCommunities(communitiesWithIcons);
-        if (!selectedCommunity || search) {
-          setSelectedCommunity(communitiesWithIcons[0]);
-        }
+        // Don't auto-select community
       } else {
         setCommunities([]);
         if (!search) {
@@ -116,7 +127,9 @@ const Community = () => {
         setLoadingMorePosts(true);
       }
 
-      const data = await getPosts(communityId, page, 5);
+      const data = showMyPosts
+        ? await getMyPosts(page, 5)
+        : await getPosts(communityId, page, 5);
 
       // Transform backend data to frontend format
       const transformedPosts = data.map((post) => {
@@ -563,17 +576,156 @@ const Community = () => {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
-            <Icon
-              icon="solar:users-group-rounded-bold-duotone"
-              className="w-24 h-24 mx-auto mb-4 text-gray-400"
-            />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              لا توجد مجموعات متاحة
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              لم يتم العثور على أي مجموعات في الوقت الحالي
+          {/* Page Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <Icon
+                icon="solar:users-group-rounded-bold-duotone"
+                className="w-16 h-16 text-sky-500"
+              />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              منتدى الطلاب
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+              انضم إلى المجموعات وشارك أفكارك وخبراتك مع زملائك
             </p>
+
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  placeholder="ابحث عن مجموعة..."
+                  className="w-full px-6 py-4 pr-14 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  dir="rtl"
+                />
+                <button
+                  onClick={handleSearch}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-sky-500 hover:bg-sky-600 rounded-xl flex items-center justify-center transition-colors"
+                >
+                  <Icon
+                    icon="solar:magnifer-bold"
+                    className="w-5 h-5 text-white"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-6">
+            {/* Groups Sidebar */}
+            {communities.length > 0 && (
+              <div className="lg:col-span-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sticky top-24">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Icon
+                      icon="solar:folder-with-files-bold"
+                      className="w-6 h-6"
+                    />
+                    المجموعات المتاحة
+                  </h2>
+                  <div className="space-y-3">
+                    {(showAllGroups
+                      ? communities
+                      : communities.slice(0, 3)
+                    ).map((community) => {
+                      return (
+                        <button
+                          key={community.id}
+                          onClick={() => setSelectedCommunity(community)}
+                          className="w-full p-4 rounded-xl transition-all duration-300 text-right bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600">
+                              <Icon
+                                icon="solar:users-group-rounded-bold-duotone"
+                                className="w-6 h-6 text-gray-600 dark:text-gray-400"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+                                {community.name}
+                              </h3>
+                              <div className="flex items-center gap-3 text-xs mt-1 text-gray-500 dark:text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Icon
+                                    icon="solar:user-bold"
+                                    className="w-3 h-3"
+                                  />
+                                  {community.members_count || 0}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon
+                                    icon="solar:chat-line-bold"
+                                    className="w-3 h-3"
+                                  />
+                                  {community.posts_count || 0}
+                                </span>
+                                {community.is_member && (
+                                  <span className="flex items-center gap-1">
+                                    <Icon
+                                      icon="solar:check-circle-bold"
+                                      className="w-3 h-3"
+                                    />
+                                    عضو
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Show More Button for Groups */}
+                  {communities.length > 3 && (
+                    <button
+                      onClick={() => setShowAllGroups(!showAllGroups)}
+                      className="w-full mt-4 py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
+                    >
+                      <Icon
+                        icon={
+                          showAllGroups
+                            ? "solar:alt-arrow-up-bold"
+                            : "solar:alt-arrow-down-bold"
+                        }
+                        className="w-5 h-5"
+                      />
+                      <span>{showAllGroups ? "عرض أقل" : "عرض المزيد"}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Main Content - Empty State */}
+            <div
+              className={
+                communities.length > 0 ? "lg:col-span-8" : "lg:col-span-12"
+              }
+            >
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+                <Icon
+                  icon="solar:hand-shake-bold-duotone"
+                  className="w-24 h-24 mx-auto mb-4 text-sky-500"
+                />
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {communities.length === 0
+                    ? "لا توجد مجموعات متاحة"
+                    : "اختر مجموعة لعرض المحتوى"}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {communities.length === 0
+                    ? "لم يتم العثور على أي مجموعات في الوقت الحالي"
+                    : "حدد مجموعة من القائمة على اليمين لعرض المنشورات والمشاركة"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -958,6 +1110,38 @@ const Community = () => {
               </div>
             )}
 
+            {/* Posts Filter Switcher */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    الكل
+                  </span>
+                  <Switcher
+                    checked={showMyPosts}
+                    onChange={(value) => setShowMyPosts(value)}
+                    size="sm"
+                  />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    منشوراتي
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Icon
+                    icon={
+                      showMyPosts
+                        ? "solar:user-bold-duotone"
+                        : "solar:users-group-rounded-bold-duotone"
+                    }
+                    className="w-6 h-6 text-sky-500"
+                  />
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    {showMyPosts ? "منشوراتي" : "جميع المنشورات"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Posts */}
             <div className="space-y-4">
               {!selectedCommunity.is_public && !selectedCommunity.is_member ? (
@@ -1180,6 +1364,17 @@ const Community = () => {
                         >
                           <Icon icon="solar:share-bold" className="w-5 h-5" />
                           <span className="text-sm font-medium">مشاركة</span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            router.push(
+                              `/community/${post.communityId}/posts/${post.id}`
+                            )
+                          }
+                          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-sky-500 transition-colors"
+                        >
+                          <Icon icon="solar:eye-bold" className="w-5 h-5" />
+                          <span className="text-sm font-medium">عرض</span>
                         </button>
                       </div>
 

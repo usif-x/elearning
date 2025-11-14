@@ -1,5 +1,5 @@
 "use client";
-
+import Switcher from "@/components/ui/Switcher";
 import { useAuthStore } from "@/hooks/useAuth";
 import {
   addPostMedia,
@@ -9,6 +9,7 @@ import {
   deletePost,
   getComments,
   getCommunityById,
+  getMyPosts,
   getPosts,
   joinCommunity,
   leaveCommunity,
@@ -47,6 +48,7 @@ const CommunityDetailPage = () => {
   const [loadingComments, setLoadingComments] = useState({});
   const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
+  const [showMyPosts, setShowMyPosts] = useState(false);
   const audioRefs = useRef({});
   const imageInputRef = useRef(null);
   const audioInputRef = useRef(null);
@@ -57,6 +59,15 @@ const CommunityDetailPage = () => {
       fetchPosts(communityId, 1);
     }
   }, [communityId]);
+
+  useEffect(() => {
+    if (communityId) {
+      setCurrentPage(1);
+      setPosts([]);
+      setHasMorePosts(true);
+      fetchPosts(communityId, 1);
+    }
+  }, [showMyPosts]);
 
   const fetchCommunity = async () => {
     try {
@@ -80,7 +91,9 @@ const CommunityDetailPage = () => {
         setLoadingMorePosts(true);
       }
 
-      const data = await getPosts(communityId, page, 5);
+      const data = showMyPosts
+        ? await getMyPosts(page, 5)
+        : await getPosts(communityId, page, 5);
 
       const transformedPosts = data.map((post) => {
         let type = "text";
@@ -751,6 +764,36 @@ const CommunityDetailPage = () => {
           </div>
         )}
 
+        {/* Posts Filter Switcher */}
+        {community.is_member && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  الكل
+                </span>
+                <Switcher
+                  checked={showMyPosts}
+                  onChange={(checked) => setShowMyPosts(checked)}
+                  size="sm"
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  منشوراتي
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Icon
+                  icon="solar:posts-carousel-horizontal-bold-duotone"
+                  className="w-5 h-5 text-sky-500"
+                />
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  تصفية المنشورات
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Posts */}
         <div className="space-y-4">
           {!community.is_public && !community.is_member ? (
@@ -960,6 +1003,17 @@ const CommunityDetailPage = () => {
                     >
                       <Icon icon="solar:share-bold" className="w-5 h-5" />
                       <span className="text-sm font-medium">مشاركة</span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        router.push(
+                          `/community/${post.communityId}/posts/${post.id}`
+                        )
+                      }
+                      className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-sky-500 transition-colors"
+                    >
+                      <Icon icon="solar:eye-bold" className="w-5 h-5" />
+                      <span className="text-sm font-medium">عرض</span>
                     </button>
                   </div>
 

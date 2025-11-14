@@ -53,6 +53,14 @@ export const getPosts = async (communityId, page = 1, size = 20) => {
   return response.posts || [];
 };
 
+export const getMyPosts = async (page = 1, size = 20) => {
+  const response = await getData(
+    `/communities/posts/me?page=${page}&size=${size}`,
+    true
+  );
+  return response.posts || [];
+};
+
 export const getPostById = async (communityId, postId) => {
   return await getData(`/communities/${communityId}/posts/${postId}`, true);
 };
