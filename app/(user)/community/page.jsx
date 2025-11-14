@@ -1,163 +1,209 @@
 "use client";
 
+import { useAuthStore } from "@/hooks/useAuth";
+import {
+  addPostMedia,
+  addReaction,
+  createComment,
+  createPost,
+  deletePost,
+  getComments,
+  getCommunities,
+  getPosts,
+  joinCommunity,
+  leaveCommunity,
+  removeReaction,
+} from "@/services/Community";
 import { Icon } from "@iconify/react";
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
-// Fake data for groups
-const fakeGroups = [
-  {
-    id: 1,
-    name: "مجموعة الكيمياء العامة",
-    description: "مجموعة لمناقشة مواضيع الكيمياء العامة والتفاعلات الكيميائية",
-    members: 245,
-    posts: 89,
-    cover: "/images/hero.svg",
-    icon: "solar:atom-bold-duotone",
-    color: "sky",
-  },
-  {
-    id: 2,
-    name: "مجموعة الفيزياء",
-    description: "نقاش حول القوانين الفيزيائية والتجارب العملية",
-    members: 189,
-    posts: 56,
-    cover: "/images/hero.svg",
-    icon: "solar:lightbulb-bolt-bold-duotone",
-    color: "purple",
-  },
-  {
-    id: 3,
-    name: "مجموعة الرياضيات",
-    description: "حل المسائل الرياضية ومشاركة الأفكار",
-    members: 312,
-    posts: 124,
-    cover: "/images/hero.svg",
-    icon: "solar:calculator-bold-duotone",
-    color: "blue",
-  },
-  {
-    id: 4,
-    name: "مجموعة البرمجة",
-    description: "تعلم البرمجة ومشاركة المشاريع والخبرات",
-    members: 428,
-    posts: 201,
-    cover: "/images/hero.svg",
-    icon: "solar:code-bold-duotone",
-    color: "green",
-  },
-];
-
-// Fake data for posts
-const fakePosts = [
-  {
-    id: 1,
-    groupId: 1,
-    author: {
-      name: "أحمد محمد",
-      avatar: null,
-      role: "طالب",
-    },
-    content:
-      "هل يمكن لأحد أن يشرح لي الفرق بين التفاعلات الطاردة والماصة للحرارة؟",
-    timestamp: "منذ ساعتين",
-    likes: 12,
-    comments: 8,
-    isLiked: false,
-    type: "text", // text, audio, image
-  },
-  {
-    id: 2,
-    groupId: 1,
-    author: {
-      name: "فاطمة علي",
-      avatar: null,
-      role: "طالبة",
-    },
-    content: "شكراً للأستاذ على الشرح الرائع في محاضرة اليوم! استفدت كثيراً 🙏",
-    timestamp: "منذ 3 ساعات",
-    likes: 24,
-    comments: 5,
-    isLiked: true,
-    type: "text",
-  },
-  {
-    id: 3,
-    groupId: 1,
-    author: {
-      name: "محمود حسن",
-      avatar: null,
-      role: "طالب",
-    },
-    content:
-      "هل يوجد ملخص لدرس التفاعلات الكيميائية؟ أحتاجه للمراجعة قبل الامتحان",
-    timestamp: "منذ 5 ساعات",
-    likes: 18,
-    comments: 12,
-    isLiked: false,
-    type: "text",
-  },
-  {
-    id: 4,
-    groupId: 1,
-    author: {
-      name: "سارة إبراهيم",
-      avatar: null,
-      role: "طالبة",
-    },
-    content:
-      "قمت بتجربة التفاعل في المعمل اليوم وكانت النتائج رائعة! سأشارك الفيديو قريباً 🔬",
-    timestamp: "منذ يوم",
-    likes: 35,
-    comments: 15,
-    isLiked: true,
-    type: "image",
-    images: ["/images/hero.svg", "/images/hero.svg"],
-  },
-  {
-    id: 5,
-    groupId: 1,
-    author: {
-      name: "خالد أحمد",
-      avatar: null,
-      role: "طالب",
-    },
-    content: "سجلت شرح صوتي لموضوع التفاعلات الكيميائية، أتمنى أن يفيدكم!",
-    timestamp: "منذ 3 ساعات",
-    likes: 28,
-    comments: 9,
-    isLiked: false,
-    type: "audio",
-    audioDuration: "2:45",
-  },
-  {
-    id: 6,
-    groupId: 1,
-    author: {
-      name: "نور محمود",
-      avatar: null,
-      role: "طالبة",
-    },
-    content: "هذه صورة من الكتاب توضح الجدول الدوري بشكل مفصل للمراجعة",
-    timestamp: "منذ 6 ساعات",
-    likes: 42,
-    comments: 18,
-    isLiked: true,
-    type: "image",
-    images: ["/images/hero.svg"],
-  },
+// Icon mapping for communities
+const communityIcons = [
+  { icon: "solar:atom-bold-duotone", color: "sky" },
+  { icon: "solar:lightbulb-bolt-bold-duotone", color: "purple" },
+  { icon: "solar:calculator-bold-duotone", color: "blue" },
+  { icon: "solar:code-bold-duotone", color: "green" },
+  { icon: "solar:book-bold-duotone", color: "red" },
+  { icon: "solar:cup-star-bold-duotone", color: "orange" },
 ];
 
 const Community = () => {
-  const [selectedGroup, setSelectedGroup] = useState(fakeGroups[0]);
-  const [posts, setPosts] = useState(fakePosts);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://0.0.0.0:8000";
+  const { user } = useAuthStore();
+  const router = useRouter();
+  const [communities, setCommunities] = useState([]);
+  const [selectedCommunity, setSelectedCommunity] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(false);
   const [showAllGroups, setShowAllGroups] = useState(false);
   const [showAllPosts, setShowAllPosts] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [loadingMorePosts, setLoadingMorePosts] = useState(false);
   const [playingAudio, setPlayingAudio] = useState(null);
   const [audioProgress, setAudioProgress] = useState({});
   const [expandedImage, setExpandedImage] = useState(null);
   const [imageRotation, setImageRotation] = useState(0);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedAudio, setSelectedAudio] = useState(null);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCommentsFor, setShowCommentsFor] = useState(null);
+  const [comments, setComments] = useState({});
+  const [newComment, setNewComment] = useState({});
+  const [loadingComments, setLoadingComments] = useState({});
+  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+  const [joiningCommunityId, setJoiningCommunityId] = useState(null);
   const audioRefs = useRef({});
+  const imageInputRef = useRef(null);
+  const audioInputRef = useRef(null);
+
+  // Fetch communities on mount
+  useEffect(() => {
+    fetchCommunities();
+  }, []);
+
+  // Fetch posts when community changes
+  useEffect(() => {
+    if (selectedCommunity) {
+      setCurrentPage(1);
+      setPosts([]);
+      setHasMorePosts(true);
+      fetchPosts(selectedCommunity.id, 1);
+    }
+  }, [selectedCommunity]);
+
+  const fetchCommunities = async (search = "") => {
+    try {
+      setLoading(true);
+      const data = await getCommunities(1, 50, null, search || null);
+      console.log("Communities data:", data);
+      if (data && Array.isArray(data) && data.length > 0) {
+        // Add icon and color to communities
+        const communitiesWithIcons = data.map((community, index) => ({
+          ...community,
+          icon: communityIcons[index % communityIcons.length].icon,
+          color: communityIcons[index % communityIcons.length].color,
+        }));
+        setCommunities(communitiesWithIcons);
+        if (!selectedCommunity || search) {
+          setSelectedCommunity(communitiesWithIcons[0]);
+        }
+      } else {
+        setCommunities([]);
+        if (!search) {
+          setSelectedCommunity(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching communities:", error);
+      toast.error("فشل في تحميل المجموعات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPosts = async (communityId, page = 1) => {
+    try {
+      if (page === 1) {
+        setPostsLoading(true);
+      } else {
+        setLoadingMorePosts(true);
+      }
+
+      const data = await getPosts(communityId, page, 5);
+
+      // Transform backend data to frontend format
+      const transformedPosts = data.map((post) => {
+        // Determine post type based on media
+        let type = "text";
+        let images = [];
+        let audioDuration = null;
+
+        if (post.media && post.media.length > 0) {
+          const hasImage = post.media.some((m) => m.media_type === "image");
+          const hasAudio = post.media.some((m) => m.media_type === "audio");
+
+          if (hasImage) {
+            type = "image";
+            images = post.media
+              .filter((m) => m.media_type === "image")
+              .map((m) => `${API_URL}/storage/${m.media_url}`);
+          } else if (hasAudio) {
+            type = "audio";
+            const audioMedia = post.media.find((m) => m.media_type === "audio");
+            if (audioMedia && audioMedia.duration) {
+              audioDuration = formatTime(audioMedia.duration);
+            }
+          }
+        }
+
+        return {
+          id: post.id,
+          communityId: post.community_id,
+          author: {
+            name:
+              post.author?.id === user?.id
+                ? "أنت"
+                : post.author?.full_name ||
+                  post.author?.telegram_username ||
+                  "مستخدم",
+            avatar: post.author?.profile_picture,
+            role: post.author?.user_type === "teacher" ? "معلم" : "طالب",
+          },
+          content: post.content,
+          timestamp: formatTimestamp(post.created_at),
+          likes: post.reactions_count || 0,
+          comments: post.comments_count || 0,
+          isLiked: post.user_reaction === "like",
+          type,
+          images,
+          audioDuration,
+          audioUrl: post.media?.find((m) => m.media_type === "audio")?.media_url
+            ? `${API_URL}/storage/${
+                post.media.find((m) => m.media_type === "audio").media_url
+              }`
+            : null,
+          isPinned: post.is_pinned,
+          isEdited: post.is_edited,
+        };
+      });
+
+      if (page === 1) {
+        setPosts(transformedPosts);
+      } else {
+        setPosts((prev) => [...prev, ...transformedPosts]);
+      }
+
+      // Check if there are more posts
+      setHasMorePosts(transformedPosts.length === 5);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      toast.error("فشل في تحميل المنشورات");
+    } finally {
+      setPostsLoading(false);
+      setLoadingMorePosts(false);
+    }
+  };
+
+  const formatTimestamp = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+    if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+    if (diffDays < 7) return `منذ ${diffDays} يوم`;
+    return date.toLocaleDateString("ar-EG");
+  };
 
   const getColorClasses = (color) => {
     const colors = {
@@ -189,39 +235,236 @@ const Community = () => {
     return colors[color] || colors.sky;
   };
 
-  const handleLike = (postId) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              isLiked: !post.isLiked,
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-            }
-          : post
-      )
-    );
+  const handleLike = async (postId) => {
+    const post = posts.find((p) => p.id === postId);
+    if (!post) return;
+
+    try {
+      if (post.isLiked) {
+        await removeReaction(postId);
+      } else {
+        await addReaction(postId, "like");
+      }
+
+      // Update local state
+      setPosts(
+        posts.map((p) =>
+          p.id === postId
+            ? {
+                ...p,
+                isLiked: !p.isLiked,
+                likes: p.isLiked ? p.likes - 1 : p.likes + 1,
+              }
+            : p
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      toast.error("فشل في تحديث الإعجاب");
+    }
   };
 
-  const handleCreatePost = () => {
-    if (newPost.trim()) {
-      const post = {
-        id: posts.length + 1,
-        groupId: selectedGroup.id,
-        author: {
-          name: "أنت",
-          avatar: null,
-          role: "طالب",
-        },
-        content: newPost,
-        timestamp: "الآن",
-        likes: 0,
-        comments: 0,
-        isLiked: false,
-        type: "text",
-      };
-      setPosts([post, ...posts]);
+  const handleCreatePost = async () => {
+    if (
+      (!newPost.trim() && selectedImages.length === 0 && !selectedAudio) ||
+      !selectedCommunity
+    )
+      return;
+
+    try {
+      // Create the post first
+      const data = await createPost(selectedCommunity.id, {
+        content: newPost.trim() || "شارك محتوى جديد",
+        is_pinned: false,
+      });
+
+      // Upload images if any
+      if (selectedImages.length > 0) {
+        setUploadingMedia(true);
+        for (const image of selectedImages) {
+          await addPostMedia(data.id, image, "image");
+        }
+      }
+
+      // Upload audio if any
+      if (selectedAudio) {
+        setUploadingMedia(true);
+        await addPostMedia(data.id, selectedAudio, "audio");
+      }
+
+      // Clear form
       setNewPost("");
+      setSelectedImages([]);
+      setSelectedAudio(null);
+      setUploadingMedia(false);
+
+      toast.success("تم نشر المنشور بنجاح");
+
+      // Refresh posts from the beginning
+      setCurrentPage(1);
+      setPosts([]);
+      setHasMorePosts(true);
+      await fetchPosts(selectedCommunity.id, 1);
+    } catch (error) {
+      console.error("Error creating post:", error);
+      toast.error("فشل في نشر المنشور");
+      setUploadingMedia(false);
+    }
+  };
+
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length + selectedImages.length > 4) {
+      toast.error("يمكنك رفع حتى 4 صور فقط");
+      return;
+    }
+    setSelectedImages([...selectedImages, ...files]);
+    setSelectedAudio(null); // Clear audio if images selected
+  };
+
+  const handleAudioSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedAudio(file);
+      setSelectedImages([]); // Clear images if audio selected
+    }
+  };
+
+  const removeSelectedImage = (index) => {
+    setSelectedImages(selectedImages.filter((_, i) => i !== index));
+  };
+
+  const removeSelectedAudio = () => {
+    setSelectedAudio(null);
+  };
+
+  const handleJoinCommunity = async (communityId, communityIsPublic = true) => {
+    // Check if community is private
+    if (!communityIsPublic) {
+      // Show invite code modal for private communities
+      setJoiningCommunityId(communityId);
+      setShowInviteCodeModal(true);
+      return;
+    }
+
+    // For public communities, join directly
+    try {
+      await joinCommunity(communityId, null);
+      toast.success("تم الانضمام إلى المجموعة بنجاح");
+      await fetchCommunities();
+    } catch (error) {
+      console.error("Error joining community:", error);
+      toast.error("فشل في الانضمام إلى المجموعة");
+    }
+  };
+
+  const handleJoinWithInviteCode = async () => {
+    if (!inviteCode.trim()) {
+      toast.error("الرجاء إدخال رمز الدعوة");
+      return;
+    }
+
+    try {
+      await joinCommunity(joiningCommunityId, inviteCode.trim());
+      toast.success("تم الانضمام إلى المجموعة بنجاح");
+      setShowInviteCodeModal(false);
+      setInviteCode("");
+      setJoiningCommunityId(null);
+      await fetchCommunities();
+    } catch (error) {
+      console.error("Error joining community:", error);
+      toast.error(
+        error.response?.data?.detail || "فشل في الانضمام إلى المجموعة"
+      );
+    }
+  };
+
+  const handleLeaveCommunity = async (communityId) => {
+    if (!confirm("هل أنت متأكد من الخروج من هذه المجموعة؟")) return;
+
+    try {
+      await leaveCommunity(communityId);
+      toast.success("تم الخروج من المجموعة بنجاح");
+      await fetchCommunities();
+    } catch (error) {
+      console.error("Error leaving community:", error);
+      toast.error("فشل في الخروج من المجموعة");
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!confirm("هل أنت متأكد من حذف هذا المنشور؟")) return;
+
+    try {
+      await deletePost(postId);
+      setPosts(posts.filter((p) => p.id !== postId));
+      toast.success("تم حذف المنشور بنجاح");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("فشل في حذف المنشور");
+    }
+  };
+
+  const handleSearch = () => {
+    fetchCommunities(searchQuery);
+  };
+
+  const handleLoadMorePosts = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchPosts(selectedCommunity.id, nextPage);
+  };
+
+  const toggleComments = async (postId) => {
+    if (showCommentsFor === postId) {
+      setShowCommentsFor(null);
+    } else {
+      setShowCommentsFor(postId);
+      if (!comments[postId]) {
+        await fetchComments(postId);
+      }
+    }
+  };
+
+  const fetchComments = async (postId) => {
+    try {
+      setLoadingComments((prev) => ({ ...prev, [postId]: true }));
+      const data = await getComments(postId, 1, 50);
+      setComments((prev) => ({ ...prev, [postId]: data }));
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      toast.error("فشل في تحميل التعليقات");
+    } finally {
+      setLoadingComments((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const handleCreateComment = async (postId) => {
+    const content = newComment[postId]?.trim();
+    if (!content) return;
+
+    try {
+      const data = await createComment(postId, { content });
+
+      // Add comment to local state
+      setComments((prev) => ({
+        ...prev,
+        [postId]: [data, ...(prev[postId] || [])],
+      }));
+
+      // Update comment count in posts
+      setPosts(
+        posts.map((p) =>
+          p.id === postId ? { ...p, comments: p.comments + 1 } : p
+        )
+      );
+
+      // Clear input
+      setNewComment((prev) => ({ ...prev, [postId]: "" }));
+      toast.success("تم إضافة التعليق بنجاح");
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      toast.error("فشل في إضافة التعليق");
     }
   };
 
@@ -300,12 +543,47 @@ const Community = () => {
     setImageRotation(0);
   };
 
-  const groupPosts = posts.filter((post) => post.groupId === selectedGroup.id);
-  const colorClasses = getColorClasses(selectedGroup.color);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12 flex items-center justify-center">
+        <div className="text-center">
+          <Icon
+            icon="svg-spinners:180-ring-with-bg"
+            className="w-16 h-16 text-sky-500 mx-auto mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-400">
+            جاري تحميل المجموعات...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedCommunity || communities.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+            <Icon
+              icon="solar:users-group-rounded-bold-duotone"
+              className="w-24 h-24 mx-auto mb-4 text-gray-400"
+            />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              لا توجد مجموعات متاحة
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              لم يتم العثور على أي مجموعات في الوقت الحالي
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const colorClasses = getColorClasses(selectedCommunity.color);
 
   // Display logic
-  const displayedGroups = showAllGroups ? fakeGroups : fakeGroups.slice(0, 3);
-  const displayedPosts = showAllPosts ? groupPosts : groupPosts.slice(0, 3);
+  const displayedGroups = showAllGroups ? communities : communities.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
@@ -321,9 +599,33 @@ const Community = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             منتدى الطلاب
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
             انضم إلى المجموعات وشارك أفكارك وخبراتك مع زملائك
           </p>
+
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="ابحث عن مجموعة..."
+                className="w-full px-6 py-4 pr-14 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors"
+                dir="rtl"
+              />
+              <button
+                onClick={handleSearch}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-sky-500 hover:bg-sky-600 rounded-xl flex items-center justify-center transition-colors"
+              >
+                <Icon
+                  icon="solar:magnifer-bold"
+                  className="w-5 h-5 text-white"
+                />
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-6">
@@ -335,48 +637,47 @@ const Community = () => {
                 المجموعات المتاحة
               </h2>
               <div className="space-y-3">
-                {displayedGroups.map((group) => {
-                  const groupColors = getColorClasses(group.color);
+                {displayedGroups.map((community) => {
                   return (
                     <button
-                      key={group.id}
-                      onClick={() => setSelectedGroup(group)}
+                      key={community.id}
+                      onClick={() => setSelectedCommunity(community)}
                       className={`w-full p-4 rounded-xl transition-all duration-300 text-right ${
-                        selectedGroup.id === group.id
-                          ? `${groupColors.bg} text-white shadow-lg`
+                        selectedCommunity.id === community.id
+                          ? "bg-sky-500 text-white shadow-lg"
                           : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`p-2 rounded-lg ${
-                            selectedGroup.id === group.id
+                            selectedCommunity.id === community.id
                               ? "bg-white/20"
-                              : groupColors.lightBg
+                              : "bg-gray-200 dark:bg-gray-600"
                           }`}
                         >
                           <Icon
-                            icon={group.icon}
+                            icon="solar:users-group-rounded-bold-duotone"
                             className={`w-6 h-6 ${
-                              selectedGroup.id === group.id
+                              selectedCommunity.id === community.id
                                 ? "text-white"
-                                : groupColors.text
+                                : "text-gray-600 dark:text-gray-400"
                             }`}
                           />
                         </div>
                         <div className="flex-1">
                           <h3
                             className={`font-bold text-sm ${
-                              selectedGroup.id === group.id
+                              selectedCommunity.id === community.id
                                 ? "text-white"
                                 : "text-gray-900 dark:text-white"
                             }`}
                           >
-                            {group.name}
+                            {community.name}
                           </h3>
                           <div
                             className={`flex items-center gap-3 text-xs mt-1 ${
-                              selectedGroup.id === group.id
+                              selectedCommunity.id === community.id
                                 ? "text-white/80"
                                 : "text-gray-500 dark:text-gray-400"
                             }`}
@@ -386,15 +687,24 @@ const Community = () => {
                                 icon="solar:user-bold"
                                 className="w-3 h-3"
                               />
-                              {group.members}
+                              {community.members_count || 0}
                             </span>
                             <span className="flex items-center gap-1">
                               <Icon
                                 icon="solar:chat-line-bold"
                                 className="w-3 h-3"
                               />
-                              {group.posts}
+                              {community.posts_count || 0}
                             </span>
+                            {community.is_member && (
+                              <span className="flex items-center gap-1">
+                                <Icon
+                                  icon="solar:check-circle-bold"
+                                  className="w-3 h-3"
+                                />
+                                عضو
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -404,7 +714,7 @@ const Community = () => {
               </div>
 
               {/* Show More Button for Groups */}
-              {fakeGroups.length > 3 && (
+              {communities.length > 3 && (
                 <button
                   onClick={() => setShowAllGroups(!showAllGroups)}
                   className="w-full mt-4 py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
@@ -425,19 +735,21 @@ const Community = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-8 space-y-6">
-            {/* Group Header */}
+            {/* Community Header */}
             <div
               className={`${colorClasses.bg} text-white rounded-2xl shadow-lg overflow-hidden`}
             >
               <div className="p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="bg-white/20 p-3 rounded-xl">
-                    <Icon icon={selectedGroup.icon} className="w-10 h-10" />
+                    <Icon icon={selectedCommunity.icon} className="w-10 h-10" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">{selectedGroup.name}</h2>
+                    <h2 className="text-2xl font-bold">
+                      {selectedCommunity.name}
+                    </h2>
                     <p className="text-white/80 text-sm mt-1">
-                      {selectedGroup.description}
+                      {selectedCommunity.description}
                     </p>
                   </div>
                 </div>
@@ -447,85 +759,253 @@ const Community = () => {
                       icon="solar:users-group-rounded-bold"
                       className="w-5 h-5"
                     />
-                    <span>{selectedGroup.members} عضو</span>
+                    <span>{selectedCommunity.members_count || 0} عضو</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Icon
                       icon="solar:chat-round-line-bold"
                       className="w-5 h-5"
                     />
-                    <span>{selectedGroup.posts} منشور</span>
+                    <span>{selectedCommunity.posts_count || 0} منشور</span>
                   </div>
+                  {!selectedCommunity.is_public && (
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        icon="solar:lock-password-bold"
+                        className="w-5 h-5"
+                      />
+                      <span>خاصة</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Join/Leave Button */}
+                <div className="mt-4 flex items-center gap-3">
+                  {selectedCommunity.is_member ? (
+                    <button
+                      onClick={() => handleLeaveCommunity(selectedCommunity.id)}
+                      className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                    >
+                      <Icon icon="solar:logout-2-bold" className="w-5 h-5" />
+                      <span>مغادرة المجموعة</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        handleJoinCommunity(
+                          selectedCommunity.id,
+                          selectedCommunity.is_public
+                        )
+                      }
+                      className="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                    >
+                      <Icon icon="solar:add-circle-bold" className="w-5 h-5" />
+                      <span>انضم الآن</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() =>
+                      router.push(`/community/${selectedCommunity.id}`)
+                    }
+                    className="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <Icon icon="solar:folder-open-bold" className="w-5 h-5" />
+                    <span>فتح المجموعة</span>
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* Create Post */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold">
-                  <Icon icon="solar:user-bold" className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <textarea
-                    value={newPost}
-                    onChange={(e) => setNewPost(e.target.value)}
-                    placeholder="شارك أفكارك مع المجموعة..."
-                    className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white resize-none focus:outline-none focus:border-sky-500 transition-colors"
-                    rows="3"
-                    dir="rtl"
-                  />
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-2">
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <Icon
-                          icon="solar:gallery-bold"
-                          className="w-5 h-5 text-gray-600 dark:text-gray-400"
+            {selectedCommunity.is_member && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                    <Icon icon="solar:user-bold" className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <textarea
+                      value={newPost}
+                      onChange={(e) => setNewPost(e.target.value)}
+                      placeholder="شارك أفكارك مع المجموعة..."
+                      className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white resize-none focus:outline-none focus:border-sky-500 transition-colors"
+                      rows="3"
+                      dir="rtl"
+                    />
+
+                    {/* Media Preview */}
+                    {selectedImages.length > 0 && (
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {selectedImages.map((image, index) => (
+                          <div
+                            key={index}
+                            className="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700"
+                          >
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-32 object-cover"
+                            />
+                            <button
+                              onClick={() => removeSelectedImage(index)}
+                              className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                            >
+                              <Icon
+                                icon="solar:close-circle-bold"
+                                className="w-5 h-5 text-white"
+                              />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedAudio && (
+                      <div className="mt-3 p-4 bg-sky-50 dark:bg-sky-900/20 rounded-xl border-2 border-sky-200 dark:border-sky-800 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Icon
+                            icon="solar:microphone-bold-duotone"
+                            className="w-6 h-6 text-sky-500"
+                          />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {selectedAudio.name}
+                          </span>
+                        </div>
+                        <button
+                          onClick={removeSelectedAudio}
+                          className="p-2 hover:bg-sky-100 dark:hover:bg-sky-900/50 rounded-lg transition-colors"
+                        >
+                          <Icon
+                            icon="solar:trash-bin-2-bold"
+                            className="w-5 h-5 text-red-500"
+                          />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={imageInputRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImageSelect}
+                          className="hidden"
                         />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <Icon
-                          icon="solar:video-library-bold"
-                          className="w-5 h-5 text-gray-600 dark:text-gray-400"
+                        <button
+                          onClick={() => imageInputRef.current?.click()}
+                          disabled={selectedAudio !== null}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Icon
+                            icon="solar:gallery-bold"
+                            className="w-5 h-5 text-gray-600 dark:text-gray-400"
+                          />
+                        </button>
+
+                        <input
+                          ref={audioInputRef}
+                          type="file"
+                          accept="audio/*"
+                          onChange={handleAudioSelect}
+                          className="hidden"
                         />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <Icon
-                          icon="solar:link-bold"
-                          className="w-5 h-5 text-gray-600 dark:text-gray-400"
-                        />
+                        <button
+                          onClick={() => audioInputRef.current?.click()}
+                          disabled={selectedImages.length > 0}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Icon
+                            icon="solar:microphone-bold"
+                            className="w-5 h-5 text-gray-600 dark:text-gray-400"
+                          />
+                        </button>
+                      </div>
+                      <button
+                        onClick={handleCreatePost}
+                        disabled={
+                          (!newPost.trim() &&
+                            selectedImages.length === 0 &&
+                            !selectedAudio) ||
+                          uploadingMedia
+                        }
+                        className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${
+                          (newPost.trim() ||
+                            selectedImages.length > 0 ||
+                            selectedAudio) &&
+                          !uploadingMedia
+                            ? `${colorClasses.bg} text-white hover:opacity-80`
+                            : "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        {uploadingMedia ? (
+                          <>
+                            <Icon
+                              icon="svg-spinners:180-ring"
+                              className="w-5 h-5"
+                            />
+                            <span>جاري الرفع...</span>
+                          </>
+                        ) : (
+                          <span>نشر</span>
+                        )}
                       </button>
                     </div>
-                    <button
-                      onClick={handleCreatePost}
-                      disabled={!newPost.trim()}
-                      className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${
-                        newPost.trim()
-                          ? `${colorClasses.bg} text-white hover:opacity-80`
-                          : "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
-                      }`}
-                    >
-                      نشر
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Posts */}
             <div className="space-y-4">
-              {groupPosts.length > 0 ? (
+              {!selectedCommunity.is_public && !selectedCommunity.is_member ? (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+                  <Icon
+                    icon="solar:lock-password-bold-duotone"
+                    className="w-24 h-24 mx-auto mb-4 text-gray-400"
+                  />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    مجموعة خاصة
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    لا يمكن عرض المنشورات حتى تنضم إلى المجموعة
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+                    تحتاج إلى رمز دعوة للانضمام إلى هذه المجموعة
+                  </p>
+                </div>
+              ) : postsLoading ? (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+                  <Icon
+                    icon="svg-spinners:180-ring-with-bg"
+                    className="w-12 h-12 text-sky-500 mx-auto mb-4"
+                  />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    جاري تحميل المنشورات...
+                  </p>
+                </div>
+              ) : posts.length > 0 ? (
                 <>
-                  {displayedPosts.map((post) => (
+                  {posts.map((post) => (
                     <div
                       key={post.id}
                       className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
                     >
                       {/* Post Header */}
                       <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white font-bold">
-                          <Icon icon="solar:user-bold" className="w-6 h-6" />
-                        </div>
+                        {post.author.avatar ? (
+                          <img
+                            src={post.author.avatar}
+                            alt={post.author.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                            <Icon icon="solar:user-bold" className="w-6 h-6" />
+                          </div>
+                        )}
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <div>
@@ -536,12 +1016,21 @@ const Community = () => {
                                 {post.author.role} • {post.timestamp}
                               </p>
                             </div>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                              <Icon
-                                icon="solar:menu-dots-bold"
-                                className="w-5 h-5 text-gray-600 dark:text-gray-400"
-                              />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              {post.isPinned && (
+                                <div className="px-3 py-1 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                                  <Icon
+                                    icon="solar:pin-bold"
+                                    className="w-4 h-4 text-sky-500"
+                                  />
+                                </div>
+                              )}
+                              {post.isEdited && (
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  معدل
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -555,11 +1044,11 @@ const Community = () => {
                       </p>
 
                       {/* Audio Player */}
-                      {post.type === "audio" && (
+                      {post.type === "audio" && post.audioUrl && (
                         <div className="mb-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 p-4 rounded-xl border-2 border-sky-200 dark:border-sky-800">
                           <audio
                             ref={(el) => (audioRefs.current[post.id] = el)}
-                            src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+                            src={post.audioUrl}
                             onTimeUpdate={() => handleAudioTimeUpdate(post.id)}
                             onEnded={() => handleAudioEnded(post.id)}
                             onLoadedMetadata={() =>
@@ -669,7 +1158,10 @@ const Community = () => {
                             {post.likes}
                           </span>
                         </button>
-                        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-sky-500 transition-colors">
+                        <button
+                          onClick={() => toggleComments(post.id)}
+                          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-sky-500 transition-colors"
+                        >
                           <Icon
                             icon="solar:chat-round-line-bold"
                             className="w-5 h-5"
@@ -678,31 +1170,159 @@ const Community = () => {
                             {post.comments}
                           </span>
                         </button>
-                        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-sky-500 transition-colors">
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/community/${post.communityId}/posts/${post.id}`;
+                            navigator.clipboard.writeText(url);
+                            toast.success("تم نسخ رابط المنشور");
+                          }}
+                          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-sky-500 transition-colors"
+                        >
                           <Icon icon="solar:share-bold" className="w-5 h-5" />
                           <span className="text-sm font-medium">مشاركة</span>
                         </button>
                       </div>
+
+                      {/* Comments Section */}
+                      {showCommentsFor === post.id && (
+                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          {/* Add Comment */}
+                          <div className="flex items-start gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                              <Icon
+                                icon="solar:user-bold"
+                                className="w-5 h-5"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={newComment[post.id] || ""}
+                                  onChange={(e) =>
+                                    setNewComment((prev) => ({
+                                      ...prev,
+                                      [post.id]: e.target.value,
+                                    }))
+                                  }
+                                  onKeyPress={(e) => {
+                                    if (e.key === "Enter") {
+                                      handleCreateComment(post.id);
+                                    }
+                                  }}
+                                  placeholder="اكتب تعليقاً..."
+                                  className="flex-1 px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors"
+                                  dir="rtl"
+                                />
+                                <button
+                                  onClick={() => handleCreateComment(post.id)}
+                                  disabled={!newComment[post.id]?.trim()}
+                                  className={`px-4 py-2 rounded-xl font-semibold transition-colors ${
+                                    newComment[post.id]?.trim()
+                                      ? "bg-sky-500 hover:bg-sky-600 text-white"
+                                      : "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                                  }`}
+                                >
+                                  <Icon
+                                    icon="streamline:send-email-solid"
+                                    className="w-5 h-5"
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Comments List */}
+                          {loadingComments[post.id] ? (
+                            <div className="text-center py-4">
+                              <Icon
+                                icon="svg-spinners:180-ring-with-bg"
+                                className="w-8 h-8 text-sky-500 mx-auto"
+                              />
+                            </div>
+                          ) : comments[post.id] &&
+                            comments[post.id].length > 0 ? (
+                            <div className="space-y-3">
+                              {comments[post.id].map((comment) => (
+                                <div
+                                  key={comment.id}
+                                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"
+                                >
+                                  {comment.author?.profile_picture ? (
+                                    <img
+                                      src={comment.author.profile_picture}
+                                      alt={comment.author.full_name}
+                                      className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 flex-shrink-0"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                                      <Icon
+                                        icon="solar:user-bold"
+                                        className="w-4 h-4"
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-sm text-gray-900 dark:text-white">
+                                        {comment.author?.id === user?.id
+                                          ? "أنت"
+                                          : comment.author?.full_name ||
+                                            comment.author?.telegram_username ||
+                                            "مستخدم"}
+                                      </span>
+                                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        {formatTimestamp(comment.created_at)}
+                                      </span>
+                                    </div>
+                                    <p
+                                      className="text-sm text-gray-700 dark:text-gray-300"
+                                      dir="rtl"
+                                    >
+                                      {comment.content}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                              <Icon
+                                icon="solar:chat-line-bold-duotone"
+                                className="w-12 h-12 mx-auto mb-2 opacity-50"
+                              />
+                              <p className="text-sm">لا توجد تعليقات بعد</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
 
-                  {/* Show More Button for Posts */}
-                  {groupPosts.length > 3 && (
+                  {/* Load More Button for Posts */}
+                  {hasMorePosts && (
                     <button
-                      onClick={() => setShowAllPosts(!showAllPosts)}
-                      className={`w-full py-4 px-6 ${colorClasses.bg} hover:opacity-90 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg`}
+                      onClick={handleLoadMorePosts}
+                      disabled={loadingMorePosts}
+                      className={`w-full py-4 px-6 ${colorClasses.bg} hover:opacity-90 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      <Icon
-                        icon={
-                          showAllPosts
-                            ? "solar:alt-arrow-up-bold"
-                            : "solar:alt-arrow-down-bold"
-                        }
-                        className="w-5 h-5"
-                      />
-                      <span>
-                        {showAllPosts ? "عرض أقل" : "عرض المزيد من المنشورات"}
-                      </span>
+                      {loadingMorePosts ? (
+                        <>
+                          <Icon
+                            icon="svg-spinners:180-ring"
+                            className="w-5 h-5"
+                          />
+                          <span>جاري التحميل...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Icon
+                            icon="solar:alt-arrow-down-bold"
+                            className="w-5 h-5"
+                          />
+                          <span>تحميل المزيد من المنشورات</span>
+                        </>
+                      )}
                     </button>
                   )}
                 </>
@@ -770,6 +1390,92 @@ const Community = () => {
                 <Icon icon="solar:gallery-bold-duotone" className="w-5 h-5" />
                 <span>اضغط على الصورة للتكبير • استخدم زر الدوران للتدوير</span>
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Code Modal */}
+      {showInviteCodeModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => {
+            setShowInviteCodeModal(false);
+            setInviteCode("");
+            setJoiningCommunityId(null);
+          }}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                رمز الدعوة مطلوب
+              </h3>
+              <button
+                onClick={() => {
+                  setShowInviteCodeModal(false);
+                  setInviteCode("");
+                  setJoiningCommunityId(null);
+                }}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <Icon icon="solar:close-circle-bold" className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-400 mb-4" dir="rtl">
+              هذه المجموعة خاصة. الرجاء إدخال رمز الدعوة للانضمام.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                  dir="rtl"
+                >
+                  رمز الدعوة
+                </label>
+                <input
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleJoinWithInviteCode();
+                    }
+                  }}
+                  placeholder="أدخل رمز الدعوة"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  dir="rtl"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleJoinWithInviteCode}
+                  disabled={!inviteCode.trim()}
+                  className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${
+                    inviteCode.trim()
+                      ? "bg-sky-500 hover:bg-sky-600 text-white"
+                      : "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  انضم الآن
+                </button>
+                <button
+                  onClick={() => {
+                    setShowInviteCodeModal(false);
+                    setInviteCode("");
+                    setJoiningCommunityId(null);
+                  }}
+                  className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
             </div>
           </div>
         </div>
