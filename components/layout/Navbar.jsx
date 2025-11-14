@@ -204,20 +204,22 @@ const Navbar = ({ children }) => {
             <div className="hidden lg:flex items-center gap-3">
               {isAuthenticated ? (
                 <>
-                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl smooth hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <Icon
-                      icon="solar:wallet-bold"
-                      className="w-5 h-5 text-green-500"
-                    />
-                    <div>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
-                        الرصيد{" "}
-                      </span>
-                      <span className="text-sm font-bold text-gray-800 dark:text-white leading-none">
-                        {user?.wallet_balance || 0} ج.م
-                      </span>
+                  {userType !== "admin" && (
+                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl smooth hover:bg-gray-100 dark:hover:bg-gray-700">
+                      <Icon
+                        icon="solar:wallet-bold"
+                        className="w-5 h-5 text-green-500"
+                      />
+                      <div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
+                          الرصيد{" "}
+                        </span>
+                        <span className="text-sm font-bold text-gray-800 dark:text-white leading-none">
+                          {user?.wallet_balance || 0} ج.م
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <button
                     onClick={toggleSearch}
                     className="w-10 h-10 lg:w-12 lg:h-12 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center"
@@ -372,53 +374,71 @@ const Navbar = ({ children }) => {
                     </div>
 
                     {/* بطاقة الرصيد */}
-                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm mt-3">
-                      <Icon
-                        icon="solar:wallet-bold"
-                        className="w-5 h-5 text-green-500"
-                      />
-                      <div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
-                          الرصيد
-                        </span>
-                        <span className="block text-sm font-bold text-gray-800 dark:text-white leading-none">
-                          {user?.wallet_balance || 0} ج.م
-                        </span>
+                    {userType !== "admin" && (
+                      <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm mt-3">
+                        <Icon
+                          icon="solar:wallet-bold"
+                          className="w-5 h-5 text-green-500"
+                        />
+                        <div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
+                            الرصيد
+                          </span>
+                          <span className="block text-sm font-bold text-gray-800 dark:text-white leading-none">
+                            {user?.wallet_balance || 0} ج.م
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="space-y-2">
-                      <Link
-                        href="/dashboard"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
-                          pathname === "/dashboard"
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:home-smile-bold"
-                          className="w-5 h-5"
-                        />
-                        <span>الصفحة الرئيسية</span>
-                      </Link>
+                      {userType === "admin" ? (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 w-full p-3 rounded-xl smooth bg-red-500 text-white hover:bg-red-600"
+                        >
+                          <Icon
+                            icon="solar:shield-user-bold"
+                            className="w-5 h-5"
+                          />
+                          <span>لوحة الإدارة</span>
+                        </Link>
+                      ) : (
+                        <>
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                              pathname === "/dashboard"
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <Icon
+                              icon="solar:home-smile-bold"
+                              className="w-5 h-5"
+                            />
+                            <span>الصفحة الرئيسية</span>
+                          </Link>
 
-                      <Link
-                        href="/profile"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
-                          isProfileDropdownActive()
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:user-circle-bold"
-                          className="w-5 h-5"
-                        />
-                        <span>ملفي الشخصي</span>
-                      </Link>
+                          <Link
+                            href="/profile"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                              isProfileDropdownActive()
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <Icon
+                              icon="solar:user-circle-bold"
+                              className="w-5 h-5"
+                            />
+                            <span>ملفي الشخصي</span>
+                          </Link>
+                        </>
+                      )}
 
                       <Link
                         href="/community"
@@ -435,20 +455,6 @@ const Navbar = ({ children }) => {
                         />
                         <span>منتدى الطلاب</span>
                       </Link>
-
-                      {userType === "admin" && (
-                        <Link
-                          href="/admin/dashboard"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 w-full p-3 rounded-xl smooth bg-red-500 text-white hover:bg-red-600"
-                        >
-                          <Icon
-                            icon="solar:shield-user-bold"
-                            className="w-5 h-5"
-                          />
-                          <span>لوحة الإدارة</span>
-                        </Link>
-                      )}
 
                       <Link
                         href="/courses"
@@ -555,7 +561,9 @@ const Navbar = ({ children }) => {
             </div>
 
             {/* User Info */}
-            {shouldShowExpanded ? (
+            {shouldShowExpanded &&
+            userType !== "admin" &&
+            userType === "user" ? (
               <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-2xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
                 {/* صورة البروفايل */}
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-500 flex items-center justify-center">
@@ -640,41 +648,63 @@ const Navbar = ({ children }) => {
 
           {/* Sidebar Content */}
           <div className="p-4 space-y-2 overflow-y-auto h-full pb-32">
-            {/* Home Page */}
-            <Link
-              href="/dashboard"
-              className={`flex items-center w-full p-3 rounded-xl smooth ${
-                !shouldShowExpanded ? "justify-center" : "gap-3"
-              } ${
-                pathname === "/dashboard"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-              title={!shouldShowExpanded ? "الصفحة الرئيسية" : ""}
-            >
-              <Icon icon="solar:home-smile-bold" className="w-6 h-6" />
-              {shouldShowExpanded && (
-                <span className="font-medium">الصفحة الرئيسية</span>
-              )}
-            </Link>
+            {userType === "admin" ? (
+              /* Admin Dashboard Link */
+              <Link
+                href="/admin/dashboard"
+                className={`flex items-center w-full p-3 rounded-xl smooth ${
+                  !shouldShowExpanded ? "justify-center" : "gap-3"
+                } ${
+                  pathname.startsWith("/admin")
+                    ? "bg-red-500 text-white"
+                    : "text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700"
+                }`}
+                title={!shouldShowExpanded ? "لوحة الإدارة" : ""}
+              >
+                <Icon icon="solar:shield-user-bold" className="w-6 h-6" />
+                {shouldShowExpanded && (
+                  <span className="font-medium">لوحة الإدارة</span>
+                )}
+              </Link>
+            ) : (
+              <>
+                {/* Home Page */}
+                <Link
+                  href="/dashboard"
+                  className={`flex items-center w-full p-3 rounded-xl smooth ${
+                    !shouldShowExpanded ? "justify-center" : "gap-3"
+                  } ${
+                    pathname === "/dashboard"
+                      ? "bg-blue-500 text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                  title={!shouldShowExpanded ? "الصفحة الرئيسية" : ""}
+                >
+                  <Icon icon="solar:home-smile-bold" className="w-6 h-6" />
+                  {shouldShowExpanded && (
+                    <span className="font-medium">الصفحة الرئيسية</span>
+                  )}
+                </Link>
 
-            {/* My Profile */}
-            <Link
-              href="/profile"
-              className={`flex items-center w-full p-3 rounded-xl smooth ${
-                !shouldShowExpanded ? "justify-center" : "gap-3"
-              } ${
-                isProfileDropdownActive()
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-              title={!shouldShowExpanded ? "ملفي الشخصي" : ""}
-            >
-              <Icon icon="solar:user-circle-bold" className="w-6 h-6" />
-              {shouldShowExpanded && (
-                <span className="font-medium">ملفي الشخصي</span>
-              )}
-            </Link>
+                {/* My Profile */}
+                <Link
+                  href="/profile"
+                  className={`flex items-center w-full p-3 rounded-xl smooth ${
+                    !shouldShowExpanded ? "justify-center" : "gap-3"
+                  } ${
+                    isProfileDropdownActive()
+                      ? "bg-blue-500 text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                  title={!shouldShowExpanded ? "ملفي الشخصي" : ""}
+                >
+                  <Icon icon="solar:user-circle-bold" className="w-6 h-6" />
+                  {shouldShowExpanded && (
+                    <span className="font-medium">ملفي الشخصي</span>
+                  )}
+                </Link>
+              </>
+            )}
 
             {/* Courses with Dropdown */}
 
@@ -695,26 +725,6 @@ const Navbar = ({ children }) => {
                 <span className="font-medium">منتدى الطلاب</span>
               )}
             </Link>
-
-            {/* Admin Panel - Only for admins */}
-            {userType === "admin" && (
-              <Link
-                href="/admin/dashboard"
-                className={`flex items-center w-full p-3 rounded-xl smooth ${
-                  !shouldShowExpanded ? "justify-center" : "gap-3"
-                } ${
-                  pathname.startsWith("/admin")
-                    ? "bg-red-500 text-white"
-                    : "text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700"
-                }`}
-                title={!shouldShowExpanded ? "لوحة الإدارة" : ""}
-              >
-                <Icon icon="solar:shield-user-bold" className="w-6 h-6" />
-                {shouldShowExpanded && (
-                  <span className="font-medium">لوحة الإدارة</span>
-                )}
-              </Link>
-            )}
 
             <div
               className={`${

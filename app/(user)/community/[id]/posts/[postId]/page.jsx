@@ -8,6 +8,7 @@ import {
   getCommunityById,
   getPostById,
   removeReaction,
+  reportPost,
 } from "@/services/Community";
 import { Icon } from "@iconify/react";
 import { useParams, useRouter } from "next/navigation";
@@ -41,6 +42,8 @@ const PostDetailPage = () => {
   });
   const [expandedImage, setExpandedImage] = useState(null);
   const [imageRotation, setImageRotation] = useState(0);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -192,6 +195,25 @@ const PostDetailPage = () => {
     } catch (error) {
       console.error("Error creating comment:", error);
       toast.error("فشل في إضافة التعليق");
+    }
+  };
+
+  const handleReportPost = async () => {
+    if (!reportReason.trim()) {
+      toast.error("يرجى إدخال سبب البلاغ");
+      return;
+    }
+
+    try {
+      console.log("Reporting post:", postId, "Reason:", reportReason);
+      await reportPost(postId, reportReason);
+      toast.success("تم إرسال البلاغ بنجاح");
+      setShowReportModal(false);
+      setReportReason("");
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      console.error("Error response:", error?.response?.data);
+      // Don't show duplicate error toast as axios already shows one
     }
   };
 
@@ -539,6 +561,13 @@ const PostDetailPage = () => {
               <Icon icon="solar:share-bold" className="w-6 h-6" />
               <span className="text-sm font-medium">مشاركة</span>
             </button>
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors"
+            >
+              <Icon icon="solar:danger-circle-bold" className="w-6 h-6" />
+              <span className="text-sm font-medium">بلاغ</span>
+            </button>
           </div>
         </div>
 
@@ -683,6 +712,67 @@ const PostDetailPage = () => {
                 className="max-w-full max-h-full object-contain transition-transform duration-300"
                 style={{ transform: `rotate(${imageRotation}deg)` }}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                الإبلاغ عن المنشور
+              </h3>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason("");
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <Icon icon="solar:close-circle-bold" className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                سبب البلاغ
+              </label>
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="يرجى ذكر سبب الإبلاغ..."
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors resize-none"
+                rows="4"
+                dir="rtl"
+                autoFocus
+                minLength={10}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleReportPost}
+                disabled={!reportReason.trim()}
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${
+                  reportReason.trim()
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                إرسال البلاغ
+              </button>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason("");
+                }}
+                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-colors"
+              >
+                إلغاء
+              </button>
             </div>
           </div>
         </div>

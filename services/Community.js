@@ -122,3 +122,12 @@ export const updateComment = async (commentId, data) => {
 export const deleteComment = async (commentId) => {
   return await deleteData(`/communities/comments/${commentId}`, true);
 };
+
+// Reports
+export const reportPost = async (postId, reason) => {
+  return await postData(
+    `/communities/posts/${postId}/report`,
+    { reason },
+    true
+  );
+};

@@ -52,7 +52,40 @@ const courseProgress = [
 
 export function UserDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
-  const { userType } = useAuthStore();
+  const { userType, user } = useAuthStore();
+
+  // Admin view
+  if (userType === "admin") {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="inline-flex p-6 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
+                <Icon
+                  icon="solar:shield-user-bold-duotone"
+                  className="w-24 h-24 text-red-500"
+                />
+              </div>
+              <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                مرحباً Admin
+              </h1>
+              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+                {user?.full_name || user?.display_name || "مدير النظام"}
+              </p>
+              <Link
+                href="/admin/dashboard"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors shadow-lg text-lg"
+              >
+                <Icon icon="solar:shield-user-bold" className="w-6 h-6" />
+                <span>الذهاب إلى لوحة الإدارة</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const getColorClasses = (color) => {
     const colors = {

@@ -15,6 +15,7 @@ import {
   joinCommunity,
   leaveCommunity,
   removeReaction,
+  reportPost,
 } from "@/services/Community";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
@@ -66,6 +67,9 @@ const Community = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedAudio, setRecordedAudio] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportingPostId, setReportingPostId] = useState(null);
+  const [reportReason, setReportReason] = useState("");
   const audioRefs = useRef({});
   const imageInputRef = useRef(null);
   const audioInputRef = useRef(null);
@@ -293,7 +297,7 @@ const Community = () => {
     try {
       // Create the post first
       const data = await createPost(selectedCommunity.id, {
-        content: newPost.trim() || "شارك محتوى جديد",
+        content: newPost.trim() || ".",
         is_pinned: false,
       });
 
@@ -317,7 +321,7 @@ const Community = () => {
       setSelectedAudio(null);
       setUploadingMedia(false);
 
-      toast.success("تم نشر المنشور بنجاح");
+      toast.success("تم ارسال المنشور الي المراجعه ");
 
       // Refresh posts from the beginning
       setCurrentPage(1);
@@ -646,6 +650,26 @@ const Community = () => {
       ...prev,
       [postId]: { ...(prev[postId] || {}), visible: false },
     }));
+  };
+
+  const handleReportPost = async () => {
+    if (!reportReason.trim()) {
+      toast.error("يرجى إدخال سبب البلاغ");
+      return;
+    }
+
+    try {
+      console.log("Reporting post:", reportingPostId, "Reason:", reportReason);
+      await reportPost(reportingPostId, reportReason);
+      toast.success("تم إرسال البلاغ بنجاح");
+      setShowReportModal(false);
+      setReportingPostId(null);
+      setReportReason("");
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      console.error("Error response:", error?.response?.data);
+      // Don't show duplicate error toast as axios already shows one
+    }
   };
 
   const formatTime = (seconds) => {
@@ -1575,6 +1599,19 @@ const Community = () => {
                           <Icon icon="solar:eye-bold" className="w-5 h-5" />
                           <span className="text-sm font-medium">عرض</span>
                         </button>
+                        <button
+                          onClick={() => {
+                            setReportingPostId(post.id);
+                            setShowReportModal(true);
+                          }}
+                          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Icon
+                            icon="solar:danger-circle-bold"
+                            className="w-5 h-5"
+                          />
+                          <span className="text-sm font-medium">بلاغ</span>
+                        </button>
                       </div>
 
                       {/* Comments Section */}
@@ -1870,6 +1907,69 @@ const Community = () => {
                   إلغاء
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                الإبلاغ عن المنشور
+              </h3>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportingPostId(null);
+                  setReportReason("");
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <Icon icon="solar:close-circle-bold" className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                سبب البلاغ
+              </label>
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="يرجى ذكر سبب الإبلاغ..."
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors resize-none"
+                rows="4"
+                dir="rtl"
+                autoFocus
+                minLength={10}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleReportPost}
+                disabled={!reportReason.trim()}
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-colors ${
+                  reportReason.trim()
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                إرسال البلاغ
+              </button>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportingPostId(null);
+                  setReportReason("");
+                }}
+                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-colors"
+              >
+                إلغاء
+              </button>
             </div>
           </div>
         </div>
