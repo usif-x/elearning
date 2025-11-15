@@ -257,7 +257,6 @@ export default function TelegramLoginPage() {
                   مرحباً بك مرة أخرى
                 </p>
               </div>
-
               {/* Step 1: Telegram Auth */}
               {step === 1 && (
                 <div className="space-y-6">
@@ -286,7 +285,6 @@ export default function TelegramLoginPage() {
                   </div>
                 </div>
               )}
-
               {/* Step 2: Login Method Selection and Form */}
               {step === 2 && (
                 <div className="space-y-6">
@@ -451,22 +449,30 @@ export default function TelegramLoginPage() {
                   )}
                 </div>
               )}
-
-              {/* Register Link */}
               <div className="mt-8 text-center border-t border-gray-200 dark:border-gray-700 pt-6">
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                   ليس لديك حساب؟
                 </p>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-blue-600 dark:text-blue-400 font-medium transition-colors text-sm"
-                >
-                  <Icon
-                    icon="material-symbols:person-add"
-                    className="w-4 h-4"
-                  />
-                  إنشاء حساب جديد
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-blue-600 dark:text-blue-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon
+                      icon="material-symbols:person-add"
+                      className="w-4 h-4"
+                    />
+                    إنشاء حساب جديد
+                  </Link>
+
+                  <Link
+                    href="/"
+                    className="inline-flex items-center justify-center gap-2 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon icon="material-symbols:home" className="w-4 h-4" />
+                    العودة للرئيسية
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

@@ -18,11 +18,11 @@ const CoursesPage = () => {
         const featuredCourses = await getFeaturedCourses();
         const formattedCourses = featuredCourses.map((course) => ({
           id: course.id,
-          title: course.title,
+          name: course.name,
           description: course.description,
           image: course.image,
           price: course.price,
-          original_price: course.discount || course.price,
+          price_before_discount: course.price_before_discount || 0,
           is_free: course.is_free,
           is_subscribed: course.is_subscribed,
           created_at: course.created_at,
@@ -47,11 +47,11 @@ const CoursesPage = () => {
         const featuredCourses = await getFeaturedCourses();
         const formattedCourses = featuredCourses.map((course) => ({
           id: course.id,
-          title: course.title,
+          name: course.name,
           description: course.description,
           image: course.image,
           price: course.price,
-          original_price: course.discount || course.price,
+          price_before_discount: course.price_before_discount || 0,
           is_free: course.is_free,
           is_subscribed: course.is_subscribed,
           created_at: course.created_at,

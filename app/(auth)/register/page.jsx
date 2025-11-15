@@ -707,13 +707,22 @@ export default function TelegramRegisterPage() {
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                   لديك حساب بالفعل؟
                 </p>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
-                >
-                  <Icon icon="material-symbols:login" className="w-4 h-4" />
-                  تسجيل الدخول
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center text-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon icon="material-symbols:login" className="w-4 h-4" />
+                    تسجيل الدخول
+                  </Link>
+                  <Link
+                    href="/"
+                    className="inline-flex items-center justify-center gap-2 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon icon="material-symbols:home" className="w-4 h-4" />
+                    العودة للرئيسية
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

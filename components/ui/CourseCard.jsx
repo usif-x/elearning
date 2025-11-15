@@ -23,6 +23,7 @@ const formatDescription = (desc, _, __, maxLength) => {
 
 const CourseCard = ({ courses = [] }) => {
   const { isAuthenticated } = useAuthStore();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   // Handle empty or undefined courses array
   if (!courses || courses.length === 0) {
@@ -70,11 +71,11 @@ const CourseCard = ({ courses = [] }) => {
       {courses.map(
         ({
           id = 0,
-          title: name = "",
+          name = "",
           description = "",
           price = 0,
-          original_price: price_before_discount = 0,
-          image: picture = "",
+          price_before_discount = 0,
+          image = "",
           created_at = "",
           is_subscribed = false,
           is_free = false,
@@ -90,7 +91,9 @@ const CourseCard = ({ courses = [] }) => {
             >
               <div className="rounded-xl relative overflow-hidden">
                 <Image
-                  src={picture || "/placeholder.jpg"}
+                  src={
+                    image ? `${apiUrl}/storage/${image}` : "/placeholder.jpg"
+                  }
                   alt={name}
                   width={400}
                   height={300}
@@ -98,10 +101,33 @@ const CourseCard = ({ courses = [] }) => {
                   className="w-full h-full max-h-[300px] object-cover"
                 />
               </div>
-              <div className="flex flex-col space-y-0 leading-0">
-                <div className="flex md:flex-row md:justify-between flex-col-reverse w-full text-lg">
-                  <div className="text-gray-900 dark:text-white">{name}</div>
+              <div className="flex flex-col space-y-3 leading-0">
+                {/* Course Name - Centered */}
+                <div className="text-center">
+                  <h3
+                    className="text-xl font-bold text-gray-900 dark:text-white"
+                    dir="rtl"
+                  >
+                    {name}
+                  </h3>
                 </div>
+
+                {/* Horizontal Line */}
+                <div className="h-1 m-2 w-full rounded-full bg-sky-700 " />
+
+                {/* Course Description - Centered */}
+                <div className="text-center">
+                  <p
+                    className="text-sm text-gray-600 dark:text-gray-400 transition-all duration-300"
+                    dir="rtl"
+                  >
+                    {formatDescription(description, true, "", 80)}
+                  </p>
+                </div>
+
+                {/* Horizontal Line */}
+                <div className="h-1 m-2 w-full rounded-full bg-sky-700 " />
+
                 <div className="flex md:flex-row md:justify-between flex-col md:items-center w-full">
                   <div className="md:space-y-1 flex md:flex-col flex-row-reverse justify-between">
                     {!is_subscribed && (
@@ -135,9 +161,6 @@ const CourseCard = ({ courses = [] }) => {
                         </div>
                       </>
                     )}
-                    <div className="text-sm text-gray-500 dark:text-gray-400   mt-1 transition-all duration-300">
-                      {formatDescription(description, true, "", 40)}
-                    </div>
                   </div>
                   <CreatedAndUpadtedAtComponent
                     created_at={created_at}

@@ -1,13 +1,35 @@
 "use client";
 
 import { useAuthStore } from "@/hooks/useAuth";
+import { getUserQuizAnalytics } from "@/services/QuizAnalytics";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const UserProfile = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState("overview");
+  const [quizResults, setQuizResults] = useState([]);
+  const [quizLoading, setQuizLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === "quiz-results") {
+      loadQuizResults();
+    }
+  }, [activeTab]);
+
+  const loadQuizResults = async () => {
+    setQuizLoading(true);
+    try {
+      const data = await getUserQuizAnalytics();
+      setQuizResults(data.quizzes || []);
+    } catch (error) {
+      console.error("Error loading quiz results:", error);
+    } finally {
+      setQuizLoading(false);
+    }
+  };
 
   const profileTabs = [
     {
@@ -19,6 +41,11 @@ const UserProfile = () => {
       id: "personal-info",
       label: "المعلومات الشخصية",
       icon: "solar:card-bold",
+    },
+    {
+      id: "quiz-results",
+      label: "نتائج الاختبارات",
+      icon: "solar:clipboard-list-bold",
     },
     {
       id: "security",
@@ -118,6 +145,117 @@ const UserProfile = () => {
                 </p>
               </div>
             </div>
+          </div>
+        );
+
+      case "quiz-results":
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                نتائج الاختبارات
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Icon icon="solar:clipboard-list-bold" className="w-5 h-5" />
+                <span>إجمالي المحاولات: {quizResults.length}</span>
+              </div>
+            </div>
+
+            {quizLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Icon
+                  icon="eos-icons:loading"
+                  className="w-12 h-12 text-sky-500"
+                />
+              </div>
+            ) : quizResults.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-right">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                      <th scope="col" className="px-6 py-3">
+                        اسم الاختبار
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        النتيجة
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        الإجابات الصحيحة
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        الوقت المستغرق
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        تاريخ الإكمال
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        الإجراءات
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {quizResults.map((quiz) => (
+                      <tr
+                        key={quiz.attempt_id}
+                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                          {quiz.quiz_title}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`text-lg font-bold ${
+                              quiz.score >= 50
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {quiz.score}%
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-900 dark:text-white">
+                          {quiz.correct_answers} / {quiz.total_questions}
+                        </td>
+                        <td className="px-6 py-4 text-gray-900 dark:text-white">
+                          {quiz.time_taken} دقيقة
+                        </td>
+                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                          {quiz.completed_at
+                            ? new Date(quiz.completed_at).toLocaleString(
+                                "ar-EG"
+                              )
+                            : "-"}
+                        </td>
+                        <td className="px-6 py-4">
+                          {quiz.is_completed ? (
+                            <Link
+                              href={`/profile/quiz-result/${quiz.attempt_id}`}
+                              className="text-sky-600 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300 font-medium"
+                            >
+                              عرض التفاصيل
+                            </Link>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-600 text-xs">
+                              غير مكتمل
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Icon
+                  icon="solar:clipboard-list-bold-duotone"
+                  className="w-24 h-24 text-gray-400 mx-auto mb-4"
+                />
+                <p className="text-gray-500 dark:text-gray-400">
+                  لم تقم بأي اختبارات حتى الآن
+                </p>
+              </div>
+            )}
           </div>
         );
 
