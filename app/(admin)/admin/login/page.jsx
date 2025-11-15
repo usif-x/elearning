@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
 
   // Form data
   const [formData, setFormData] = useState({
-    email: "",
+    username_or_email: "",
     password: "",
     rememberMe: false,
   });
@@ -56,10 +56,8 @@ export default function AdminLoginPage() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.email) {
-      newErrors.email = "البريد الإلكتروني مطلوب";
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = "يرجى إدخال بريد إلكتروني صالح";
+    if (!formData.username_or_email) {
+      newErrors.username_or_email = "اسم المستخدم أو البريد الإلكتروني مطلوب";
     }
 
     if (!formData.password) {
@@ -81,7 +79,7 @@ export default function AdminLoginPage() {
 
     try {
       const loginData = {
-        username_or_email: formData.email,
+        username_or_email: formData.username_or_email,
         password: formData.password,
         remember_me: formData.rememberMe,
       };
@@ -165,12 +163,12 @@ export default function AdminLoginPage() {
                   <div className="space-y-4">
                     <Input
                       icon="material-symbols:admin-panel-settings"
-                      placeholder="البريد الإلكتروني او اسم المستخدم"
-                      value={formData.email}
-                      onChange={handleInputChange("email")}
-                      error={errors.email}
+                      placeholder="اسم المستخدم أو البريد الإلكتروني"
+                      value={formData.username_or_email}
+                      onChange={handleInputChange("username_or_email")}
+                      error={errors.username_or_email}
                       dir="rtl"
-                      type="email"
+                      type="text"
                       required
                     />
 

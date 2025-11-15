@@ -131,3 +131,80 @@ export const reportPost = async (postId, reason) => {
     true
   );
 };
+
+// Admin / Community management helpers
+export const deleteCommunity = async (id) => {
+  return await deleteData(`/communities/${id}`, true);
+};
+
+export const regenerateInvite = async (id) => {
+  return await postData(`/communities/${id}/regenerate-invite`, {}, true);
+};
+
+export const getCommunityMembers = async (id, page = 1, size = 100) => {
+  const response = await getData(
+    `/communities/${id}/members?page=${page}&size=${size}`,
+    true
+  );
+  return response;
+};
+
+export const addCommunityMember = async (id, userId) => {
+  return await postData(
+    `/communities/${id}/members`,
+    { user_id: userId },
+    true
+  );
+};
+
+export const removeCommunityMember = async (id, userId) => {
+  return await deleteData(`/communities/${id}/members/${userId}`, true);
+};
+
+// Admin - Pending Posts Management
+export const getPendingPosts = async (
+  page = 1,
+  size = 20,
+  communityId = null
+) => {
+  let url = `/communities/admin/posts/pending?page=${page}&size=${size}`;
+  if (communityId) url += `&community_id=${communityId}`;
+  const response = await getData(url, true);
+  return response.posts || [];
+};
+
+export const acceptPost = async (postId) => {
+  return await postData(`/communities/admin/posts/${postId}/accept`, {}, true);
+};
+
+export const rejectPost = async (postId) => {
+  return await postData(`/communities/admin/posts/${postId}/reject`, {}, true);
+};
+
+// Admin - Reported Posts Management
+export const getReportedPosts = async (page = 1, size = 20) => {
+  const response = await getData(
+    `/communities/admin/reports?page=${page}&size=${size}`,
+    true
+  );
+  return response;
+};
+
+export const deleteReportedPost = async (reportId) => {
+  return await deleteData(
+    `/communities/admin/reports/${reportId}/delete`,
+    true
+  );
+};
+
+export const passReport = async (reportId) => {
+  return await postData(
+    `/communities/admin/reports/${reportId}/pass`,
+    {},
+    true
+  );
+};
+
+export const adminDeletePost = async (postId) => {
+  return await deleteData(`/communities/admin/posts/${postId}`, true);
+};

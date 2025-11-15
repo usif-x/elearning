@@ -275,11 +275,6 @@ export async function middleware(request) {
       return createRedirectResponse(loginUrl.toString());
     }
 
-    // Redirect admin users accessing dashboard to admin dashboard
-    if (isAdmin && pathname === "/dashboard") {
-      return createRedirectResponse("/admin/dashboard");
-    }
-
     // Redirect admin users accessing profile to admin dashboard
     if (isAdmin && pathname.startsWith("/profile")) {
       return createRedirectResponse("/admin/dashboard");
