@@ -18,7 +18,7 @@ const AboutSection = () => {
               <div className="p-8 md:p-12">
                 {/* Title: Text color changes for dark mode */}
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-10 text-right smooth">
-                  عن م/خالد صقر
+                  مستقبل التعليم الإلكتروني
                 </h2>
 
                 {/* Features Grid */}
@@ -28,13 +28,13 @@ const AboutSection = () => {
                     {/* Icon Background: Gets darker */}
                     <div className="bg-gray-100 dark:bg-gray-700 p-3 md:p-4 rounded-xl transition-transform hover:scale-110 smooth">
                       <Icon
-                        icon="ph:book-open-text-light"
+                        icon="ph:robot"
                         className="w-6 h-6 md:w-8 md:h-8 text-primary"
                       />
                     </div>
                     {/* Feature Text: Gets lighter */}
                     <p className="text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-300 font-medium leading-tight smooth">
-                      شروحات فيديو تفصيلية
+                      الذكاء الاصطناعي في التعليم
                     </p>
                   </div>
 
@@ -43,13 +43,13 @@ const AboutSection = () => {
                     {/* Icon Background: Gets darker */}
                     <div className="bg-gray-100 dark:bg-gray-700 p-3 md:p-4 rounded-xl transition-transform hover:scale-110 smooth">
                       <Icon
-                        icon="tabler:flask-2"
+                        icon="tabler:device-analytics"
                         className="w-6 h-6 md:w-8 md:h-8 text-primary smooth"
                       />
                     </div>
                     {/* Feature Text: Gets lighter */}
                     <p className="text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-300 font-medium leading-tight smooth">
-                      تجارب كيميائية تفاعلية
+                      تحليلات متقدمة للأداء
                     </p>
                   </div>
 
@@ -58,13 +58,13 @@ const AboutSection = () => {
                     {/* Icon Background: Gets darker */}
                     <div className="bg-gray-100 dark:bg-gray-700 p-3 md:p-4 rounded-xl transition-transform hover:scale-110 smooth">
                       <Icon
-                        icon="healthicons:i-exam-qualification-outline"
+                        icon="healthicons:i-groups-perspective-crowd"
                         className="w-6 h-6 md:w-8 md:h-8 text-primary smooth"
                       />
                     </div>
                     {/* Feature Text: Gets lighter */}
                     <p className="text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-300 font-medium leading-tight smooth">
-                      اختبارات وواجبات دورية
+                      تعلم تفاعلي جماعي
                     </p>
                   </div>
                 </div>
@@ -73,8 +73,8 @@ const AboutSection = () => {
               {/* Image Container - Gradient updated for dark mode */}
               <div className="relative w-full h-64 md:h-80 lg:h-96 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-800 smooth">
                 <Image
-                  src="/images/image.png"
-                  alt="الأستاذ خالد صقر - The Legend in Chemistry"
+                  src="/images/future-learning.png"
+                  alt="مستقبل التعليم الإلكتروني - The Future of E-Learning"
                   fill
                   className="object-contain object-bottom"
                   priority
@@ -86,8 +86,9 @@ const AboutSection = () => {
             <div className="bg-primary text-white p-8 md:p-12 flex items-center order-2 lg:order-1">
               <div className="flex flex-col justify-center h-full">
                 <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-right leading-relaxed">
-                  صَحصح شوية وشد حيلك معانا... هنمشى سوا خطوة بخطوة لحد ما تلم
-                  المنهج كيمياء وتبقى لعبه في ايدك.
+                  انضم إلى ثورة التعليم الرقمي... مع منصتنا المتطورة، ستكتشف
+                  عالماً جديداً من التعلم التفاعلي الذي يجمع بين التكنولوجيا
+                  الحديثة والتعليم الفعال.
                 </h3>
               </div>
             </div>

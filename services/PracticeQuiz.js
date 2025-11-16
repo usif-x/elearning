@@ -1,9 +1,11 @@
 import { getData, postData } from "@/libs/axios";
 
 /**
- * Generate a new practice quiz from user's incorrect/unanswered questions
+ * Generate a new practice quiz from user's incorrect/unanswered questions or specific lectures/quizzes
  * @param {Object} data - Quiz generation parameters
- * @param {number} data.course_id - Course ID to generate quiz from
+ * @param {number} [data.course_id] - Course ID to generate quiz from (optional)
+ * @param {Array<number>} [data.lecture_ids] - Array of lecture IDs to include (optional)
+ * @param {Array<number>} [data.quiz_ids] - Array of quiz content IDs to include (optional)
  * @param {number} data.question_count - Number of questions (default: 10)
  * @param {boolean} data.include_unanswered - Include unanswered questions
  * @returns {Promise<Object>} Practice quiz data with practice_quiz_id

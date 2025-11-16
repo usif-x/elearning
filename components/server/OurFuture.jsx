@@ -7,40 +7,21 @@ const lemonada = Lemonada({ subsets: ["latin", "arabic"], weight: "400" });
 // Data-Driven Approach: Manage all features in one place for easy updates.
 const features = [
   {
-    icon: "/icons/icon-chat.png", // Replace with your actual icon path
-    title: "شرح مبسط ومركز",
-    description:
-      "شرح النظريات والمفاهيم زي ما بتفهمها في حياتك اليومية، بعيد عن التعقيد الأكاديمي.",
-  },
-  {
     icon: "/icons/icon-exam.png", // Replace with your actual icon path
-    title: "نماذج امتحانات بنفس النظام",
-    description:
-      "امتحانات تفاعلية بنفس شكل امتحانات الثانوية العامة، عشان تعيش جو الامتحان على المنصة.",
-  },
-  {
-    icon: "/icons/icon-certificate.png", // Replace with your actual icon path
-    title: "متابعة دورية وتقييم مستمر",
-    description:
-      "تقدمك بيتراجع أسبوعياً، وبنقدملك توصيات حسب احتياجك، ومتابعة أول بأول.",
+    title: "نماذج امتحانات",
+    description: "امتحانات تفاعلية تقدر تعملها بنفسك او تحلها من زمايلك",
   },
   {
     icon: "/icons/icon-hat.png", // Replace with your actual icon path
-    title: "خطة مذاكرة منظمة",
+    title: "شرح للمحاضرات",
     description:
-      "المنصة بتديك جدول مذاكرة جاهز حسب وقتك ومستواك، عشان تذاكر بتركيز وراحة.",
+      "هتلاقي شرح لمعظم المحاضرات بواسطة زمايلك تساعدك عشان تفهم الماده اسهل",
   },
   {
     icon: "/icons/icon-video.png", // Replace with your actual icon path
-    title: "تفاعل مباشر",
+    title: "منتدي للطلاب و للأسئلة",
     description:
-      "أي استفسار، أو نقطة مش واضحة تسأل عنها وإحنا هنرد عليها بشكل فوري، وكده مش هتحس إنك لوحدك.",
-  },
-  {
-    icon: "/icons/icon-calendar.png", // Replace with your actual icon path
-    title: "فيديوهات مراجعة مركزة ليالي الامتحان",
-    description:
-      "فيديوهات مراجعة قصيرة مركزة على أهم النقاط اللي محتاج تذاكرها قبل ما تدخل قاعة الامتحان.",
+      "منتدي ليك و لزمايلك تسألو فيه عن أي حاجة تخص المذاكرة أو المنهج، وتساعدوا بعض في الفهم و كمان منتدي اسئله تشاركوها مع بعض.",
   },
 ];
 

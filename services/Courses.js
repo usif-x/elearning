@@ -56,10 +56,16 @@ export const getContent = async (courseId, lectureId, contentId) => {
   }
 };
 
-export const getQuizAttempts = async (courseId, lectureId, contentId) => {
+export const getQuizAttempts = async (
+  courseId,
+  lectureId,
+  contentId,
+  page = 1,
+  size = 10
+) => {
   try {
     const response = await getData(
-      `courses/${courseId}/lectures/${lectureId}/contents/${contentId}/attempts`,
+      `courses/${courseId}/lectures/${lectureId}/contents/${contentId}/attempts?page=${page}&size=${size}`,
       true
     );
     return response;

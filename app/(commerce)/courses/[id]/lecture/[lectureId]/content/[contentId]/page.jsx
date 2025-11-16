@@ -24,6 +24,9 @@ const ContentPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeLecture, setActiveLecture] = useState(null);
   const [activeContent, setActiveContent] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [attemptsPerPage] = useState(10);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   useEffect(() => {
@@ -45,10 +48,13 @@ const ContentPage = () => {
           const attemptsData = await getQuizAttempts(
             courseId,
             lectureId,
-            contentId
+            contentId,
+            currentPage,
+            attemptsPerPage
           );
           setQuizAttempts(attemptsData.completed_attempts || []);
           setIncompleteAttempt(attemptsData.incomplete_attempt || null);
+          setTotalPages(attemptsData.total_pages || 1);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -66,7 +72,7 @@ const ContentPage = () => {
     if (courseId && lectureId && contentId) {
       fetchData();
     }
-  }, [courseId, lectureId, contentId]);
+  }, [courseId, lectureId, contentId, currentPage, attemptsPerPage]);
 
   const handleStartQuiz = async () => {
     try {
@@ -354,14 +360,146 @@ const ContentPage = () => {
 
               {/* Quiz Attempts */}
               {(quizAttempts.length > 0 || incompleteAttempt) && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-6xl mx-auto w-full">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 max-w-6xl mx-auto w-full">
                   <h4
-                    className="text-xl font-bold text-gray-900 dark:text-white mb-4"
+                    className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4"
                     dir="rtl"
                   >
                     المحاولات السابقة
                   </h4>
-                  <div className="overflow-x-auto">
+
+                  {/* Mobile View - Cards */}
+                  <div className="block lg:hidden space-y-4">
+                    {/* Incomplete Attempt Card */}
+                    {incompleteAttempt && (
+                      <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-500 rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold px-2.5 py-1 rounded">
+                            قيد التنفيذ ⏳
+                          </span>
+                          <span className="text-sm font-bold text-gray-900 dark:text-white">
+                            جاري التنفيذ
+                          </span>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              الإجابات الصحيحة:
+                            </span>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              - / {incompleteAttempt.total_questions}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              تاريخ البدء:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {new Date(
+                                incompleteAttempt.started_at
+                              ).toLocaleDateString("ar-EG")}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            router.push(
+                              `/courses/${courseId}/lecture/${lectureId}/content/${contentId}/quiz/attempt`
+                            )
+                          }
+                          className="mt-3 w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-2 px-4 rounded transition-all"
+                        >
+                          متابعة الاختبار
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Completed Attempts Cards */}
+                    {quizAttempts.map((attempt, index) => (
+                      <div
+                        key={attempt.id}
+                        className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <span
+                            className={`text-xl font-bold ${
+                              attempt.score >= content.passing_score
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {attempt.score}%
+                          </span>
+                          <span className="text-sm font-bold text-gray-900 dark:text-white">
+                            المحاولة #{quizAttempts.length - index}
+                          </span>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              الإجابات الصحيحة:
+                            </span>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {attempt.correct_answers} /{" "}
+                              {attempt.total_questions}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              الوقت المستغرق:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {attempt.time_taken} دقيقة
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              تاريخ البدء:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {new Date(attempt.started_at).toLocaleDateString(
+                                "ar-EG"
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              تاريخ الانتهاء:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {attempt.completed_at
+                                ? new Date(
+                                    attempt.completed_at
+                                  ).toLocaleDateString("ar-EG")
+                                : "-"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          {attempt.is_completed &&
+                          attempt.show_correct_answers ? (
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/profile/quiz-result/${attempt.id}`
+                                )
+                              }
+                              className="w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold py-2 px-4 rounded transition-all"
+                            >
+                              عرض النتائج
+                            </button>
+                          ) : (
+                            <span className="block text-center text-gray-400 dark:text-gray-600 text-xs">
+                              النتائج غير متاحة
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop View - Table */}
+                  <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full text-sm text-right">
                       <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
@@ -526,6 +664,96 @@ const ContentPage = () => {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div
+                      className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+                      dir="rtl"
+                    >
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        صفحة {currentPage} من {totalPages}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() =>
+                            setCurrentPage((prev) => Math.max(1, prev - 1))
+                          }
+                          disabled={currentPage === 1}
+                          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                            currentPage === 1
+                              ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                              : "bg-sky-500 hover:bg-sky-600 text-white"
+                          }`}
+                        >
+                          <Icon
+                            icon="solar:alt-arrow-right-linear"
+                            className="w-5 h-5"
+                          />
+                        </button>
+
+                        {/* Page Numbers */}
+                        <div className="flex items-center gap-1">
+                          {[...Array(totalPages)].map((_, index) => {
+                            const pageNum = index + 1;
+                            // Show first, last, current, and adjacent pages
+                            if (
+                              pageNum === 1 ||
+                              pageNum === totalPages ||
+                              (pageNum >= currentPage - 1 &&
+                                pageNum <= currentPage + 1)
+                            ) {
+                              return (
+                                <button
+                                  key={pageNum}
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                                    currentPage === pageNum
+                                      ? "bg-sky-500 text-white"
+                                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                                  }`}
+                                >
+                                  {pageNum}
+                                </button>
+                              );
+                            } else if (
+                              pageNum === currentPage - 2 ||
+                              pageNum === currentPage + 2
+                            ) {
+                              return (
+                                <span
+                                  key={pageNum}
+                                  className="text-gray-400 dark:text-gray-600 px-2"
+                                >
+                                  ...
+                                </span>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(totalPages, prev + 1)
+                            )
+                          }
+                          disabled={currentPage === totalPages}
+                          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                            currentPage === totalPages
+                              ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                              : "bg-sky-500 hover:bg-sky-600 text-white"
+                          }`}
+                        >
+                          <Icon
+                            icon="solar:alt-arrow-left-linear"
+                            className="w-5 h-5"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 
-const QuizStatsBar = ({
-  timeRemaining,
+const QuestionsForumQuizStatsBar = ({
+  timeElapsed,
   answeredCount,
   totalQuestions,
   flaggedCount,
@@ -19,15 +19,11 @@ const QuizStatsBar = ({
               className="w-4 h-4 sm:w-5 sm:h-5 text-white"
             />
             <span className="text-xs sm:text-sm text-white/90">
-              الوقت المتبقي
+              الوقت المستغرق
             </span>
           </div>
-          <span
-            className={`text-xl sm:text-2xl font-bold text-white ${
-              timeRemaining < 60 ? "animate-pulse" : ""
-            }`}
-          >
-            {formatTime(timeRemaining)}
+          <span className="text-xl sm:text-2xl font-bold text-white">
+            {formatTime(timeElapsed)}
           </span>
         </div>
 
@@ -79,4 +75,4 @@ const QuizStatsBar = ({
   );
 };
 
-export default QuizStatsBar;
+export default QuestionsForumQuizStatsBar;

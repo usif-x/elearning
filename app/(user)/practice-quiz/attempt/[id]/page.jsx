@@ -1,8 +1,8 @@
 "use client";
 
-import QuizNavigation from "@/app/(commerce)/courses/[id]/lecture/[lectureId]/content/[contentId]/quiz/components/QuizNavigation";
-import QuizQuestion from "@/app/(commerce)/courses/[id]/lecture/[lectureId]/content/[contentId]/quiz/components/QuizQuestion";
-import QuizStatsBar from "@/app/(commerce)/courses/[id]/lecture/[lectureId]/content/[contentId]/quiz/components/QuizStatsBar";
+import QuizNavigation from "@/app/(user)/questions-forum/components/QuestionsForumQuizNavigation";
+import QuizQuestion from "@/app/(user)/questions-forum/components/QuestionsForumQuizQuestion";
+import QuizStatsBar from "@/app/(user)/questions-forum/components/QuestionsForumQuizStatsBar";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import {
   getPracticeQuizQuestions,
@@ -61,14 +61,15 @@ const PracticeQuizAttemptPage = () => {
 
   // Timer
   useEffect(() => {
-    if (loading || submitting) return;
+    if (loading || submitting || !quizData) return;
 
     const timer = setInterval(() => {
-      setTimeElapsed(Math.floor((Date.now() - startTime) / 1000));
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      setTimeElapsed(elapsed);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [loading, submitting, startTime]);
+  }, [loading, submitting, startTime, quizData]);
 
   const handleAnswerSelect = (optionIndex) => {
     setAnswers((prev) => ({
@@ -151,6 +152,9 @@ const PracticeQuizAttemptPage = () => {
   };
 
   const formatTime = (seconds) => {
+    if (isNaN(seconds) || seconds < 0) {
+      return "00:00";
+    }
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs
@@ -199,7 +203,7 @@ const PracticeQuizAttemptPage = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             {/* Stats Bar - Note: Practice quiz shows elapsed time instead of remaining time */}
             <QuizStatsBar
-              timeRemaining={timeElapsed}
+              timeElapsed={timeElapsed}
               answeredCount={getAnsweredCount()}
               totalQuestions={questions.length}
               flaggedCount={flaggedQuestions.size}

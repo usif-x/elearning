@@ -163,10 +163,27 @@ const CourseData = () => {
                       )}
                   </div>
                 </div>
-                <button className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 space-x-reverse">
-                  <Icon icon="mdi:cart-plus" className="w-6 h-6" />
-                  <span>اشترك في الكورس</span>
-                </button>
+                {parseFloat(course.price) === 0 ? (
+                  <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <Icon
+                        icon="solar:check-circle-bold"
+                        className="w-6 h-6 text-green-500"
+                      />
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                        كورس مجاني
+                      </p>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      يمكنك مشاهدة المحتوى مباشرة
+                    </p>
+                  </div>
+                ) : (
+                  <button className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 space-x-reverse">
+                    <Icon icon="mdi:cart-plus" className="w-6 h-6" />
+                    <span>اشترك في الكورس</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -269,31 +286,42 @@ const CourseData = () => {
                                   icon: "solar:play-circle-bold-duotone",
                                   color: "text-sky-500",
                                   bg: "bg-sky-100 dark:bg-sky-900/30",
+                                  label: "فيديو",
                                 };
-                              case "pdf":
+                              case "photo":
+                                return {
+                                  icon: "solar:gallery-bold-duotone",
+                                  color: "text-pink-500",
+                                  bg: "bg-pink-100 dark:bg-pink-900/30",
+                                  label: "صورة",
+                                };
+                              case "file":
                                 return {
                                   icon: "solar:file-text-bold-duotone",
                                   color: "text-blue-500",
                                   bg: "bg-blue-100 dark:bg-blue-900/30",
+                                  label: "ملف",
                                 };
-                              case "book":
+                              case "audio":
                                 return {
-                                  icon: "solar:book-2-bold-duotone",
-                                  color: "text-amber-500",
-                                  bg: "bg-amber-100 dark:bg-amber-900/30",
+                                  icon: "solar:music-library-bold-duotone",
+                                  color: "text-purple-500",
+                                  bg: "bg-purple-100 dark:bg-purple-900/30",
+                                  label: "صوت",
                                 };
                               case "quiz":
-                              case "exam":
                                 return {
                                   icon: "solar:clipboard-list-bold-duotone",
                                   color: "text-indigo-500",
                                   bg: "bg-indigo-100 dark:bg-indigo-900/30",
+                                  label: "اختبار",
                                 };
                               case "link":
                                 return {
                                   icon: "solar:link-bold-duotone",
-                                  color: "text-purple-500",
-                                  bg: "bg-purple-100 dark:bg-purple-900/30",
+                                  color: "text-amber-500",
+                                  bg: "bg-amber-100 dark:bg-amber-900/30",
+                                  label: "رابط",
                                 };
                               default:
                                 return {

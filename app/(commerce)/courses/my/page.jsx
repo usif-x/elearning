@@ -104,117 +104,144 @@ const MyCourses = () => {
         {/* Courses Grid */}
         {!loading && courses.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 p-4">
               {courses.map((enrollment) => (
-                <Link
-                  key={enrollment.id}
-                  href={`/courses/${enrollment.course_id}`}
-                  className="group bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  {/* Course Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600 overflow-hidden">
-                    {enrollment.course_image ? (
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_API_URL?.replace(
-                          "/api",
-                          ""
-                        )}/${enrollment.course_image}`}
-                        alt={enrollment.course_name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Icon
-                          icon="solar:book-bookmark-bold"
-                          className="w-20 h-20 text-white/50"
+                <div key={enrollment.id} className="group relative h-full">
+                  <div className="bg-white dark:bg-gray-800 text-sky-500 border-2 border-sky-500 transition-all duration-300 rounded-xl p-4 flex flex-col space-y-4 h-full">
+                    {/* Course Image */}
+                    <div className="rounded-xl relative overflow-hidden">
+                      {enrollment.course_image ? (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_API_URL}/storage/${enrollment.course_image}`}
+                          alt={enrollment.course_name}
+                          className="w-full h-full max-h-[300px] object-cover"
                         />
-                      </div>
-                    )}
-                    {/* Progress Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                      <div className="flex items-center justify-between text-white text-sm mb-2">
-                        <span className="font-medium">التقدم</span>
-                        <span className="font-bold">
-                          {enrollment.progress_percentage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-green-400 h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${enrollment.progress_percentage}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Course Info */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-blue-500 transition-colors">
-                      {enrollment.course_name}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                      {enrollment.course_description}
-                    </p>
-
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Icon
-                          icon="solar:video-library-bold"
-                          className="w-4 h-4 text-blue-500"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {enrollment.completed_lectures}/
-                          {enrollment.total_lectures} محاضرة
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Icon
-                          icon="solar:calendar-bold"
-                          className="w-4 h-4 text-green-500"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {formatDate(enrollment.enrolled_at)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Enrollment Type Badge */}
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          enrollment.course_is_free
-                            ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                            : "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                        }`}
-                      >
-                        {enrollment.course_is_free ? "مجاني" : "مدفوع"}
-                      </span>
-                      {enrollment.completed_at && (
-                        <span className="flex items-center gap-1 text-xs font-semibold text-green-600 dark:text-green-400">
+                      ) : (
+                        <div className="w-full h-[300px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                           <Icon
-                            icon="solar:check-circle-bold"
+                            icon="solar:book-bookmark-bold"
+                            className="w-20 h-20 text-white/50"
+                          />
+                        </div>
+                      )}
+                      {/* Progress Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                        <div className="flex items-center justify-between text-white text-sm mb-2">
+                          <span className="font-medium">التقدم</span>
+                          <span className="font-bold">
+                            {enrollment.progress_percentage}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-green-400 h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${enrollment.progress_percentage}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Course Content */}
+                    <div className="flex flex-col space-y-3 leading-0 flex-1">
+                      {/* Course Name - Centered */}
+                      <div className="text-center">
+                        <h3
+                          className="text-xl font-bold text-gray-900 dark:text-white"
+                          dir="rtl"
+                        >
+                          {enrollment.course_name}
+                        </h3>
+                      </div>
+
+                      {/* Horizontal Line */}
+                      <div className="h-1 m-2 w-full rounded-full bg-sky-700" />
+
+                      {/* Course Description - Centered */}
+                      <div className="text-center">
+                        <p
+                          className="text-sm text-gray-600 dark:text-gray-400 transition-all duration-300"
+                          dir="rtl"
+                        >
+                          {enrollment.course_description?.length > 80
+                            ? enrollment.course_description.substring(0, 80) +
+                              "..."
+                            : enrollment.course_description}
+                        </p>
+                      </div>
+
+                      {/* Horizontal Line */}
+                      <div className="h-1 m-2 w-full rounded-full bg-sky-700" />
+
+                      {/* Stats and Date */}
+                      <div className="flex md:flex-row md:justify-between flex-col md:items-center w-full">
+                        <div className="md:space-y-1 flex md:flex-col flex-row-reverse justify-between">
+                          {/* Stats */}
+                          <div className="flex flex-col gap-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Icon
+                                icon="solar:video-library-bold"
+                                className="w-4 h-4 text-blue-500"
+                              />
+                              <span className="text-gray-700 dark:text-gray-300">
+                                {enrollment.completed_lectures}/
+                                {enrollment.total_lectures} محاضرة
+                              </span>
+                            </div>
+                            {/* Badge */}
+                            <span
+                              className={`text-xs font-semibold px-3 py-1 rounded-md w-fit ${
+                                enrollment.course_is_free
+                                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-500"
+                                  : "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-500"
+                              }`}
+                            >
+                              {enrollment.course_is_free
+                                ? "كورس مجاني"
+                                : "مدفوع"}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Date */}
+                        <div className="hidden md:flex flex-col items-end space-y-1 text-gray-500 dark:text-gray-400 text-xs">
+                          <div className="flex items-center gap-1">
+                            <span>{formatDate(enrollment.enrolled_at)}</span>
+                            <Icon
+                              icon="solar:calendar-bold"
+                              className="w-4 h-4"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-between items-center w-full !mt-auto pt-4">
+                      {/* Mobile Date */}
+                      <div className="flex md:hidden flex-col space-y-1 text-gray-500 dark:text-gray-400 text-xs w-1/2">
+                        <div className="flex items-center gap-1">
+                          <Icon
+                            icon="solar:calendar-bold"
                             className="w-4 h-4"
                           />
-                          مكتمل
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Continue Learning Button */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-center gap-2 text-blue-500 group-hover:text-blue-600 font-medium text-sm">
-                        <span>متابعة التعلم</span>
-                        <Icon
-                          icon="solar:arrow-left-bold"
-                          className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                        />
+                          <span>{formatDate(enrollment.enrolled_at)}</span>
+                        </div>
+                      </div>
+                      {/* Button */}
+                      <div className="md:w-full w-1/2">
+                        <Link
+                          href={`/courses/${enrollment.course_id}`}
+                          className="w-full block"
+                        >
+                          <button className="border-2 transition-all duration-300 w-full rounded-xl px-4 py-2 bg-sky-500 border-sky-500 dark:bg-sky-500 dark:border-sky-500 text-white hover:bg-sky-600">
+                            متابعة التعلم
+                          </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
 

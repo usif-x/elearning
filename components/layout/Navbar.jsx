@@ -457,6 +457,22 @@ const Navbar = ({ children }) => {
                       </Link>
 
                       <Link
+                        href="/questions-forum"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          pathname === "/questions-forum"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:question-circle-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>منتدي الأسئلة</span>
+                      </Link>
+
+                      <Link
                         href="/community"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -740,7 +756,23 @@ const Navbar = ({ children }) => {
               )}
             </Link>
 
-            {/* Courses with Dropdown */}
+            {/* Questions Forum */}
+            <Link
+              href="/questions-forum"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/questions-forum"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "منتدي الأسئلة" : ""}
+            >
+              <Icon icon="solar:question-circle-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">منتدي الأسئلة</span>
+              )}
+            </Link>
 
             {/* Community */}
             <Link
@@ -759,6 +791,8 @@ const Navbar = ({ children }) => {
                 <span className="font-medium">منتدى الطلاب</span>
               )}
             </Link>
+
+            {/* Courses with Dropdown */}
 
             <div
               className={`${

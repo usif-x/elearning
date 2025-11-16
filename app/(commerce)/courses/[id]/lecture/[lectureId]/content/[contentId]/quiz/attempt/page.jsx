@@ -277,7 +277,9 @@ const QuizAttemptPage = () => {
       await Swal.fire({
         icon: "success",
         title: "تم التسليم بنجاح",
-        text: `لقد حصلت على ${response.score}% (${response.correct_answers} من ${response.total_questions})`,
+        text: `لقد حصلت على ${response.score || 0}% (${
+          response.correct_answers
+        } من ${response.total_questions})`,
         confirmButtonText: "عرض النتائج",
         confirmButtonColor: "#0ea5e9",
       });
