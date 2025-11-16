@@ -1,69 +1,90 @@
 "use client";
 
-import { getQuizAttemptDetails } from "@/services/QuizAnalytics";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { getPracticeQuizDetailedResult } from "@/services/PracticeQuiz";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
-const QuizResultPage = () => {
-  const { id: attemptId } = useParams();
+const PracticeQuizResultPage = () => {
+  const { id: practiceQuizId } = useParams();
   const router = useRouter();
-  const [quizResult, setQuizResult] = useState(null);
+
+  const [quizData, setQuizData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [explanationLang, setExplanationLang] = useState({});
+  const [selectedLanguage, setSelectedLanguage] = useState({});
+
+  // Initialize language selection - prefer Arabic if available
+  useEffect(() => {
+    if (quizData?.questions_with_results) {
+      const initialLanguages = {};
+      quizData.questions_with_results.forEach((question, index) => {
+        initialLanguages[index] = question.explanation_ar ? "ar" : "en";
+      });
+      setSelectedLanguage(initialLanguages);
+    }
+  }, [quizData]);
 
   useEffect(() => {
-    const fetchQuizResult = async () => {
+    const fetchResult = async () => {
       try {
-        const data = await getQuizAttemptDetails(attemptId);
-        setQuizResult(data);
+        const data = await getPracticeQuizDetailedResult(practiceQuizId);
+
+        // Check if quiz is not completed
+        if (!data.is_completed) {
+          toast.warning("لم يتم إكمال هذا الاختبار بعد");
+          router.push("/practice-quiz");
+          return;
+        }
+
+        setQuizData(data);
       } catch (error) {
-        console.error("Error fetching quiz result:", error);
+        console.error("Error fetching result:", error);
+        toast.error("حدث خطأ أثناء تحميل النتيجة");
+        router.push("/practice-quiz");
       } finally {
         setLoading(false);
       }
     };
 
-    if (attemptId) {
-      fetchQuizResult();
-    }
-  }, [attemptId]);
+    fetchResult();
+  }, [practiceQuizId, router]);
+
+  const toggleLanguage = (index, lang) => {
+    setSelectedLanguage((prev) => ({
+      ...prev,
+      [index]: lang,
+    }));
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins} دقيقة و ${secs} ثانية`;
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-        <div className="text-center">
-          <Icon
-            icon="eos-icons:loading"
-            className="w-12 h-12 text-sky-500 mx-auto mb-4"
-          />
-          <p className="text-gray-600 dark:text-gray-400">
-            جاري تحميل النتائج...
-          </p>
-        </div>
+        <LoadingSpinner />
       </div>
     );
   }
 
-  if (!quizResult) {
+  if (!quizData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
         <div className="text-center text-gray-500 dark:text-gray-400">
           <Icon icon="mdi:alert-circle" className="w-16 h-16 mx-auto mb-4" />
-          <p className="text-xl">لم يتم العثور على نتائج الاختبار</p>
-          <Link
-            href="/profile"
-            className="mt-4 inline-block text-sky-500 hover:text-sky-600"
-          >
-            العودة للملف الشخصي
-          </Link>
+          <p className="text-xl">لم يتم العثور على النتيجة</p>
         </div>
       </div>
     );
   }
 
-  const isPassed = quizResult.score >= 50; // Assuming 50% is passing score
+  const isPassed = quizData.score >= 50;
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
@@ -74,10 +95,10 @@ const QuizResultPage = () => {
           dir="rtl"
         >
           <Link
-            href="/profile"
+            href="/practice-quiz"
             className="hover:text-sky-500 transition-colors"
           >
-            الملف الشخصي
+            الاختبارات التدريبية
           </Link>
           <Icon icon="solar:alt-arrow-left-linear" className="w-4 h-4" />
           <span className="text-gray-900 dark:text-white font-semibold">
@@ -92,12 +113,13 @@ const QuizResultPage = () => {
               className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 break-words"
               dir="rtl"
             >
-              {quizResult.quiz_title}
+              {quizData.title}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              تاريخ الإكمال:{" "}
-              {new Date(quizResult.completed_at).toLocaleString("ar-EG")}
-            </p>
+            {quizData.description && (
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                {quizData.description}
+              </p>
+            )}
           </div>
 
           {/* Score Summary */}
@@ -127,7 +149,7 @@ const QuizResultPage = () => {
                   isPassed ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {quizResult.score}%
+                {quizData.score}%
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 sm:mt-2">
                 {isPassed ? "نجحت ✓" : "راسب ✗"}
@@ -143,7 +165,7 @@ const QuizResultPage = () => {
                 إجمالي الأسئلة
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl font-bold text-sky-600">
-                {quizResult.total_questions}
+                {quizData.total_questions}
               </p>
             </div>
 
@@ -156,7 +178,7 @@ const QuizResultPage = () => {
                 إجابات صحيحة
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600">
-                {quizResult.correct_answers}
+                {quizData.correct_answers}
               </p>
             </div>
 
@@ -169,7 +191,7 @@ const QuizResultPage = () => {
                 الوقت المستغرق
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-600">
-                {quizResult.time_taken}
+                {Math.floor(quizData.time_taken / 60)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 دقيقة
@@ -178,7 +200,7 @@ const QuizResultPage = () => {
           </div>
         </div>
 
-        {/* Questions and Answers */}
+        {/* Questions Review */}
         <div className="space-y-4 md:space-y-6">
           <h2
             className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white"
@@ -187,8 +209,9 @@ const QuizResultPage = () => {
             الأسئلة والإجابات
           </h2>
 
-          {quizResult.questions_with_results &&
-            quizResult.questions_with_results.map((question, index) => (
+          {quizData.questions_with_results &&
+          quizData.questions_with_results.length > 0 ? (
+            quizData.questions_with_results.map((question, index) => (
               <div
                 key={index}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
@@ -298,7 +321,7 @@ const QuizResultPage = () => {
 
                 {/* Explanation */}
                 {(question.explanation_ar || question.explanation_en) && (
-                  <div className="bg-sky-50 dark:bg-sky-900/20 border-r-4 border-sky-500 p-3 sm:p-4 rounded-lg">
+                  <div className="bg-sky-50 dark:bg-sky-900/20 border-r-4 border-sky-500 p-3 sm:p-4 rounded-lg mb-4">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <Icon
                         icon="solar:lightbulb-bolt-bold"
@@ -313,10 +336,12 @@ const QuizResultPage = () => {
                             question.explanation_en && (
                               <button
                                 onClick={() =>
-                                  setExplanationLang((prev) => ({
-                                    ...prev,
-                                    [index]: prev[index] === "en" ? "ar" : "en",
-                                  }))
+                                  toggleLanguage(
+                                    index,
+                                    selectedLanguage[index] === "en"
+                                      ? "ar"
+                                      : "en"
+                                  )
                                 }
                                 className="flex items-center gap-1 text-[10px] sm:text-xs bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 px-2 sm:px-3 py-1 rounded-full hover:bg-sky-200 dark:hover:bg-sky-900/60 transition-colors whitespace-nowrap"
                               >
@@ -325,7 +350,7 @@ const QuizResultPage = () => {
                                   className="w-3 h-3 sm:w-4 sm:h-4"
                                 />
                                 <span>
-                                  {explanationLang[index] === "en"
+                                  {selectedLanguage[index] === "en"
                                     ? "عربي"
                                     : "English"}
                                 </span>
@@ -334,9 +359,9 @@ const QuizResultPage = () => {
                         </div>
                         <p
                           className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed break-words"
-                          dir={explanationLang[index] === "en" ? "ltr" : "rtl"}
+                          dir={selectedLanguage[index] === "en" ? "ltr" : "rtl"}
                         >
-                          {explanationLang[index] === "en"
+                          {selectedLanguage[index] === "en"
                             ? question.explanation_en
                             : question.explanation_ar ||
                               question.explanation_en}
@@ -345,31 +370,74 @@ const QuizResultPage = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Source Info */}
+                {(question.source_quiz_title || question.source_course_id) && (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs bg-gray-100 dark:bg-gray-700/50 px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 flex-1 min-w-0">
+                      <Icon
+                        icon="solar:document-text-bold"
+                        className="w-4 h-4 flex-shrink-0"
+                      />
+                      <span className="truncate">
+                        {question.source_quiz_title
+                          ? `المصدر: ${question.source_quiz_title}`
+                          : ""}
+                        {question.source_course_id &&
+                          ` - كورس رقم ${question.source_course_id}`}
+                      </span>
+                    </div>
+                    {question.source_course_id &&
+                      question.source_lecture_id && (
+                        <Link
+                          href={`/courses/${question.source_course_id}/lecture/${question.source_lecture_id}`}
+                          className="flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+                        >
+                          <Icon
+                            icon="solar:arrow-left-bold"
+                            className="w-3 h-3"
+                          />
+                          <span>الانتقال للمحتوى</span>
+                        </Link>
+                      )}
+                  </div>
+                )}
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 text-center">
+              <Icon
+                icon="solar:clipboard-remove-bold-duotone"
+                className="w-24 h-24 mx-auto mb-6 text-gray-400"
+              />
+              <p className="text-xl font-semibold text-gray-500 dark:text-gray-400">
+                لا توجد أسئلة متاحة للمراجعة
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
         <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
           <Link
-            href="/profile"
+            href="/practice-quiz"
             className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <Icon
               icon="solar:arrow-right-linear"
               className="w-4 h-4 sm:w-5 sm:h-5"
             />
-            <span>العودة للملف الشخصي</span>
+            <span>العودة للاختبارات التدريبية</span>
           </Link>
           <Link
-            href={`/courses/${quizResult.course_id}/lecture/${quizResult.lecture_id}/content/${quizResult.content_id}`}
+            href="/practice-quiz"
             className="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <Icon
-              icon="solar:book-bookmark-bold"
+              icon="solar:add-circle-bold"
               className="w-4 h-4 sm:w-5 sm:h-5"
             />
-            <span>العودة للاختبار</span>
+            <span>إنشاء اختبار جديد</span>
           </Link>
         </div>
       </div>
@@ -377,4 +445,4 @@ const QuizResultPage = () => {
   );
 };
 
-export default QuizResultPage;
+export default PracticeQuizResultPage;

@@ -12,6 +12,7 @@ const LectureDetailPage = () => {
   const [lectures, setLectures] = useState([]);
   const [currentLecture, setCurrentLecture] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeContent, setActiveContent] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,7 +144,7 @@ const LectureDetailPage = () => {
           </h2>
 
           {currentLecture.contents && currentLecture.contents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {currentLecture.contents.map((content, index) => {
                 const getContentStyle = () => {
                   switch (content.content_type) {
@@ -151,127 +152,153 @@ const LectureDetailPage = () => {
                       return {
                         icon: "solar:play-circle-bold-duotone",
                         color: "text-sky-500",
-                        bg: "from-sky-500 to-blue-600",
+                        bg: "bg-sky-100 dark:bg-sky-900/30",
                         label: "فيديو",
                       };
                     case "photo":
                       return {
                         icon: "solar:gallery-bold-duotone",
                         color: "text-pink-500",
-                        bg: "from-pink-500 to-rose-600",
+                        bg: "bg-pink-100 dark:bg-pink-900/30",
                         label: "صورة",
                       };
                     case "file":
                       return {
                         icon: "solar:file-text-bold-duotone",
                         color: "text-blue-500",
-                        bg: "from-blue-500 to-cyan-600",
+                        bg: "bg-blue-100 dark:bg-blue-900/30",
                         label: "ملف",
                       };
                     case "audio":
                       return {
                         icon: "solar:music-library-bold-duotone",
                         color: "text-purple-500",
-                        bg: "from-purple-500 to-violet-600",
+                        bg: "bg-purple-100 dark:bg-purple-900/30",
                         label: "صوت",
                       };
                     case "quiz":
                       return {
                         icon: "solar:clipboard-list-bold-duotone",
                         color: "text-indigo-500",
-                        bg: "from-indigo-500 to-purple-600",
+                        bg: "bg-indigo-100 dark:bg-indigo-900/30",
                         label: "اختبار",
                       };
                     case "link":
                       return {
                         icon: "solar:link-bold-duotone",
                         color: "text-amber-500",
-                        bg: "from-amber-500 to-orange-600",
+                        bg: "bg-amber-100 dark:bg-amber-900/30",
                         label: "رابط",
                       };
                     default:
                       return {
                         icon: "solar:document-bold-duotone",
                         color: "text-gray-500",
-                        bg: "from-gray-500 to-gray-600",
+                        bg: "bg-gray-100 dark:bg-gray-900/30",
                         label: "محتوى",
                       };
                   }
                 };
 
                 const contentStyle = getContentStyle();
+                const isActive = activeContent === content.id;
 
                 return (
-                  <Link
+                  <div
                     key={content.id}
-                    href={`/courses/${courseId}/lecture/${lectureId}/content/${content.id}`}
-                    className="group"
+                    className="border-2 border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transform transition-all duration-200 hover:shadow-xl"
                     style={{
                       animation: `fadeInUp 0.3s ease-out ${index * 0.1}s both`,
                     }}
                   >
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 h-full border-2 border-gray-200 dark:border-gray-700 group-hover:border-sky-500">
-                      <div
-                        className={`bg-gradient-to-br ${contentStyle.bg} p-6 text-white`}
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                            <Icon
-                              icon={contentStyle.icon}
-                              className="w-8 h-8"
-                            />
-                          </div>
-                          <span className="text-sm font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <button
+                      onClick={() =>
+                        setActiveContent(isActive ? null : content.id)
+                      }
+                      className="w-full p-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-sky-50 hover:to-transparent dark:hover:from-sky-900/20 dark:hover:to-transparent transition-all duration-200 group"
+                    >
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <div
+                          className={`${contentStyle.bg} p-3 rounded-xl group-hover:scale-110 transition-transform duration-200`}
+                        >
+                          <Icon
+                            icon={contentStyle.icon}
+                            className={`w-6 h-6 ${contentStyle.color}`}
+                          />
+                        </div>
+                        <div className="text-right">
+                          <span
+                            className="text-lg font-bold text-gray-900 dark:text-white block"
+                            dir="rtl"
+                          >
+                            {content.title}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
                             {contentStyle.label}
                           </span>
                         </div>
-                        <h3
-                          className="text-lg font-bold line-clamp-2"
-                          dir="rtl"
-                        >
-                          {content.title}
-                        </h3>
                       </div>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        {content.quiz_duration && (
+                          <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                            <Icon
+                              icon="solar:clock-circle-bold"
+                              className="w-4 h-4"
+                            />
+                            <span className="text-xs">
+                              {content.quiz_duration} دقيقة
+                            </span>
+                          </div>
+                        )}
+                        <div
+                          className={`transform transition-transform duration-200 ${
+                            isActive ? "rotate-180" : ""
+                          }`}
+                        >
+                          <Icon
+                            icon="solar:alt-arrow-down-bold"
+                            className="w-6 h-6 text-sky-500"
+                          />
+                        </div>
+                      </div>
+                    </button>
 
-                      <div className="p-6">
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        isActive
+                          ? "max-h-[500px] opacity-100"
+                          : "max-h-0 opacity-0"
+                      }`}
+                    >
+                      <div className="p-6 bg-gradient-to-b from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800/50 border-t border-gray-200 dark:border-gray-700">
                         {content.description && (
                           <p
-                            className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 text-sm"
+                            className="text-gray-600 dark:text-gray-400 mb-4"
                             dir="rtl"
                           >
                             {content.description}
                           </p>
                         )}
 
-                        <div className="flex items-center justify-between">
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            #{content.position + 1}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            الترتيب: #{content.position + 1}
                           </div>
-                          {content.quiz_duration && (
-                            <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                              <Icon
-                                icon="solar:clock-circle-bold"
-                                className="w-4 h-4"
-                              />
-                              <span className="text-xs">
-                                {content.quiz_duration} دقيقة
-                              </span>
-                            </div>
-                          )}
                         </div>
 
-                        <div className="mt-4 flex items-center justify-center gap-2 text-sky-500 group-hover:gap-3 transition-all">
-                          <span className="text-sm font-semibold">
-                            عرض المحتوى
-                          </span>
+                        <Link
+                          href={`/courses/${courseId}/lecture/${lectureId}/content/${content.id}`}
+                          className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 space-x-reverse"
+                        >
+                          <span>عرض المحتوى</span>
                           <Icon
                             icon="solar:arrow-left-bold"
                             className="w-5 h-5"
                           />
-                        </div>
+                        </Link>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

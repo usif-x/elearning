@@ -10,6 +10,19 @@ export const getFeaturedCourses = async () => {
   }
 };
 
+export const getUserCourses = async (page = 1, size = 20) => {
+  try {
+    const response = await getData(
+      `users/me/courses?page=${page}&size=${size}`,
+      true
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching user courses:", error);
+    throw error;
+  }
+};
+
 export const getCourseById = async (id) => {
   try {
     const response = await getData(`courses/${id}`, true);

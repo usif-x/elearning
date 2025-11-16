@@ -441,6 +441,22 @@ const Navbar = ({ children }) => {
                       )}
 
                       <Link
+                        href="/practice-quiz"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          pathname === "/practice-quiz"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:clipboard-list-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>اختبارات تدريبية</span>
+                      </Link>
+
+                      <Link
                         href="/community"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -705,6 +721,24 @@ const Navbar = ({ children }) => {
                 </Link>
               </>
             )}
+
+            {/* Practice Quiz */}
+            <Link
+              href="/practice-quiz"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/practice-quiz"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "اختبارات تدريبية" : ""}
+            >
+              <Icon icon="solar:clipboard-list-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">اختبارات تدريبية</span>
+              )}
+            </Link>
 
             {/* Courses with Dropdown */}
 
