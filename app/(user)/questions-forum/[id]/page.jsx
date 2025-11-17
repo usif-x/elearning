@@ -3,7 +3,7 @@
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import {
   getPublicQuestionSetDetail,
-  startPublicQuestionAttempt,
+  startQuestionAttempt,
 } from "@/services/QuestionsForum";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
@@ -42,7 +42,7 @@ const PublicQuestionSetPage = () => {
   const handleStartAttempt = async () => {
     setStartingAttempt(true);
     try {
-      const attempt = await startPublicQuestionAttempt(questionSetId);
+      const attempt = await startQuestionAttempt(questionSetId);
       toast.success("تم بدء المحاولة بنجاح!");
       router.push(`/questions-forum/${attempt.id}/attempt`);
     } catch (error) {
