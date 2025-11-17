@@ -511,21 +511,6 @@ const Navbar = ({ children }) => {
                       <Icon icon="solar:logout-bold" className="w-5 h-5" />
                       <span>تسجيل الخروج</span>
                     </Link>
-                    <Link
-                      href="/support-the-platform"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
-                        pathname === "/support-the-platform"
-                          ? "bg-green-500 text-white"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      <Icon
-                        icon="solar:hand-heart-bold-duotone"
-                        className="w-5 h-5"
-                      />
-                      <span>دعم المنصة</span>
-                    </Link>
                   </>
                 ) : (
                   <div className="space-y-3">
@@ -889,24 +874,6 @@ const Navbar = ({ children }) => {
               <Icon icon="solar:logout-bold" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">تسجيل الخروج</span>
-              )}
-            </Link>
-
-            {/* Support the Platform */}
-            <Link
-              href="/support-the-platform"
-              className={`flex items-center w-full p-3 rounded-xl smooth ${
-                !shouldShowExpanded ? "justify-center" : "gap-3"
-              } ${
-                pathname === "/support-the-platform"
-                  ? "bg-green-500 text-white"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-              title={!shouldShowExpanded ? "دعم المنصة" : ""}
-            >
-              <Icon icon="solar:hand-heart-bold-duotone" className="w-6 h-6" />
-              {shouldShowExpanded && (
-                <span className="font-medium">دعم المنصة</span>
               )}
             </Link>
           </div>
