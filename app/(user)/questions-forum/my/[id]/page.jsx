@@ -624,7 +624,7 @@ const QuestionSetDetailPage = () => {
                     const url = `${window.location.origin}/questions-forum/${questionSetId}`;
                     navigator.clipboard.writeText(url).then(() => {
                       // You could add a toast notification here
-                      alert("تم نسخ الرابط!");
+                      toast.success("تم نسخ الرابط!");
                     });
                   }}
                   className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"

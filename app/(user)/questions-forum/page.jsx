@@ -178,7 +178,7 @@ const QuestionsForumPage = () => {
                 onClick={() => {
                   const url = `${window.location.origin}/questions-forum/${set.id}`;
                   navigator.clipboard.writeText(url).then(() => {
-                    alert("تم نسخ الرابط!");
+                    toast.success("تم نسخ الرابط!");
                   });
                 }}
                 className="flex-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-800/50 text-green-700 dark:text-green-300 p-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
