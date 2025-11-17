@@ -100,7 +100,7 @@ export default function TelegramRegisterPage() {
     return () => {
       delete window.onTelegramAuth;
     };
-  }, [step]);
+  }, [step, router]);
 
   // Validation functions
   const validatePhoneNumber = (phone) => {
@@ -174,6 +174,7 @@ export default function TelegramRegisterPage() {
 
   // Handle next step
   const handleNext = () => {
+    // Validate the current step before moving to the next
     if (validateStep(step)) {
       setStep(step + 1);
     }
@@ -186,9 +187,11 @@ export default function TelegramRegisterPage() {
 
   // Handle final registration
   const handleRegister = async () => {
+    // Final validation before submitting
     if (!validateStep(3)) return;
 
     setIsLoading(true);
+    setErrors({});
 
     try {
       const registrationData = {
@@ -198,44 +201,45 @@ export default function TelegramRegisterPage() {
         phone_number: formData.phoneNumber,
         password: formData.password,
         confirm_password: formData.confirmPassword,
-        // Note: gender is not in the backend schema
-        // but can be added to user profile later
+        gender: formData.gender,
       };
+
       const registerResponse = await postData(
         "/auth/register",
         registrationData
       );
+
       if (registerResponse.error) {
-        throw new Error(registerResponse.error);
+        // Handle backend validation errors
+        if (typeof registerResponse.error === "object") {
+          setErrors(registerResponse.error);
+          toast.error("يرجى مراجعة الحقول المدخلة.");
+        } else {
+          throw new Error(registerResponse.error);
+        }
+        return;
       }
-      Swal.fire({
-        icon: "success",
-        title: "تم إنشاء الحساب بنجاح!",
-        text: "يمكنك الآن تسجيل الدخول إلى حسابك.",
-        confirmButtonText: "حسناً",
-      }).then(() => {
-        router.push("/");
-      });
+
       login({
         user: registerResponse.user,
         token: registerResponse.access_token,
         refresh_token: registerResponse.refresh_token,
       });
 
-      // Reset form for demo
-      setStep(1);
-      setTelegramData(null);
-      setFormData({
-        fullName: "",
-        phoneNumber: "",
-        gender: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+      await Swal.fire({
+        icon: "success",
+        title: "تم إنشاء الحساب بنجاح!",
+        text: "تم تسجيل دخولك تلقائيًا.",
+        confirmButtonText: "حسناً",
       });
+
+      router.push("/");
     } catch (error) {
       console.error("Registration error:", error);
-      setErrors({ general: "فشل التسجيل. يرجى المحاولة مرة أخرى." });
+      toast.error(error.message || "فشل التسجيل. يرجى المحاولة مرة أخرى.");
+      setErrors({
+        general: error.message || "فشل التسجيل. يرجى المحاولة مرة أخرى.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +247,8 @@ export default function TelegramRegisterPage() {
 
   // Progress indicator
   const getProgressWidth = () => {
-    return `${(step / 3) * 100}%`;
+    // Adjusted for a 3-step process (0%, 50%, 100%)
+    return `${((step - 1) / 2) * 100}%`;
   };
 
   return (
@@ -280,7 +285,7 @@ export default function TelegramRegisterPage() {
                     الخطوة {step} من 3
                   </span>
                   <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                    {Math.round((step / 3) * 100)}%
+                    {Math.round(((step - 1) / 2) * 100)}%
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -402,30 +407,19 @@ export default function TelegramRegisterPage() {
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={handlePrevious}
-                      disabled={isLoading}
-                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
                     >
                       رجوع
                     </button>
                     <button
-                      onClick={handleRegister}
-                      disabled={isLoading}
-                      className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-medium"
+                      onClick={handleNext}
+                      className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center font-medium"
                     >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
-                          جاري التسجيل...
-                        </>
-                      ) : (
-                        <>
-                          <Icon
-                            icon="material-symbols:person-add"
-                            className="w-4 h-4 ml-2"
-                          />
-                          إنشاء الحساب
-                        </>
-                      )}
+                      <Icon
+                        icon="material-symbols:arrow-forward"
+                        className="w-4 h-4 ml-2"
+                      />
+                      التالي
                     </button>
                   </div>
                 </div>
@@ -433,88 +427,6 @@ export default function TelegramRegisterPage() {
 
               {/* Step 3: Security Information */}
               {step === 3 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center">
-                      <Icon
-                        icon="material-symbols:security"
-                        className="w-6 h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      معلومات الأمان
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      اختر بريد إلكتروني وكلمة مرور قوية
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Input
-                      icon="material-symbols:mail"
-                      placeholder="البريد الإلكتروني (مثل: ahmed@example.com)"
-                      value={formData.email}
-                      onChange={handleInputChange("email")}
-                      error={errors.email}
-                      dir="rtl"
-                      type="email"
-                    />
-
-                    <Input
-                      icon="material-symbols:lock"
-                      placeholder="كلمة المرور (8 أحرف على الأقل)"
-                      value={formData.password}
-                      onChange={handleInputChange("password")}
-                      error={errors.password}
-                      dir="rtl"
-                      type="password"
-                    />
-
-                    <Input
-                      icon="material-symbols:lock-open"
-                      placeholder="تأكيد كلمة المرور"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange("confirmPassword")}
-                      error={errors.confirmPassword}
-                      dir="rtl"
-                      type="password"
-                    />
-                  </div>
-
-                  {/* Show validation errors if any */}
-                  {(errors.email ||
-                    errors.password ||
-                    errors.confirmPassword) && (
-                    <div className="text-red-500 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800">
-                      <Icon
-                        icon="material-symbols:error"
-                        className="w-4 h-4 mx-auto mb-1"
-                      />
-                      {errors.email ||
-                        errors.password ||
-                        errors.confirmPassword}
-                    </div>
-                  )}
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handlePrevious}
-                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
-                    >
-                      رجوع
-                    </button>
-                    <button
-                      onClick={handleNext}
-                      className="flex-1 py-3 px-4 bg-purple-600 dark:bg-purple-500 text-white rounded-xl hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors font-medium"
-                    >
-                      التالي
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Security Information */}
-              {step === 4 && (
                 <div className="space-y-6">
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 mx-auto mb-3 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center">
