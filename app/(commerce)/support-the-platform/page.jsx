@@ -58,7 +58,7 @@ const SupportPage = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg mb-6">
             <Icon
-              icon="solar:heart-hand-bold"
+              icon="solar:hand-heart-bold-duotone"
               className="text-3xl text-white"
             />
           </div>
