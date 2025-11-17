@@ -65,16 +65,20 @@ export const putData = async (endpoint, data, auth = false) => {
 };
 
 // ✅ DELETE
-export const deleteData = async (endpoint, auth = false) => {
+export const deleteData = async (endpoint, data = {}, auth = false) => {
   try {
     const headers = auth ? getAuthHeaders() : {};
-    const res = await api.delete(endpoint, { headers });
+
+    const res = await api.delete(endpoint, {
+      headers,
+      data, // 💥 أهم سطر — يرسل الـ body في DELETE
+    });
+
     return res.data;
   } catch (error) {
     toast.error(
       error?.response?.data?.detail || error.message || "Something went wrong"
     );
-
     throw error;
   }
 };
