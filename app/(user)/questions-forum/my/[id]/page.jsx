@@ -517,7 +517,7 @@ const QuestionSetDetailPage = () => {
                   >
                     <div className="flex items-center">
                       <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        أ
+                        A
                       </span>
                       <span
                         className={`text-lg ${
@@ -547,7 +547,7 @@ const QuestionSetDetailPage = () => {
                   >
                     <div className="flex items-center">
                       <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        ب
+                        B
                       </span>
                       <span
                         className={`text-lg ${
