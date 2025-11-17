@@ -63,7 +63,7 @@ const Footer = ({ isSidebarCollapsed }) => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-                  دحيحة حلوان
+                  دحيحة ميديكال
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400"></p>
               </div>
@@ -94,7 +94,7 @@ const Footer = ({ isSidebarCollapsed }) => {
           <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
               <p>
-                © {new Date().getFullYear()} دحيحة حلوان. جميع الحقوق محفوظة.
+                © {new Date().getFullYear()} دحيحة ميديكال. جميع الحقوق محفوظة.
               </p>
               <div className="flex items-center gap-2">
                 <span>تطوير</span>

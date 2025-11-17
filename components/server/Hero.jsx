@@ -34,7 +34,7 @@ const Hero = () => {
               <h1
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 ${lemonada.className}`}
               >
-                دحيحة حلوان
+                دحيحة ميديكال
               </h1>
               <div className="absolute -bottom-2 right-0 w-24 sm:w-32 lg:w-40 h-1 bg-white/50 rounded-full"></div>
             </div>
@@ -42,7 +42,7 @@ const Hero = () => {
             {/* Description paragraphs with improved spacing */}
             <div className="space-y-3 sm:space-y-4 max-w-xl">
               <p className="text-base sm:text-lg lg:text-xl text-sky-50 dark:text-sky-100 leading-relaxed">
-                دحيحة حلوان منصة معمولة مخصوص علشان تساعد طلاب جامعة حلوان
+                دحيحة ميديكال منصة معمولة مخصوص علشان تساعد طلاب التخصصات الطبيه
                 يفهموا المذاكرة من غير تعقيد.
               </p>
               <p className="text-base sm:text-lg lg:text-xl text-sky-50 dark:text-sky-100 leading-relaxed">
@@ -75,7 +75,7 @@ const Hero = () => {
               <div className="absolute inset-0 bg-white/20 rounded-full blur-3xl scale-90"></div>
               <Image
                 src="/images/hero.svg"
-                alt="دحيحة حلوان - منصة تعليمية لطلاب جامعة حلوان"
+                alt="دحيحة ميديكال - منصة تعليمية"
                 width={1000}
                 height={1000}
                 priority
