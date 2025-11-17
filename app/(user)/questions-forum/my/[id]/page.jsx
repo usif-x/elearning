@@ -8,6 +8,8 @@ import Swal from "sweetalert2";
 import LoadingSpinner from "../../../../../components/ui/LoadingSpinner.jsx";
 import {
   deleteMyQuestionSet,
+  deleteQuestionFromSet,
+  editQuestionInSet,
   getMyQuestionSetDetail,
   startQuestionAttempt,
   updateMyQuestionSet,
@@ -29,7 +31,10 @@ const QuestionSetDetailPage = () => {
   const [startingAttempt, setStartingAttempt] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const questionsPerPage = 5;
-  const [explanationLanguages, setExplanationLanguages] = useState({}); // Track language preference per question
+  const [explanationLanguages, setExplanationLanguages] = useState({});
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [editQuestionData, setEditQuestionData] = useState(null);
+  const [deletingQuestion, setDeletingQuestion] = useState(null);
 
   // Helper function to determine question type based on options
   const getQuestionType = (question) => {
@@ -121,6 +126,145 @@ const QuestionSetDetailPage = () => {
     } finally {
       setStartingAttempt(false);
     }
+  };
+
+  // Edit Question Functions
+  const startEditQuestion = (question, index) => {
+    const globalIndex = indexOfFirstQuestion + index;
+    setEditingQuestion(globalIndex);
+    setEditQuestionData({
+      question: question.question,
+      options: [...question.options],
+      correct_answer: question.correct_answer,
+      explanation_en: question.explanation_en || "",
+      explanation_ar: question.explanation_ar || "",
+      question_type: question.question_type || getQuestionType(question),
+    });
+  };
+
+  const cancelEditQuestion = () => {
+    setEditingQuestion(null);
+    setEditQuestionData(null);
+  };
+
+  const handleEditQuestion = async (index) => {
+    if (!editQuestionData.question.trim()) {
+      toast.error("يرجى إدخال نص السؤال");
+      return;
+    }
+
+    // Validate that all options are filled for multiple choice and true/false
+    if (
+      editQuestionData.question_type === "multiple_choice" ||
+      editQuestionData.question_type === "true_false"
+    ) {
+      const emptyOption = editQuestionData.options.find((opt) => !opt.trim());
+      if (emptyOption) {
+        toast.error("يرجى ملء جميع الخيارات");
+        return;
+      }
+    }
+
+    // Validate that correct answer is provided for short answer
+    if (
+      editQuestionData.question_type === "short_answer" &&
+      !editQuestionData.options[editQuestionData.correct_answer]?.trim()
+    ) {
+      toast.error("يرجى إدخال الإجابة الصحيحة");
+      return;
+    }
+
+    try {
+      const response = await editQuestionInSet(questionSetId, {
+        question_index: index,
+        question_data: editQuestionData,
+      });
+
+      setQuestionSet(response);
+      setEditingQuestion(null);
+      setEditQuestionData(null);
+      toast.success("تم تحديث السؤال بنجاح");
+    } catch (error) {
+      console.error("Error editing question:", error);
+      toast.error("حدث خطأ أثناء تحديث السؤال");
+    }
+  };
+
+  const handleDeleteQuestion = async (index) => {
+    // Check if this is the last question
+    if (questionSet.questions.length <= 1) {
+      toast.error("لا يمكن حذف السؤال الأخير في المجموعة");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "هل أنت متأكد؟",
+      text: "لا يمكن التراجع عن حذف هذا السؤال!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "نعم، احذف",
+      cancelButtonText: "إلغاء",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setDeletingQuestion(index);
+    try {
+      const response = await deleteQuestionFromSet(questionSetId, {
+        question_index: index,
+      });
+
+      setQuestionSet(response);
+
+      // Adjust pagination if needed
+      if (
+        currentPage > Math.ceil(response.questions.length / questionsPerPage)
+      ) {
+        setCurrentPage(Math.ceil(response.questions.length / questionsPerPage));
+      }
+
+      toast.success("تم حذف السؤال بنجاح");
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      toast.error("حدث خطأ أثناء حذف السؤال");
+    } finally {
+      setDeletingQuestion(null);
+    }
+  };
+
+  // Helper functions for question editing
+  const addOption = () => {
+    setEditQuestionData((prev) => ({
+      ...prev,
+      options: [...prev.options, ""],
+    }));
+  };
+
+  const updateOption = (optionIndex, value) => {
+    setEditQuestionData((prev) => ({
+      ...prev,
+      options: prev.options.map((opt, idx) =>
+        idx === optionIndex ? value : opt
+      ),
+    }));
+  };
+
+  const removeOption = (optionIndex) => {
+    if (editQuestionData.options.length <= 2) {
+      toast.error("يجب أن يحتوي السؤال على خيارين على الأقل");
+      return;
+    }
+
+    setEditQuestionData((prev) => ({
+      ...prev,
+      options: prev.options.filter((_, idx) => idx !== optionIndex),
+      correct_answer:
+        prev.correct_answer >= optionIndex && prev.correct_answer > 0
+          ? prev.correct_answer - 1
+          : prev.correct_answer,
+    }));
   };
 
   if (loading) {
@@ -400,6 +544,58 @@ const QuestionSetDetailPage = () => {
             </div>
           </div>
 
+          {/* Source Display */}
+          {questionSet.source_type && (
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                المصدر
+              </h3>
+              {questionSet.source_type === "pdf" ? (
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                  <Icon
+                    icon="solar:document-bold"
+                    className="w-8 h-8 text-blue-600"
+                  />
+                  <div className="flex-1">
+                    <p className="text-gray-900 dark:text-white font-semibold">
+                      {questionSet.source_file_name}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      ملف PDF
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = `${process.env.NEXT_PUBLIC_API_URL}/storage/user_questions/${questionSet.source_file_name}`;
+                      link.download = questionSet.source_file_name;
+                      link.click();
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+                  >
+                    <Icon icon="solar:download-bold" className="w-5 h-5" />
+                    <span>تحميل</span>
+                  </button>
+                </div>
+              ) : questionSet.source_type === "topic" ? (
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
+                  <Icon
+                    icon="solar:tag-bold"
+                    className="w-8 h-8 text-green-600"
+                  />
+                  <div>
+                    <p className="text-gray-900 dark:text-white font-semibold">
+                      {questionSet.topic}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      موضوع
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-4">
             <button
@@ -414,279 +610,507 @@ const QuestionSetDetailPage = () => {
               )}
               <span>بدء المحاولة</span>
             </button>
-            <Link
-              href={`/questions-forum/${questionSetId}/participants`}
-              className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
-            >
-              <Icon icon="solar:cup-bold" className="w-6 h-6" />
-              <span>المشاركون</span>
-            </Link>
+            {questionSet.is_public ? (
+              <Link
+                href={`/questions-forum/${questionSetId}/participants`}
+                className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
+              >
+                <Icon icon="solar:cup-bold" className="w-6 h-6" />
+                <span>المشاركون</span>
+              </Link>
+            ) : null}
           </div>
         </div>
 
         {/* Questions Section */}
         <div className="space-y-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl">
-              <Icon
-                icon="solar:question-circle-bold"
-                className="w-8 h-8 text-indigo-500"
-              />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl">
+                <Icon
+                  icon="solar:question-circle-bold"
+                  className="w-8 h-8 text-indigo-500"
+                />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                الأسئلة ({questionSet.questions.length})
+              </h2>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              الأسئلة ({questionSet.questions.length})
-            </h2>
+
+            {/* Add Questions Button */}
+            <Link
+              href={`/questions-forum/${questionSetId}/add-questions`}
+              className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <Icon icon="solar:add-circle-bold" className="w-5 h-5" />
+              <span>إضافة أسئلة</span>
+            </Link>
           </div>
 
-          {currentQuestions.map((question, index) => (
-            <div
-              key={index}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700"
-            >
-              <div className="flex justify-between items-start mb-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex-1 leading-relaxed">
-                  {indexOfFirstQuestion + index + 1}. {question.question}
-                </h3>
-                <span
-                  className={`px-4 py-2 font-semibold text-sm rounded-full ml-4 whitespace-nowrap ${
-                    getQuestionType(question) === "multiple_choice"
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                      : getQuestionType(question) === "true_false"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                      : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                  }`}
-                >
-                  {getQuestionType(question) === "multiple_choice"
-                    ? "اختيار متعدد"
-                    : getQuestionType(question) === "true_false"
-                    ? "صح أم خطأ"
-                    : "إجابة قصيرة"}
-                </span>
-              </div>
+          {currentQuestions.map((question, index) => {
+            const globalIndex = indexOfFirstQuestion + index;
+            const isEditing = editingQuestion === globalIndex;
 
-              {/* Options for multiple choice */}
-              {getQuestionType(question) === "multiple_choice" &&
-                Array.isArray(question.options) &&
-                question.options.length > 0 && (
-                  <div className="space-y-4 mb-6">
-                    {question.options.map((option, optionIndex) => (
-                      <div
-                        key={optionIndex}
-                        className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                          optionIndex === question.correct_answer
-                            ? "border-green-500 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 shadow-md"
-                            : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                            {String.fromCharCode(65 + optionIndex)}
-                          </span>
-                          <span
-                            className={`text-lg ${
-                              optionIndex === question.correct_answer
-                                ? "font-bold text-green-800 dark:text-green-200"
-                                : "text-gray-700 dark:text-gray-300"
-                            }`}
-                          >
-                            {option}
-                          </span>
-                          {optionIndex === question.correct_answer && (
-                            <div className="mr-4 p-2 bg-green-500 rounded-full">
-                              <Icon
-                                icon="solar:check-circle-bold"
-                                className="w-5 h-5 text-white"
-                              />
-                            </div>
+            return (
+              <div
+                key={globalIndex}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex justify-between items-start mb-6">
+                  {isEditing ? (
+                    <div className="flex-1">
+                      <textarea
+                        value={editQuestionData.question}
+                        onChange={(e) =>
+                          setEditQuestionData((prev) => ({
+                            ...prev,
+                            question: e.target.value,
+                          }))
+                        }
+                        className="w-full text-xl font-bold border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        rows={3}
+                        placeholder="أدخل نص السؤال..."
+                      />
+                    </div>
+                  ) : (
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex-1 leading-relaxed">
+                      {globalIndex + 1}. {question.question}
+                    </h3>
+                  )}
+
+                  <div className="flex items-center gap-2 ml-4">
+                    {/* Question Type Badge */}
+                    <span
+                      className={`px-4 py-2 font-semibold text-sm rounded-full whitespace-nowrap ${
+                        getQuestionType(question) === "multiple_choice"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                          : getQuestionType(question) === "true_false"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                      }`}
+                    >
+                      {getQuestionType(question) === "multiple_choice"
+                        ? "اختيار متعدد"
+                        : getQuestionType(question) === "true_false"
+                        ? "صح أم خطأ"
+                        : "إجابة قصيرة"}
+                    </span>
+
+                    {/* Edit & Delete Buttons */}
+                    {!isEditing && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => startEditQuestion(question, index)}
+                          className="p-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
+                          title="تعديل السؤال"
+                        >
+                          <Icon icon="solar:pen-bold" className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuestion(globalIndex)}
+                          disabled={deletingQuestion === globalIndex}
+                          className="p-2 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900 transition-all duration-300 disabled:opacity-50"
+                          title="حذف السؤال"
+                        >
+                          {deletingQuestion === globalIndex ? (
+                            <LoadingSpinner size="small" />
+                          ) : (
+                            <Icon
+                              icon="solar:trash-bin-minimalistic-bold"
+                              className="w-5 h-5"
+                            />
                           )}
-                        </div>
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-              {/* True/False */}
-              {getQuestionType(question) === "true_false" && (
-                <div className="space-y-4 mb-6">
-                  <div
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                      question.correct_answer === 1
-                        ? "border-green-500 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 shadow-md"
-                        : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        A
-                      </span>
-                      <span
-                        className={`text-lg ${
-                          question.correct_answer === 1
-                            ? "font-bold text-green-800 dark:text-green-200"
-                            : "text-gray-700 dark:text-gray-300"
-                        }`}
-                      >
-                        False
-                      </span>
-                      {question.correct_answer === 1 && (
-                        <div className="mr-4 p-2 bg-green-500 rounded-full">
-                          <Icon
-                            icon="solar:check-circle-bold"
-                            className="w-5 h-5 text-white"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                      question.correct_answer === 0
-                        ? "border-green-500 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 shadow-md"
-                        : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        B
-                      </span>
-                      <span
-                        className={`text-lg ${
-                          question.correct_answer === 0
-                            ? "font-bold text-green-800 dark:text-green-200"
-                            : "text-gray-700 dark:text-gray-300"
-                        }`}
-                      >
-                        True
-                      </span>
-                      {question.correct_answer === 0 && (
-                        <div className="mr-4 p-2 bg-green-500 rounded-full">
-                          <Icon
-                            icon="solar:check-circle-bold"
-                            className="w-5 h-5 text-white"
-                          />
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
-              )}
 
-              {/* Short Answer */}
-              {getQuestionType(question) === "short_answer" && (
-                <div className="mb-6">
-                  <div className="p-6 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-2 border-green-500 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-500 rounded-full">
-                        <Icon
-                          icon="solar:check-circle-bold"
-                          className="w-6 h-6 text-white"
+                {/* Edit Mode */}
+                {isEditing ? (
+                  <div className="space-y-6">
+                    {/* Options Editing */}
+                    {(editQuestionData.question_type === "multiple_choice" ||
+                      editQuestionData.question_type === "true_false") && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-gray-700 dark:text-gray-300">
+                            الخيارات:
+                          </h4>
+                          {editQuestionData.question_type ===
+                            "multiple_choice" && (
+                            <button
+                              onClick={addOption}
+                              className="flex items-center gap-2 px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors"
+                            >
+                              <Icon
+                                icon="solar:add-circle-bold"
+                                className="w-4 h-4"
+                              />
+                              إضافة خيار
+                            </button>
+                          )}
+                        </div>
+
+                        {editQuestionData.options.map((option, optionIndex) => (
+                          <div
+                            key={optionIndex}
+                            className="flex items-center gap-3"
+                          >
+                            <input
+                              type="radio"
+                              name="correct_answer"
+                              checked={
+                                editQuestionData.correct_answer === optionIndex
+                              }
+                              onChange={() =>
+                                setEditQuestionData((prev) => ({
+                                  ...prev,
+                                  correct_answer: optionIndex,
+                                }))
+                              }
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            <input
+                              type="text"
+                              value={option}
+                              onChange={(e) =>
+                                updateOption(optionIndex, e.target.value)
+                              }
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                              placeholder={`الخيار ${optionIndex + 1}`}
+                            />
+                            {editQuestionData.options.length > 2 && (
+                              <button
+                                onClick={() => removeOption(optionIndex)}
+                                className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                              >
+                                <Icon
+                                  icon="solar:trash-bin-minimalistic-bold"
+                                  className="w-4 h-4"
+                                />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Short Answer Editing */}
+                    {editQuestionData.question_type === "short_answer" && (
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-gray-700 dark:text-gray-300">
+                          الإجابة الصحيحة:
+                        </h4>
+                        <input
+                          type="text"
+                          value={
+                            editQuestionData.options[
+                              editQuestionData.correct_answer
+                            ] || ""
+                          }
+                          onChange={(e) => {
+                            const newOptions = [...editQuestionData.options];
+                            newOptions[editQuestionData.correct_answer] =
+                              e.target.value;
+                            setEditQuestionData((prev) => ({
+                              ...prev,
+                              options: newOptions,
+                            }));
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                          placeholder="الإجابة الصحيحة"
+                        />
+                      </div>
+                    )}
+
+                    {/* Explanations Editing */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          الشرح بالعربية
+                        </label>
+                        <textarea
+                          value={editQuestionData.explanation_ar}
+                          onChange={(e) =>
+                            setEditQuestionData((prev) => ({
+                              ...prev,
+                              explanation_ar: e.target.value,
+                            }))
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 resize-none"
+                          placeholder="الشرح باللغة العربية..."
                         />
                       </div>
                       <div>
-                        <p className="font-bold text-green-800 dark:text-green-200 text-lg">
-                          الإجابة الصحيحة
-                        </p>
-                        <p className="text-green-700 dark:text-green-300 text-lg font-semibold">
-                          {Array.isArray(question.options) &&
-                          question.options.length > 0
-                            ? question.options[question.correct_answer] ||
-                              "غير محدد"
-                            : "غير محدد"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Explanations */}
-              {(question.explanation_en || question.explanation_ar) && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg">
-                        <Icon
-                          icon="solar:info-circle-bold"
-                          className="w-6 h-6 text-blue-500"
-                        />
-                      </div>
-                      <h4 className="font-bold text-gray-900 dark:text-white text-lg">
-                        الشرح والتوضيح
-                      </h4>
-                    </div>
-
-                    {/* Language Toggle Button */}
-                    {question.explanation_en &&
-                      question.explanation_ar &&
-                      question.explanation_en !== question.explanation_ar && (
-                        <button
-                          onClick={() =>
-                            setExplanationLanguages((prev) => ({
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          الشرح بالإنجليزية
+                        </label>
+                        <textarea
+                          value={editQuestionData.explanation_en}
+                          onChange={(e) =>
+                            setEditQuestionData((prev) => ({
                               ...prev,
-                              [indexOfFirstQuestion + index]:
-                                !prev[indexOfFirstQuestion + index],
+                              explanation_en: e.target.value,
                             }))
                           }
-                          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg text-sm"
-                        >
-                          <Icon
-                            icon={
-                              explanationLanguages[indexOfFirstQuestion + index]
-                                ? "solar:global-bold"
-                                : "solar:chat-square-bold"
-                            }
-                            className="w-4 h-4"
-                          />
-                          <span>
-                            {explanationLanguages[indexOfFirstQuestion + index]
-                              ? "English"
-                              : "العربية"}
-                          </span>
-                        </button>
-                      )}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 resize-none"
+                          placeholder="Explanation in English..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Edit Actions */}
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <button
+                        onClick={cancelEditQuestion}
+                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        إلغاء
+                      </button>
+                      <button
+                        onClick={() => handleEditQuestion(globalIndex)}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                      >
+                        <Icon
+                          icon="solar:check-circle-bold"
+                          className="w-5 h-5"
+                        />
+                        حفظ التغييرات
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Show selected language explanation */}
-                  {explanationLanguages[indexOfFirstQuestion + index]
-                    ? question.explanation_en && (
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
-                          <p className="text-blue-800 dark:text-blue-200 text-lg leading-relaxed">
-                            {question.explanation_en}
-                          </p>
-                        </div>
-                      )
-                    : question.explanation_ar && (
-                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                          <p className="text-green-800 dark:text-green-200 text-lg leading-relaxed">
-                            {question.explanation_ar}
-                          </p>
+                ) : (
+                  /* View Mode */
+                  <>
+                    {/* Options for multiple choice */}
+                    {getQuestionType(question) === "multiple_choice" &&
+                      Array.isArray(question.options) &&
+                      question.options.length > 0 && (
+                        <div className="space-y-4 mb-6">
+                          {question.options.map((option, optionIndex) => (
+                            <div
+                              key={optionIndex}
+                              className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                                optionIndex === question.correct_answer
+                                  ? "border-green-500 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 shadow-md"
+                                  : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                              }`}
+                            >
+                              <div className="flex items-center">
+                                <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  {String.fromCharCode(65 + optionIndex)}
+                                </span>
+                                <span
+                                  className={`text-lg ${
+                                    optionIndex === question.correct_answer
+                                      ? "font-bold text-green-800 dark:text-green-200"
+                                      : "text-gray-700 dark:text-gray-300"
+                                  }`}
+                                >
+                                  {option}
+                                </span>
+                                {optionIndex === question.correct_answer && (
+                                  <div className="mr-4 p-2 bg-green-500 rounded-full">
+                                    <Icon
+                                      icon="solar:check-circle-bold"
+                                      className="w-5 h-5 text-white"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
 
-                  {/* Fallback: show available explanation if preferred language not available */}
-                  {explanationLanguages[indexOfFirstQuestion + index] &&
-                    !question.explanation_en &&
-                    question.explanation_ar && (
-                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                        <p className="text-green-800 dark:text-green-200 text-lg leading-relaxed">
-                          {question.explanation_ar}
-                        </p>
+                    {/* True/False */}
+                    {getQuestionType(question) === "true_false" && (
+                      <div className="space-y-4 mb-6">
+                        <div
+                          className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                            question.correct_answer === 1
+                              ? "border-green-500 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 shadow-md"
+                              : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                              A
+                            </span>
+                            <span
+                              className={`text-lg ${
+                                question.correct_answer === 1
+                                  ? "font-bold text-green-800 dark:text-green-200"
+                                  : "text-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              False
+                            </span>
+                            {question.correct_answer === 1 && (
+                              <div className="mr-4 p-2 bg-green-500 rounded-full">
+                                <Icon
+                                  icon="solar:check-circle-bold"
+                                  className="w-5 h-5 text-white"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                            question.correct_answer === 0
+                              ? "border-green-500 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 shadow-md"
+                              : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <span className="font-bold text-lg mr-4 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                              B
+                            </span>
+                            <span
+                              className={`text-lg ${
+                                question.correct_answer === 0
+                                  ? "font-bold text-green-800 dark:text-green-200"
+                                  : "text-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              True
+                            </span>
+                            {question.correct_answer === 0 && (
+                              <div className="mr-4 p-2 bg-green-500 rounded-full">
+                                <Icon
+                                  icon="solar:check-circle-bold"
+                                  className="w-5 h-5 text-white"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                  {!explanationLanguages[indexOfFirstQuestion + index] &&
-                    !question.explanation_ar &&
-                    question.explanation_en && (
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
-                        <p className="text-blue-800 dark:text-blue-200 text-lg leading-relaxed">
-                          {question.explanation_en}
-                        </p>
+                    {/* Short Answer */}
+                    {getQuestionType(question) === "short_answer" && (
+                      <div className="mb-6">
+                        <div className="p-6 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-2 border-green-500 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-500 rounded-full">
+                              <Icon
+                                icon="solar:check-circle-bold"
+                                className="w-6 h-6 text-white"
+                              />
+                            </div>
+                            <div>
+                              <p className="font-bold text-green-800 dark:text-green-200 text-lg">
+                                الإجابة الصحيحة
+                              </p>
+                              <p className="text-green-700 dark:text-green-300 text-lg font-semibold">
+                                {Array.isArray(question.options) &&
+                                question.options.length > 0
+                                  ? question.options[question.correct_answer] ||
+                                    "غير محدد"
+                                  : "غير محدد"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
-                </div>
-              )}
-            </div>
-          ))}
+
+                    {/* Explanations */}
+                    {(question.explanation_en || question.explanation_ar) && (
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg">
+                              <Icon
+                                icon="solar:info-circle-bold"
+                                className="w-6 h-6 text-blue-500"
+                              />
+                            </div>
+                            <h4 className="font-bold text-gray-900 dark:text-white text-lg">
+                              الشرح والتوضيح
+                            </h4>
+                          </div>
+
+                          {/* Language Toggle Button */}
+                          {question.explanation_en &&
+                            question.explanation_ar &&
+                            question.explanation_en !==
+                              question.explanation_ar && (
+                              <button
+                                onClick={() =>
+                                  setExplanationLanguages((prev) => ({
+                                    ...prev,
+                                    [globalIndex]: !prev[globalIndex],
+                                  }))
+                                }
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg text-sm"
+                              >
+                                <Icon
+                                  icon={
+                                    explanationLanguages[globalIndex]
+                                      ? "solar:global-bold"
+                                      : "solar:chat-square-bold"
+                                  }
+                                  className="w-4 h-4"
+                                />
+                                <span>
+                                  {explanationLanguages[globalIndex]
+                                    ? "English"
+                                    : "العربية"}
+                                </span>
+                              </button>
+                            )}
+                        </div>
+
+                        {/* Show selected language explanation */}
+                        {explanationLanguages[globalIndex]
+                          ? question.explanation_en && (
+                              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                                <p className="text-blue-800 dark:text-blue-200 text-lg leading-relaxed">
+                                  {question.explanation_en}
+                                </p>
+                              </div>
+                            )
+                          : question.explanation_ar && (
+                              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
+                                <p className="text-green-800 dark:text-green-200 text-lg leading-relaxed">
+                                  {question.explanation_ar}
+                                </p>
+                              </div>
+                            )}
+
+                        {/* Fallback: show available explanation if preferred language not available */}
+                        {explanationLanguages[globalIndex] &&
+                          !question.explanation_en &&
+                          question.explanation_ar && (
+                            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
+                              <p className="text-green-800 dark:text-green-200 text-lg leading-relaxed">
+                                {question.explanation_ar}
+                              </p>
+                            </div>
+                          )}
+
+                        {!explanationLanguages[globalIndex] &&
+                          !question.explanation_ar &&
+                          question.explanation_en && (
+                            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                              <p className="text-blue-800 dark:text-blue-200 text-lg leading-relaxed">
+                                {question.explanation_en}
+                              </p>
+                            </div>
+                          )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Pagination */}

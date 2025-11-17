@@ -698,11 +698,26 @@ const PracticeQuizPage = () => {
                         </div>
                       </div>
                       <Link
-                        href={`/practice-quiz/result/${quiz.id}`}
+                        href={
+                          quiz.is_completed
+                            ? `/practice-quiz/result/${quiz.id}`
+                            : `/practice-quiz/attempt/${quiz.id}`
+                        }
                         className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
                       >
-                        <Icon icon="solar:eye-bold" className="w-4 h-4" />
-                        <span className="text-sm font-medium">عرض النتيجة</span>
+                        <Icon
+                          icon={
+                            quiz.is_completed
+                              ? "solar:eye-bold"
+                              : "solar:play-bold"
+                          }
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm font-medium">
+                          {quiz.is_completed
+                            ? "عرض النتيجة"
+                            : "متابعة المحاولة"}
+                        </span>
                       </Link>
                     </div>
                   </div>

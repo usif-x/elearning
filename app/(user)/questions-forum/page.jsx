@@ -143,21 +143,35 @@ const QuestionsForumPage = () => {
             </div>
           )}
 
-          <div className="flex gap-3">
-            <Link
-              href={`/questions-forum/${set.id}/attempt`}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl text-center text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-            >
-              <Icon icon="solar:play-circle-bold" className="w-4 h-4" />
-              <span>
-                {set.user_has_pending_attempt ? "استكمال" : "بدء المحاولة"}
-              </span>
-            </Link>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-3">
+              <Link
+                href={`/questions-forum/${set.id}/attempt`}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl text-center text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <Icon icon="solar:play-circle-bold" className="w-4 h-4" />
+                <span>
+                  {set.user_has_pending_attempt ? "استكمال" : "بدء المحاولة"}
+                </span>
+              </Link>
+
+              {/* زر Show بالعربي وبنفس عرض Start */}
+              <Link
+                href={`/questions-forum/${set.id}`}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <Icon icon="mdi:eye" className="w-4 h-4" />
+                <span>عرض</span>
+              </Link>
+            </div>
+
+            {/* زر Participants تحت الزرين */}
             <Link
               href={`/questions-forum/${set.id}/participants`}
-              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               <Icon icon="solar:cup-bold" className="w-5 h-5" />
+              المشاركين
             </Link>
           </div>
         </div>

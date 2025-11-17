@@ -124,23 +124,6 @@ const MyCourses = () => {
                           />
                         </div>
                       )}
-                      {/* Progress Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                        <div className="flex items-center justify-between text-white text-sm mb-2">
-                          <span className="font-medium">التقدم</span>
-                          <span className="font-bold">
-                            {enrollment.progress_percentage}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-green-400 h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${enrollment.progress_percentage}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
                     </div>
 
                     {/* Course Content */}

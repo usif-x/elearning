@@ -12,6 +12,7 @@ const QuizQuestion = ({
   onPrevious,
   onNext,
   onSubmit,
+  onContinueLater,
   submitting,
   isLastQuestion,
 }) => {
@@ -33,18 +34,41 @@ const QuizQuestion = ({
           )}
           <button
             onClick={onToggleFlag}
-            className={`p-2 rounded-lg transition-all ${
-              flaggedQuestions.has(currentQuestionIndex)
-                ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:text-amber-500"
-            }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all border
+    ${
+      flaggedQuestions.has(currentQuestionIndex)
+        ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800 shadow-md"
+        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-amber-50 dark:hover:bg-amber-900/10 hover:text-amber-600 hover:border-amber-300 dark:hover:border-amber-700"
+    }
+  `}
             title={
               flaggedQuestions.has(currentQuestionIndex)
                 ? "إلغاء التعليم"
                 : "تعليم للمراجعة"
             }
           >
-            <Icon icon="solar:flag-bold" className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Icon
+              icon="solar:flag-bold"
+              className={`w-4 h-4 sm:w-5 sm:h-5 transition-all ${
+                flaggedQuestions.has(currentQuestionIndex)
+                  ? "text-amber-500"
+                  : "text-inherit"
+              }`}
+            />
+            {/* النص حسب حالة السؤال */}
+            <span className="text-sm font-medium">
+              {flaggedQuestions.has(currentQuestionIndex)
+                ? "معلّم"
+                : "تعليم للمراجعة"}
+            </span>
+          </button>
+          <button
+            onClick={onContinueLater}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all duration-200 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm whitespace-nowrap"
+            title="حفظ ومتابعة لاحقاً"
+          >
+            <Icon icon="solar:clock-circle-bold" className="w-4 h-4" />
+            <span>متابعة لاحقاً</span>
           </button>
           <button
             onClick={onSubmit}

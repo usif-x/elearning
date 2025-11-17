@@ -1,4 +1,10 @@
-import { deleteData, getData, patchData, postData } from "@/libs/axios";
+import {
+  deleteData,
+  getData,
+  patchData,
+  postData,
+  putData,
+} from "@/libs/axios";
 
 /**
  * Generate questions from a topic using AI
@@ -122,6 +128,10 @@ export const getPublicQuestionSets = async (params = {}) => {
   return await getData(endpoint, true);
 };
 
+export const getPublicQuestionSetDetail = async (questionSetId) => {
+  return await getData(`/user-questions/public/${questionSetId}`, true);
+};
+
 /**
  * Get participants/leaderboard for a question set
  * @param {number} questionSetId - Question set ID
@@ -200,4 +210,35 @@ export const getMyAttempts = async (params = {}) => {
  */
 export const getAttemptDetail = async (attemptId) => {
   return await getData(`/user-questions/attempts/${attemptId}`, true);
+};
+
+/**
+ * Edit a specific question in a question set
+ * @param {number} questionSetId - Question set ID
+ * @param {Object} data - Edit data
+ * @param {number} data.question_index - Index of the question to edit
+ * @param {Object} data.question_data - New question data
+ * @returns {Promise<Object>} Updated question set
+ */
+export const editQuestionInSet = async (questionSetId, data) => {
+  return await putData(
+    `/user-questions/${questionSetId}/edit-question`,
+    data,
+    true
+  );
+};
+
+/**
+ * Delete a specific question from a question set
+ * @param {number} questionSetId - Question set ID
+ * @param {Object} data - Delete data
+ * @param {number} data.question_index - Index of the question to delete
+ * @returns {Promise<Object>} Updated question set
+ */
+export const deleteQuestionFromSet = async (questionSetId, data) => {
+  return await deleteData(
+    `/user-questions/${questionSetId}/delete-question`,
+    data,
+    true
+  );
 };

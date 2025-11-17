@@ -8,6 +8,7 @@ const QuizNavigation = ({
   flaggedQuestions,
   showOnlyFlagged,
   setShowOnlyFlagged,
+  onToggleFlag,
   answeredCount,
   remainingCount,
 }) => {
@@ -34,9 +35,7 @@ const QuizNavigation = ({
           dir="rtl"
         >
           <Icon
-            icon={
-              showOnlyFlagged ? "solar:eye-bold" : "solar:filter-bold"
-            }
+            icon={showOnlyFlagged ? "solar:eye-bold" : "solar:filter-bold"}
             className="w-3 h-3 sm:w-3.5 sm:h-3.5"
           />
           {showOnlyFlagged ? "عرض الكل" : "المعلّمة فقط"}
@@ -53,9 +52,7 @@ const QuizNavigation = ({
             icon="solar:clipboard-list-bold"
             className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500"
           />
-          <span className="text-gray-600 dark:text-gray-400">
-            إجمالي:
-          </span>
+          <span className="text-gray-600 dark:text-gray-400">إجمالي:</span>
           <span className="font-bold text-gray-900 dark:text-white">
             {questions.length}
           </span>
@@ -65,9 +62,7 @@ const QuizNavigation = ({
             icon="solar:check-circle-bold"
             className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500"
           />
-          <span className="text-gray-600 dark:text-gray-400">
-            تم الإجابة:
-          </span>
+          <span className="text-gray-600 dark:text-gray-400">تم الإجابة:</span>
           <span className="font-bold text-green-600 dark:text-green-400">
             {answeredCount}
           </span>
@@ -77,9 +72,7 @@ const QuizNavigation = ({
             icon="solar:clock-circle-bold"
             className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500"
           />
-          <span className="text-gray-600 dark:text-gray-400">
-            المتبقية:
-          </span>
+          <span className="text-gray-600 dark:text-gray-400">المتبقية:</span>
           <span className="font-bold text-amber-600 dark:text-amber-400">
             {remainingCount}
           </span>
@@ -129,9 +122,7 @@ const QuizNavigation = ({
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-green-500 rounded shadow"></div>
-          <span className="text-gray-600 dark:text-gray-400">
-            تم الإجابة
-          </span>
+          <span className="text-gray-600 dark:text-gray-400">تم الإجابة</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -140,10 +131,7 @@ const QuizNavigation = ({
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Icon
-            icon="solar:flag-bold"
-            className="w-3 h-3 text-amber-500"
-          />
+          <Icon icon="solar:flag-bold" className="w-3 h-3 text-amber-500" />
           <span className="text-gray-600 dark:text-gray-400">
             معلّم للمراجعة
           </span>

@@ -17,6 +17,7 @@ import Swal from "sweetalert2";
 const PracticeQuizAttemptPage = () => {
   const { id: practiceQuizId } = useParams();
   const router = useRouter();
+  const storageKey = `practice_quiz_attempt_${practiceQuizId}`;
 
   const [quizData, setQuizData] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -47,6 +48,23 @@ const PracticeQuizAttemptPage = () => {
 
         setQuizData(data);
         setQuestions(data.questions || []);
+
+        // Check for saved data
+        const savedData = localStorage.getItem(storageKey);
+        if (savedData) {
+          try {
+            const {
+              answers: savedAnswers,
+              timeElapsed: savedTime,
+              flagged: savedFlagged,
+            } = JSON.parse(savedData);
+            setAnswers(savedAnswers);
+            setTimeElapsed(savedTime);
+            setFlaggedQuestions(new Set(savedFlagged));
+          } catch (error) {
+            console.error("Error parsing saved data:", error);
+          }
+        }
       } catch (error) {
         console.error("Error fetching quiz:", error);
         toast.error("حدث خطأ أثناء تحميل الاختبار");
@@ -142,12 +160,39 @@ const PracticeQuizAttemptPage = () => {
       await submitPracticeQuiz(practiceQuizId, submissionData);
 
       toast.success("تم تسليم الاختبار بنجاح!");
+      // Remove saved data
+      localStorage.removeItem(storageKey);
       router.push(`/practice-quiz/result/${practiceQuizId}`);
     } catch (error) {
       console.error("Error submitting quiz:", error);
       toast.error("حدث خطأ أثناء تسليم الاختبار");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleContinueLater = async () => {
+    const result = await Swal.fire({
+      title: "متابعة لاحقاً",
+      text: "هل أنت متأكد من رغبتك في حفظ التقدم والمتابعة لاحقاً؟ يمكنك استئناف الاختبار من حيث توقفت.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "نعم، احفظ وتابع لاحقاً",
+      cancelButtonText: "إلغاء",
+      confirmButtonColor: "#f97316",
+      cancelButtonColor: "#6b7280",
+    });
+
+    if (result.isConfirmed) {
+      const dataToSave = {
+        answers,
+        timeElapsed,
+        flagged: Array.from(flaggedQuestions),
+      };
+
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+      toast.success("تم حفظ التقدم!");
+      router.push("/practice-quiz");
     }
   };
 
@@ -237,6 +282,7 @@ const PracticeQuizAttemptPage = () => {
               onPrevious={handlePrevious}
               onNext={handleNext}
               onSubmit={handleSubmit}
+              onContinueLater={() => handleContinueLater()}
               submitting={submitting}
               isLastQuestion={currentQuestionIndex === questions.length - 1}
             />

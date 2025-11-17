@@ -11,6 +11,7 @@ import {
 import { Icon } from "@iconify/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import CourseContentSection from "../components/CourseContentSection";
 import QuizBreadcrumb from "../components/QuizBreadcrumb";
@@ -308,6 +309,28 @@ const QuizAttemptPage = () => {
     }
   };
 
+  const handleContinueLater = async () => {
+    const result = await Swal.fire({
+      title: "متابعة لاحقاً",
+      text: "هل أنت متأكد من رغبتك في حفظ التقدم والمتابعة لاحقاً؟ يمكنك استئناف الاختبار من حيث توقفت.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "نعم، احفظ وتابع لاحقاً",
+      cancelButtonText: "إلغاء",
+      confirmButtonColor: "#f97316",
+      cancelButtonColor: "#6b7280",
+    });
+
+    if (result.isConfirmed) {
+      // Data is already saved to localStorage via useEffect
+      // Just navigate back to the content page
+      toast.success("تم حفظ الأسئلة!");
+      router.push(
+        `/courses/${courseId}/lecture/${lectureId}/content/${contentId}`
+      );
+    }
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -411,6 +434,7 @@ const QuizAttemptPage = () => {
                 )
               }
               onSubmit={() => handleSubmit(false)}
+              onContinueLater={() => handleContinueLater()}
               submitting={submitting}
               isLastQuestion={currentQuestionIndex === questions.length - 1}
             />

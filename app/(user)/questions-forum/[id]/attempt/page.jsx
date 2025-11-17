@@ -19,6 +19,7 @@ const QuestionAttemptPage = () => {
   const params = useParams();
   const router = useRouter();
   const questionSetId = params.id;
+  const storageKey = `users_questions_attempt_${questionSetId}`;
 
   const [attempt, setAttempt] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,23 @@ const QuestionAttemptPage = () => {
         initialAnswers[index] = null;
       });
       setAnswers(initialAnswers);
+
+      // Check for saved data
+      const savedData = localStorage.getItem(storageKey);
+      if (savedData) {
+        try {
+          const {
+            answers: savedAnswers,
+            timeElapsed: savedTime,
+            flagged: savedFlagged,
+          } = JSON.parse(savedData);
+          setAnswers(savedAnswers);
+          setTimeElapsed(savedTime);
+          setFlaggedQuestions(new Set(savedFlagged));
+        } catch (error) {
+          console.error("Error parsing saved data:", error);
+        }
+      }
     } catch (error) {
       console.error("Error starting attempt:", error);
       toast.error("حدث خطأ أثناء بدء المحاولة");
@@ -116,6 +134,8 @@ const QuestionAttemptPage = () => {
       );
       setShowResults(true);
       toast.success("تم إرسال الإجابات بنجاح!");
+      // Remove saved data
+      localStorage.removeItem(storageKey);
       // Redirect to results page after a short delay
       setTimeout(() => {
         router.push(`/questions-forum/attempts/${result.id}`);
@@ -125,6 +145,31 @@ const QuestionAttemptPage = () => {
       toast.error("حدث خطأ أثناء إرسال الإجابات");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleContinueLater = async () => {
+    const result = await Swal.fire({
+      title: "متابعة لاحقاً",
+      text: "هل أنت متأكد من رغبتك في حفظ التقدم والمتابعة لاحقاً؟ يمكنك استئناف الاختبار من حيث توقفت.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "نعم، احفظ وتابع لاحقاً",
+      cancelButtonText: "إلغاء",
+      confirmButtonColor: "#f97316",
+      cancelButtonColor: "#6b7280",
+    });
+
+    if (result.isConfirmed) {
+      const dataToSave = {
+        answers,
+        timeElapsed,
+        flagged: Array.from(flaggedQuestions),
+      };
+
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+      toast.success("تم حفظ التقدم!");
+      router.push("/questions-forum");
     }
   };
 
@@ -229,6 +274,7 @@ const QuestionAttemptPage = () => {
                 )
               }
               onSubmit={() => handleSubmit()}
+              onContinueLater={() => handleContinueLater()}
               submitting={submitting}
               isLastQuestion={
                 currentQuestionIndex === attempt.questions.length - 1
