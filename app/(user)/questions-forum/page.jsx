@@ -166,13 +166,27 @@ const QuestionsForumPage = () => {
             </div>
 
             {/* زر Participants تحت الزرين */}
-            <Link
-              href={`/questions-forum/${set.id}/participants`}
-              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-            >
-              <Icon icon="solar:cup-bold" className="w-5 h-5" />
-              المشاركين
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href={`/questions-forum/${set.id}/participants`}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <Icon icon="solar:cup-bold" className="w-5 h-5" />
+                المشاركين
+              </Link>
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/questions-forum/${set.id}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    alert("تم نسخ الرابط!");
+                  });
+                }}
+                className="flex-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-800/50 text-green-700 dark:text-green-300 p-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <Icon icon="solar:share-bold" className="w-5 h-5" />
+                مشاركة
+              </button>
+            </div>
           </div>
         </div>
       ))}

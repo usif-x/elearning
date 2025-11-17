@@ -611,13 +611,28 @@ const QuestionSetDetailPage = () => {
               <span>بدء المحاولة</span>
             </button>
             {questionSet.is_public ? (
-              <Link
-                href={`/questions-forum/${questionSetId}/participants`}
-                className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
-              >
-                <Icon icon="solar:cup-bold" className="w-6 h-6" />
-                <span>المشاركون</span>
-              </Link>
+              <>
+                <Link
+                  href={`/questions-forum/${questionSetId}/participants`}
+                  className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
+                >
+                  <Icon icon="solar:cup-bold" className="w-6 h-6" />
+                  <span>المشاركون</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/questions-forum/${questionSetId}`;
+                    navigator.clipboard.writeText(url).then(() => {
+                      // You could add a toast notification here
+                      alert("تم نسخ الرابط!");
+                    });
+                  }}
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
+                >
+                  <Icon icon="solar:share-bold" className="w-6 h-6" />
+                  <span>مشاركة</span>
+                </button>
+              </>
             ) : null}
           </div>
         </div>
