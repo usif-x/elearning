@@ -229,11 +229,11 @@ export default function TelegramRegisterPage() {
       await Swal.fire({
         icon: "success",
         title: "تم إنشاء الحساب بنجاح!",
-        text: "تم تسجيل دخولك تلقائيًا.",
+        text: "يرجي تسجيل الدخول للمتابعة.",
         confirmButtonText: "حسناً",
       });
 
-      router.push("/");
+      router.push("/login");
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(error.message || "فشل التسجيل. يرجى المحاولة مرة أخرى.");

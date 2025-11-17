@@ -157,7 +157,7 @@ export default function TelegramLoginPage() {
         token: loginResponse.access_token,
         refresh_token: loginResponse.refresh_token,
       });
-      router.push("/");
+      router.push("/dashboard");
       /* 
       
       {
