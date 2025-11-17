@@ -526,14 +526,6 @@ export default function TelegramLoginPage() {
                       className="w-6 h-6 text-white"
                     />
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">
-                      محتوى تعليمي مميز
-                    </p>
-                    <p className="text-blue-100 text-sm">
-                      مناهج شاملة وتفاعلية
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>

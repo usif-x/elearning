@@ -25,55 +25,15 @@ export default function TelegramRegisterPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
-    parentPhoneNumber: "",
-    government: "",
     gender: "",
-    level: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  // Government options for Egypt
-  const governments = [
-    { value: "cairo", label: "القاهرة" },
-    { value: "alexandria", label: "الإسكندرية" },
-    { value: "giza", label: "الجيزة" },
-    { value: "aswan", label: "أسوان" },
-    { value: "asyut", label: "أسيوط" },
-    { value: "beheira", label: "البحيرة" },
-    { value: "beni_suef", label: "بني سويف" },
-    { value: "dakahlia", label: "الدقهلية" },
-    { value: "damietta", label: "دمياط" },
-    { value: "fayyum", label: "الفيوم" },
-    { value: "gharbia", label: "الغربية" },
-    { value: "ismailia", label: "الإسماعيلية" },
-    { value: "kafr_el_sheikh", label: "كفر الشيخ" },
-    { value: "luxor", label: "الأقصر" },
-    { value: "matrouh", label: "مطروح" },
-    { value: "minya", label: "المنيا" },
-    { value: "monufia", label: "المنوفية" },
-    { value: "new_valley", label: "الوادي الجديد" },
-    { value: "north_sinai", label: "شمال سيناء" },
-    { value: "port_said", label: "بورسعيد" },
-    { value: "qalyubia", label: "القليوبية" },
-    { value: "qena", label: "قنا" },
-    { value: "red_sea", label: "البحر الأحمر" },
-    { value: "sharqia", label: "الشرقية" },
-    { value: "sohag", label: "سوهاج" },
-    { value: "south_sinai", label: "جنوب سيناء" },
-    { value: "suez", label: "السويس" },
-  ];
-
   const genderOptions = [
     { value: "male", label: "ذكر" },
     { value: "female", label: "أنثى" },
-  ];
-
-  const levelOptions = [
-    { value: "grade_1", label: "الصف الأول الثانوي" },
-    { value: "grade_2", label: "الصف الثاني الثانوي" },
-    { value: "grade_3", label: "الصف الثالث الثانوي" },
   ];
 
   // Load Telegram Login Widget script
@@ -190,24 +150,12 @@ export default function TelegramRegisterPage() {
         if (!validatePhoneNumber(formData.phoneNumber)) {
           newErrors.phoneNumber = "يرجى إدخال رقم هاتف صالح";
         }
-        if (!validatePhoneNumber(formData.parentPhoneNumber)) {
-          newErrors.parentPhoneNumber = "يرجى إدخال رقم هاتف ولي الأمر";
+        if (!formData.gender) {
+          newErrors.gender = "يرجى اختيار النوع";
         }
         break;
 
       case 3:
-        if (!formData.government) {
-          newErrors.government = "يرجى اختيار المحافظة";
-        }
-        if (!formData.gender) {
-          newErrors.gender = "يرجى اختيار النوع";
-        }
-        if (!formData.level) {
-          newErrors.level = "يرجى اختيار المرحلة الدراسية";
-        }
-        break;
-
-      case 4:
         if (!validateEmail(formData.email)) {
           newErrors.email = "يرجى إدخال بريد إلكتروني صالح";
         }
@@ -238,7 +186,7 @@ export default function TelegramRegisterPage() {
 
   // Handle final registration
   const handleRegister = async () => {
-    if (!validateStep(4)) return;
+    if (!validateStep(3)) return;
 
     setIsLoading(true);
 
@@ -248,10 +196,9 @@ export default function TelegramRegisterPage() {
         full_name: formData.fullName,
         email: formData.email,
         phone_number: formData.phoneNumber,
-        parent_phone_number: formData.parentPhoneNumber,
         password: formData.password,
         confirm_password: formData.confirmPassword,
-        // Note: government, gender, level are not in the backend schema
+        // Note: gender is not in the backend schema
         // but can be added to user profile later
       };
       const registerResponse = await postData(
@@ -281,10 +228,7 @@ export default function TelegramRegisterPage() {
       setFormData({
         fullName: "",
         phoneNumber: "",
-        parentPhoneNumber: "",
-        government: "",
         gender: "",
-        level: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -299,7 +243,7 @@ export default function TelegramRegisterPage() {
 
   // Progress indicator
   const getProgressWidth = () => {
-    return `${(step / 4) * 100}%`;
+    return `${(step / 3) * 100}%`;
   };
 
   return (
@@ -333,10 +277,10 @@ export default function TelegramRegisterPage() {
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    الخطوة {step} من 4
+                    الخطوة {step} من 3
                   </span>
                   <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                    {Math.round((step / 4) * 100)}%
+                    {Math.round((step / 3) * 100)}%
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -348,7 +292,7 @@ export default function TelegramRegisterPage() {
 
                 {/* Step Indicators */}
                 <div className="flex justify-between mt-3">
-                  {[1, 2, 3, 4].map((stepNum) => (
+                  {[1, 2, 3].map((stepNum) => (
                     <div key={stepNum} className="flex flex-col items-center">
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
@@ -369,8 +313,7 @@ export default function TelegramRegisterPage() {
                       <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {stepNum === 1 && "تليجرام"}
                         {stepNum === 2 && "شخصي"}
-                        {stepNum === 3 && "أكاديمي"}
-                        {stepNum === 4 && "أمان"}
+                        {stepNum === 3 && "أمان"}
                       </span>
                     </div>
                   ))}
@@ -445,63 +388,6 @@ export default function TelegramRegisterPage() {
                       type="tel"
                     />
 
-                    <Input
-                      icon="material-symbols:family-restroom"
-                      placeholder="رقم هاتف ولي الأمر (مثل: 01087654321)"
-                      value={formData.parentPhoneNumber}
-                      onChange={handleInputChange("parentPhoneNumber")}
-                      error={errors.parentPhoneNumber}
-                      dir="rtl"
-                      type="tel"
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handlePrevious}
-                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
-                    >
-                      رجوع
-                    </button>
-                    <button
-                      onClick={handleNext}
-                      className="flex-1 py-3 px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
-                    >
-                      التالي
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Location and Academic Info */}
-              {step === 3 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center">
-                      <Icon
-                        icon="material-symbols:school"
-                        className="w-6 h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      المعلومات الأكاديمية
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      اختر محافظتك ومستواك الدراسي والنوع
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Select
-                      icon="material-symbols:location-on"
-                      placeholder="اختر المحافظة"
-                      options={governments}
-                      value={formData.government}
-                      onChange={handleInputChange("government")}
-                      error={errors.government}
-                      dir="rtl"
-                    />
-
                     <Select
                       icon="material-symbols:person"
                       placeholder="اختر النوع"
@@ -511,26 +397,102 @@ export default function TelegramRegisterPage() {
                       error={errors.gender}
                       dir="rtl"
                     />
+                  </div>
 
-                    <Select
-                      icon="material-symbols:school"
-                      placeholder="اختر المرحلة الدراسية"
-                      options={levelOptions}
-                      value={formData.level}
-                      onChange={handleInputChange("level")}
-                      error={errors.level}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={handlePrevious}
+                      disabled={isLoading}
+                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      رجوع
+                    </button>
+                    <button
+                      onClick={handleRegister}
+                      disabled={isLoading}
+                      className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-medium"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
+                          جاري التسجيل...
+                        </>
+                      ) : (
+                        <>
+                          <Icon
+                            icon="material-symbols:person-add"
+                            className="w-4 h-4 ml-2"
+                          />
+                          إنشاء الحساب
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Security Information */}
+              {step === 3 && (
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 mx-auto mb-3 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center">
+                      <Icon
+                        icon="material-symbols:security"
+                        className="w-6 h-6 text-white"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      معلومات الأمان
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      اختر بريد إلكتروني وكلمة مرور قوية
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Input
+                      icon="material-symbols:mail"
+                      placeholder="البريد الإلكتروني (مثل: ahmed@example.com)"
+                      value={formData.email}
+                      onChange={handleInputChange("email")}
+                      error={errors.email}
                       dir="rtl"
+                      type="email"
+                    />
+
+                    <Input
+                      icon="material-symbols:lock"
+                      placeholder="كلمة المرور (8 أحرف على الأقل)"
+                      value={formData.password}
+                      onChange={handleInputChange("password")}
+                      error={errors.password}
+                      dir="rtl"
+                      type="password"
+                    />
+
+                    <Input
+                      icon="material-symbols:lock-open"
+                      placeholder="تأكيد كلمة المرور"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange("confirmPassword")}
+                      error={errors.confirmPassword}
+                      dir="rtl"
+                      type="password"
                     />
                   </div>
 
                   {/* Show validation errors if any */}
-                  {(errors.government || errors.gender || errors.level) && (
+                  {(errors.email ||
+                    errors.password ||
+                    errors.confirmPassword) && (
                     <div className="text-red-500 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800">
                       <Icon
                         icon="material-symbols:error"
                         className="w-4 h-4 mx-auto mb-1"
                       />
-                      {errors.government || errors.gender || errors.level}
+                      {errors.email ||
+                        errors.password ||
+                        errors.confirmPassword}
                     </div>
                   )}
 
@@ -740,52 +702,6 @@ export default function TelegramRegisterPage() {
                 />
               </div>
               <h1 className="text-4xl font-bold mb-6">انضم إلى عائلتنا!</h1>
-
-              {/* Features */}
-              <div className="space-y-4 text-right">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <Icon
-                      icon="material-symbols:school"
-                      className="w-6 h-6 text-white"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">
-                      محتوى تعليمي متميز
-                    </p>
-                    <p className="text-green-100 text-sm">مناهج شاملة وحديثة</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <Icon
-                      icon="material-symbols:people"
-                      className="w-6 h-6 text-white"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">مجتمع تعليمي</p>
-                    <p className="text-green-100 text-sm">
-                      تفاعل مع الطلاب والمعلمين
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <Icon
-                      icon="material-symbols:verified"
-                      className="w-6 h-6 text-white"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">شهادات معتمدة</p>
-                    <p className="text-green-100 text-sm">
-                      احصل على شهادات معترف بها
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
