@@ -1,10 +1,7 @@
 "use client";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import {
-  getPublicQuestionSetDetail,
-  startQuestionAttempt,
-} from "@/services/QuestionsForum";
+import { getPublicQuestionSetDetail } from "@/services/QuestionsForum";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -42,9 +39,8 @@ const PublicQuestionSetPage = () => {
   const handleStartAttempt = async () => {
     setStartingAttempt(true);
     try {
-      const attempt = await startQuestionAttempt(questionSetId);
       toast.success("تم بدء المحاولة بنجاح!");
-      router.push(`/questions-forum/${attempt.id}/attempt`);
+      router.push(`/questions-forum/${questionSet.id}/attempt`);
     } catch (error) {
       console.error("Error starting attempt:", error);
       toast.error("حدث خطأ أثناء بدء المحاولة");
@@ -57,7 +53,7 @@ const PublicQuestionSetPage = () => {
     setResumingAttempt(true);
     try {
       // Navigate directly to the pending attempt
-      router.push(`/questions-forum/${questionSet.pending_attempt_id}/attempt`);
+      router.push(`/questions-forum/${questionSet.id}/attempt`);
     } catch (error) {
       console.error("Error resuming attempt:", error);
       toast.error("حدث خطأ أثناء استئناف المحاولة");
