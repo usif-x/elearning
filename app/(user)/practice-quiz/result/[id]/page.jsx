@@ -38,7 +38,7 @@ const PracticeQuizResultPage = () => {
       case "correct":
         return questions.filter((q) => q.is_correct);
       case "wrong":
-        return questions.filter((q) => !q.is_correct && q.user_answer !== null);
+        return questions.filter((q) => !q.is_correct);
       case "unanswered":
         return questions.filter((q) => q.user_answer === null);
       default:
