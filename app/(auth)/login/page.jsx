@@ -35,7 +35,7 @@ export default function TelegramLoginPage() {
       script.id = "telegram-login-script";
       script.async = true;
       script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", "ELearningApplicationBot");
+      script.setAttribute("data-telegram-login", "DahhehetMedicalBot");
       script.setAttribute("data-size", "large");
       script.setAttribute("data-onauth", "onTelegramAuth(user)");
       script.setAttribute("data-request-access", "write");
@@ -466,7 +466,7 @@ export default function TelegramLoginPage() {
                   </Link>
 
                   <Link
-                    href="/auth/forgot-password"
+                    href="/forgot-password"
                     className="inline-flex items-center justify-center gap-2 bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700 px-4 py-2 rounded-lg text-red-600 dark:text-red-400 font-medium transition-colors text-sm"
                   >
                     <Icon

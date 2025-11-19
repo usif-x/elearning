@@ -95,7 +95,7 @@ const ForgotPasswordPage = () => {
       toast.success("تم إعادة تعيين كلمة المرور بنجاح!");
       // Redirect to login page after success
       setTimeout(() => {
-        window.location.href = "/auth/login";
+        window.location.href = "/login";
       }, 2000);
     } catch (error) {
       console.error("Error resetting password:", error);
@@ -344,7 +344,7 @@ const ForgotPasswordPage = () => {
         {/* Back to Login */}
         <div className="text-center mt-6">
           <Link
-            href="/auth/login"
+            href="/login"
             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center justify-center gap-2"
           >
             <Icon
