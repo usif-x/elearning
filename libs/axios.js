@@ -65,7 +65,7 @@ export const putData = async (endpoint, data, auth = false) => {
 };
 
 // ✅ DELETE
-export const deleteData = async (endpoint, data = {}, auth = false) => {
+export const deleteData = async (endpoint, data = {}, auth = true) => {
   try {
     const headers = auth ? getAuthHeaders() : {};
 

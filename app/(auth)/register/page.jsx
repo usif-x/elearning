@@ -32,8 +32,8 @@ export default function TelegramRegisterPage() {
   });
 
   const genderOptions = [
-    { value: "male", label: "ذكر" },
-    { value: "female", label: "أنثى" },
+    { value: "Male", label: "ذكر" },
+    { value: "Female", label: "أنثى" },
   ];
 
   // Load Telegram Login Widget script
@@ -43,7 +43,7 @@ export default function TelegramRegisterPage() {
       script.id = "telegram-login-script";
       script.async = true;
       script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", "DahehetHelwanBot");
+      script.setAttribute("data-telegram-login", "ELearningApplicationBot");
       script.setAttribute("data-size", "large");
       script.setAttribute("data-onauth", "onTelegramAuth(user)");
       script.setAttribute("data-request-access", "write");
@@ -201,7 +201,7 @@ export default function TelegramRegisterPage() {
         phone_number: formData.phoneNumber,
         password: formData.password,
         confirm_password: formData.confirmPassword,
-        gender: formData.gender,
+        sex: formData.gender,
       };
 
       const registerResponse = await postData(

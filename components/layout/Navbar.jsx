@@ -545,7 +545,7 @@ const Navbar = ({ children }) => {
     `}
           >
             <div
-              className="h-1 bg-blue-500 transition-all duration-300 ease-out"
+              className="h-1 bg-blue-500 transition-colors duration-300 ease-out"
               style={{ width: `${scrollProgress}%` }}
             />
           </div>

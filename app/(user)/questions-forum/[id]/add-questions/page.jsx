@@ -1,6 +1,5 @@
 "use client";
 
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { addQuestionsToSet } from "@/services/QuestionsForum";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
@@ -14,6 +13,96 @@ const AddQuestionsPage = () => {
   const questionSetId = params.id;
 
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState({
+    isLoading: false,
+    currentStep: "",
+    progress: 0,
+    currentQuestion: 0,
+    totalQuestions: 0,
+    estimatedTimeRemaining: 0,
+  });
+
+  const simulateProgress = (questionCount) => {
+    const steps = [
+      { text: "جاري تحليل المجموعة الحالية...", duration: 2000 },
+      { text: "إعداد الأسئلة الجديدة...", duration: 1500 },
+      { text: "توليد الأسئلة الإضافية...", duration: questionCount * 6000 }, // 6 seconds per question
+      { text: "دمج الأسئلة مع المجموعة...", duration: 2000 },
+      { text: "إنهاء العملية...", duration: 1000 },
+    ];
+
+    let currentStepIndex = 0;
+    let totalElapsed = 0;
+    let questionProgress = 0;
+
+    const updateProgress = () => {
+      if (currentStepIndex >= steps.length) {
+        setLoadingProgress({
+          isLoading: false,
+          currentStep: "",
+          progress: 100,
+          currentQuestion: questionCount,
+          totalQuestions: questionCount,
+          estimatedTimeRemaining: 0,
+        });
+        return;
+      }
+
+      const currentStep = steps[currentStepIndex];
+      const stepStartTime = Date.now();
+
+      setLoadingProgress({
+        isLoading: true,
+        currentStep: currentStep.text,
+        progress: Math.min(
+          (totalElapsed / (questionCount * 6000 + 6500)) * 100,
+          95
+        ),
+        currentQuestion: Math.min(questionProgress, questionCount),
+        totalQuestions: questionCount,
+        estimatedTimeRemaining: Math.max(
+          0,
+          questionCount * 6000 + 6500 - totalElapsed
+        ),
+      });
+
+      // If this is the question generation step, update question by question
+      if (currentStepIndex === 2) {
+        const questionInterval = setInterval(() => {
+          questionProgress++;
+          setLoadingProgress((prev) => ({
+            ...prev,
+            currentQuestion: Math.min(questionProgress, questionCount),
+            progress: Math.min(
+              ((totalElapsed + (Date.now() - stepStartTime)) /
+                (questionCount * 6000 + 6500)) *
+                100,
+              95
+            ),
+          }));
+
+          if (questionProgress >= questionCount) {
+            clearInterval(questionInterval);
+          }
+        }, 6000); // Update every 6 seconds per question
+
+        setTimeout(() => {
+          clearInterval(questionInterval);
+          currentStepIndex++;
+          totalElapsed += currentStep.duration;
+          updateProgress();
+        }, currentStep.duration);
+      } else {
+        setTimeout(() => {
+          currentStepIndex++;
+          totalElapsed += currentStep.duration;
+          updateProgress();
+        }, currentStep.duration);
+      }
+    };
+
+    updateProgress();
+  };
   const [formData, setFormData] = useState({
     count: 5,
     notes: "",
@@ -27,7 +116,9 @@ const AddQuestionsPage = () => {
       return;
     }
 
-    setLoading(true);
+    // Start progress simulation
+    simulateProgress(formData.count);
+
     try {
       await addQuestionsToSet(questionSetId, formData);
       toast.success("تم إضافة الأسئلة بنجاح!");
@@ -35,8 +126,14 @@ const AddQuestionsPage = () => {
     } catch (error) {
       console.error("Error adding questions:", error);
       toast.error("حدث خطأ أثناء إضافة الأسئلة");
-    } finally {
-      setLoading(false);
+      setLoadingProgress({
+        isLoading: false,
+        currentStep: "",
+        progress: 0,
+        currentQuestion: 0,
+        totalQuestions: 0,
+        estimatedTimeRemaining: 0,
+      });
     }
   };
 
@@ -63,14 +160,92 @@ const AddQuestionsPage = () => {
         <div className="mb-6">
           <Link
             href={`/questions-forum/my/${questionSetId}`}
-            className="inline-flex items-center gap-3 px-4 py-3 text-blue-600 hover:text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-800 rounded-xl hover:shadow-md transition-all duration-200 border border-blue-100 dark:border-gray-700"
+            className={`inline-flex items-center gap-3 px-4 py-3 text-blue-600 hover:text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-800 rounded-xl hover:shadow-md transition-all duration-200 border border-blue-100 dark:border-gray-700 ${
+              loadingProgress.isLoading ? "pointer-events-none opacity-50" : ""
+            }`}
           >
             <Icon icon="solar:alt-arrow-right-bold" className="text-lg" />
             <span className="font-medium">العودة للتفاصيل</span>
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Loading Progress */}
+        {loadingProgress.isLoading && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700 mb-8">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-6">
+                <Icon
+                  icon="solar:add-circle-bold"
+                  className="w-8 h-8 text-white animate-pulse"
+                />
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                جاري إضافة الأسئلة...
+              </h3>
+
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                {loadingProgress.currentStep}
+              </p>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 h-4 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${loadingProgress.progress}%` }}
+                ></div>
+              </div>
+
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <span>{Math.round(loadingProgress.progress)}%</span>
+                <span>
+                  {loadingProgress.estimatedTimeRemaining > 0
+                    ? `${Math.ceil(
+                        loadingProgress.estimatedTimeRemaining / 1000
+                      )} ثانية متبقية`
+                    : "جاري الإنهاء..."}
+                </span>
+              </div>
+
+              {/* Question Progress */}
+              {loadingProgress.totalQuestions > 0 && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      الأسئلة المُضافة:
+                    </span>
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                      {loadingProgress.currentQuestion} /{" "}
+                      {loadingProgress.totalQuestions}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${
+                          (loadingProgress.currentQuestion /
+                            loadingProgress.totalQuestions) *
+                          100
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <Icon icon="solar:clock-circle-bold" className="w-4 h-4" />
+                <span>يرجى الانتظار، هذه العملية قد تستغرق بعض الوقت</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className={`space-y-6 ${loadingProgress.isLoading ? "hidden" : ""}`}
+        >
           {/* Main Form Card */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
@@ -213,17 +388,24 @@ const AddQuestionsPage = () => {
           <div className="flex justify-end gap-4 pt-6">
             <Link
               href={`/questions-forum/my/${questionSetId}`}
-              className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 font-semibold hover:shadow-md"
+              className={`px-8 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 font-semibold hover:shadow-md ${
+                loadingProgress.isLoading
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }`}
             >
               إلغاء
             </Link>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loadingProgress.isLoading}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              {loading ? (
-                <LoadingSpinner />
+              {loadingProgress.isLoading ? (
+                <Icon
+                  icon="solar:loading-bold"
+                  className="text-xl animate-spin"
+                />
               ) : (
                 <Icon icon="solar:add-circle-bold" className="text-xl" />
               )}

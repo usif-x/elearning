@@ -13,14 +13,9 @@ export default function Home() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/profile");
     }
   }, [isAuthenticated, router]);
-
-  if (isAuthenticated) {
-    // Optionally render nothing while redirecting
-    return null;
-  }
 
   return (
     <>

@@ -106,7 +106,7 @@ export const updateMyQuestionSet = async (questionSetId, data) => {
  * @returns {Promise<void>}
  */
 export const deleteMyQuestionSet = async (questionSetId) => {
-  return await deleteData(`/user-questions/my/${questionSetId}`, true);
+  return await deleteData(`/user-questions/my/${questionSetId}`);
 };
 
 /**
@@ -238,7 +238,6 @@ export const editQuestionInSet = async (questionSetId, data) => {
 export const deleteQuestionFromSet = async (questionSetId, data) => {
   return await deleteData(
     `/user-questions/${questionSetId}/delete-question`,
-    data,
-    true
+    data
   );
 };

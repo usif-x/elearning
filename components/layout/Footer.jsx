@@ -106,7 +106,7 @@ const Footer = ({ isSidebarCollapsed }) => {
                   href={"https://yousseif.xyz"}
                   className="text-gray-700 dark:text-gray-300 font-medium bg-gray-200 smooth dark:bg-gray-800 p-2 px-4 rounded-md hover:bg-opacity-60"
                 >
-                  يوسف محمد
+                  يوسف
                 </Link>
               </div>
             </div>

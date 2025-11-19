@@ -13,7 +13,7 @@ export default function AdminDashboard() {
     if (!isAuthenticated) {
       router.push("/admin/login");
     } else if (userType !== "admin") {
-      router.push("/dashboard");
+      router.push("/profile");
     }
   }, [isAuthenticated, userType, router]);
 
