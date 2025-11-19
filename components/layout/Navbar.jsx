@@ -407,22 +407,6 @@ const Navbar = ({ children }) => {
                       ) : (
                         <>
                           <Link
-                            href="/dashboard"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
-                              pathname === "/dashboard"
-                                ? "bg-blue-500 text-white"
-                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            }`}
-                          >
-                            <Icon
-                              icon="solar:home-smile-bold"
-                              className="w-5 h-5"
-                            />
-                            <span>الصفحة الرئيسية</span>
-                          </Link>
-
-                          <Link
                             href="/profile"
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -700,24 +684,6 @@ const Navbar = ({ children }) => {
               </Link>
             ) : (
               <>
-                {/* Home Page */}
-                <Link
-                  href="/dashboard"
-                  className={`flex items-center w-full p-3 rounded-xl smooth ${
-                    !shouldShowExpanded ? "justify-center" : "gap-3"
-                  } ${
-                    pathname === "/dashboard"
-                      ? "bg-blue-500 text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                  title={!shouldShowExpanded ? "الصفحة الرئيسية" : ""}
-                >
-                  <Icon icon="solar:home-smile-bold" className="w-6 h-6" />
-                  {shouldShowExpanded && (
-                    <span className="font-medium">الصفحة الرئيسية</span>
-                  )}
-                </Link>
-
                 {/* My Profile */}
                 <Link
                   href="/profile"

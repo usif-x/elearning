@@ -49,7 +49,7 @@ const ProfileOverviewTab = ({ user }) => {
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <Icon icon="solar:quiz-bold" className="w-10 h-10" />
+            <Icon icon="ic:twotone-quiz" className="w-10 h-10" />
             <span className="text-sm opacity-90">الاختبارات المكتملة</span>
           </div>
           <p className="text-2xl font-bold">0</p>
