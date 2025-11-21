@@ -270,6 +270,21 @@ const ParticipantsPage = () => {
                     <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
                       {participant.best_score}%
                     </div>
+                    {participant.best_time && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                        <Icon
+                          icon="solar:clock-circle-bold"
+                          className="w-4 h-4"
+                        />
+                        <span>
+                          أسرع وقت: {Math.floor(participant.best_time / 60)}:
+                          {(participant.best_time % 60)
+                            .toString()
+                            .padStart(2, "0")}{" "}
+                          دقيقة
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                       <Icon
                         icon="solar:clock-circle-bold"
