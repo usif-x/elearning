@@ -120,3 +120,38 @@ export const submitQuizAttempt = async (
     throw error;
   }
 };
+
+export const searchCourses = async (
+  query,
+  page = 1,
+  size = 20,
+  categoryId = null,
+  sellable = null
+) => {
+  try {
+    let url = `courses/search?q=${encodeURIComponent(
+      query
+    )}&page=${page}&size=${size}`;
+    if (categoryId) url += `&category_id=${categoryId}`;
+    if (sellable !== null) url += `&sellable=${sellable}`;
+
+    const response = await getData(url, false); // false = no auth required for search
+    return response;
+  } catch (error) {
+    console.error("Error searching courses:", error);
+    throw error;
+  }
+};
+
+export const getSearchAutocomplete = async (query, limit = 10) => {
+  try {
+    const response = await getData(
+      `courses/autocomplete?q=${encodeURIComponent(query)}&limit=${limit}`,
+      false
+    );
+    return response.suggestions || [];
+  } catch (error) {
+    console.error("Error fetching autocomplete suggestions:", error);
+    throw error;
+  }
+};

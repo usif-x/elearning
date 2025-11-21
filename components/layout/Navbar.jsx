@@ -4,7 +4,7 @@ import { useAuthStore } from "@/hooks/useAuth";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react"; // Import useRef and useEffect
 import Button from "../ui/Button";
 import DarkModeSwitcher from "../ui/DarkModeSwitcher";
@@ -22,11 +22,17 @@ const Navbar = ({ children }) => {
 
   const { isAuthenticated, user, userType } = useAuthStore();
   const pathname = usePathname(); // Get current route
+  const router = useRouter(); // For navigation
 
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
+    if (!isSearchOpen) {
+      // Clear search when opening
+      setSearchQuery("");
+    }
   };
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleSidebarCollapse = () => {
@@ -89,6 +95,19 @@ const Navbar = ({ children }) => {
       setIsHovering(false);
       setIsCoursesDropdownOpen(false);
       setIsProfileDropdownOpen(false);
+    }
+  };
+
+  // Handle search submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to search page with query
+      router.push(
+        `/courses/search?q=${encodeURIComponent(searchQuery.trim())}`
+      );
+      setIsSearchOpen(false);
+      setSearchQuery("");
     }
   };
 
@@ -866,7 +885,7 @@ const Navbar = ({ children }) => {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                🔎 البحث
+                🔎 البحث في الكورسات
               </h2>
               <button
                 onClick={toggleSearch}
@@ -878,16 +897,31 @@ const Navbar = ({ children }) => {
                 />
               </button>
             </div>
-            <Input
-              type="text"
-              placeholder="ابحث في كورسات الموقع"
-              icon={"solar:magnifer-bold"}
-              className="w-full"
-              dir="rtl"
-            />
-            <div className="mt-4 flex justify-center">
-              <Button onClick={() => console.log("بحث")} text="بحث" />
-            </div>
+            <form onSubmit={handleSearchSubmit}>
+              <Input
+                type="text"
+                placeholder="ابحث عن كورسات الطب، البرمجة، إلخ..."
+                icon={"solar:magnifer-bold"}
+                className="w-full"
+                dir="rtl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <div className="mt-4 flex justify-center gap-3">
+                <Button
+                  type="submit"
+                  text="بحث"
+                  disabled={!searchQuery.trim()}
+                />
+                <Button
+                  type="button"
+                  onClick={toggleSearch}
+                  text="إلغاء"
+                  color="gray"
+                  shade={500}
+                />
+              </div>
+            </form>
           </div>
         </div>
       )}
