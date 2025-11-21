@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 const NotificationsTab = () => {
   const handleStartBot = () => {
     // Open Telegram with the bot and /start command
-    window.open("https://t.me/DahhehetMedicalBot?start=start", "_blank");
+    window.open("https://t.me/ElearningApplicationBot?start=start", "_blank");
   };
 
   return (
@@ -82,7 +82,7 @@ const NotificationsTab = () => {
                   البوت متصل ويعمل
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  جميع الإشعارات يتم إرسالها عبر @DahhehetMedicalBot
+                  جميع الإشعارات يتم إرسالها عبر @ElearningApplicationBot
                 </p>
               </div>
             </div>

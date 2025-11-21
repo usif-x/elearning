@@ -43,7 +43,7 @@ export default function TelegramRegisterPage() {
       script.id = "telegram-login-script";
       script.async = true;
       script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", "DahhehetMedicalBot");
+      script.setAttribute("data-telegram-login", "ElearningApplicationBot");
       script.setAttribute("data-size", "large");
       script.setAttribute("data-onauth", "onTelegramAuth(user)");
       script.setAttribute("data-request-access", "write");
@@ -581,7 +581,8 @@ export default function TelegramRegisterPage() {
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                   لديك حساب بالفعل؟
                 </p>
-                <div className="flex flex-col gap-2">
+
+                <div className="flex flex-col gap-2 items-center">
                   <Link
                     href="/login"
                     className="inline-flex items-center text-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
@@ -589,6 +590,7 @@ export default function TelegramRegisterPage() {
                     <Icon icon="material-symbols:login" className="w-4 h-4" />
                     تسجيل الدخول
                   </Link>
+
                   <Link
                     href="/"
                     className="inline-flex items-center justify-center gap-2 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"

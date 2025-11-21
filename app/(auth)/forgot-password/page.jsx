@@ -1,11 +1,13 @@
 "use client";
 
+import Input from "@/components/ui/Input";
 import {
   forgotPassword,
   resetPassword,
   verifyResetCode,
 } from "@/services/User";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -110,119 +112,101 @@ const ForgotPasswordPage = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6">
-                <Icon
-                  icon="solar:key-bold"
-                  className="w-10 h-10 text-blue-600 dark:text-blue-400"
-                />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                نسيت كلمة المرور؟
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                أدخل رقم هاتفك وسنرسل رمز التحقق إلى حساب تيليجرام المربوط
-              </p>
-            </div>
+            <Input
+              icon="material-symbols:phone-android"
+              placeholder="رقم الهاتف (مثل: 01012345678)"
+              value={formData.phone_number}
+              onChange={(e) =>
+                setFormData({ ...formData, phone_number: e.target.value })
+              }
+              dir="rtl"
+              type="tel"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              سيتم إرسال رمز التحقق إلى حساب تيليجرام المرتبط بهذا الرقم
+            </p>
 
-            <form onSubmit={handleRequestCode} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  رقم الهاتف *
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone_number: e.target.value })
-                  }
-                  className="w-full px-4 py-4 text-center text-xl border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="01012345678"
-                  required
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-                  أدخل رقم الهاتف المسجل في حسابك
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                {loading ? (
-                  <Icon
-                    icon="solar:loading-bold"
-                    className="w-5 h-5 animate-spin"
-                  />
-                ) : (
+            <button
+              onClick={handleRequestCode}
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>جاري الإرسال...</span>
+                </>
+              ) : (
+                <>
                   <Icon icon="bxl:telegram" className="w-5 h-5" />
-                )}
-                إرسال رمز التحقق عبر تيليجرام
-              </button>
-            </form>
+                  إرسال رمز التحقق
+                </>
+              )}
+            </button>
           </div>
         );
 
       case 2:
         return (
           <div className="space-y-6">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full mb-6">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-3">
                 <Icon
-                  icon="solar:verified-check-bold"
-                  className="w-10 h-10 text-green-600 dark:text-green-400"
+                  icon="material-symbols:check-circle"
+                  className="w-6 h-6 text-green-500 dark:text-green-400"
                 />
+                <div className="flex-1 text-right">
+                  <p className="font-medium text-gray-800 dark:text-gray-200 text-sm">
+                    تم إرسال الرمز بنجاح
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    تحقق من تيليجرام الخاص بك
+                  </p>
+                </div>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                أدخل رمز التحقق
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                تم إرسال رمز التحقق إلى تيليجرام الخاص بك
-              </p>
             </div>
 
-            <form onSubmit={handleVerifyCode} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  رمز التحقق *
-                </label>
-                <input
-                  type="text"
-                  value={formData.code}
-                  onChange={(e) =>
-                    setFormData({ ...formData, code: e.target.value })
-                  }
-                  className="w-full px-4 py-4 text-center text-2xl font-mono tracking-widest border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="000000"
-                  maxLength="6"
-                  required
-                />
-              </div>
+            <Input
+              icon="material-symbols:lock"
+              placeholder="000000"
+              value={formData.code}
+              onChange={(e) =>
+                setFormData({ ...formData, code: e.target.value })
+              }
+              dir="ltr"
+              type="text"
+              maxLength={6}
+              className="text-center text-lg font-mono tracking-widest"
+            />
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                {loading ? (
+            <button
+              onClick={handleVerifyCode}
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>جاري التحقق...</span>
+                </>
+              ) : (
+                <>
                   <Icon
-                    icon="solar:loading-bold"
-                    className="w-5 h-5 animate-spin"
+                    icon="material-symbols:check-circle"
+                    className="w-5 h-5"
                   />
-                ) : (
-                  <Icon icon="solar:check-circle-bold" className="w-5 h-5" />
-                )}
-                التحقق من الرمز
-              </button>
-            </form>
+                  التحقق من الرمز
+                </>
+              )}
+            </button>
 
             <div className="text-center">
               <button
                 onClick={handleRequestCode}
                 disabled={loading}
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium inline-flex items-center gap-2"
               >
+                <Icon icon="material-symbols:refresh" className="w-4 h-4" />
                 إعادة إرسال الرمز
               </button>
             </div>
@@ -232,41 +216,45 @@ const ForgotPasswordPage = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-6">
-                <Icon
-                  icon="solar:lock-password-bold"
-                  className="w-10 h-10 text-purple-600 dark:text-purple-400"
-                />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                إعادة تعيين كلمة المرور
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                أدخل كلمة المرور الجديدة
-              </p>
-            </div>
-
-            <form onSubmit={handleResetPassword} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  كلمة المرور الجديدة *
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                كلمة المرور الجديدة
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Icon
+                    icon="material-symbols:lock"
+                    className="w-5 h-5 text-gray-400"
+                  />
+                </div>
                 <input
                   type="password"
                   value={formData.new_password}
                   onChange={(e) =>
                     setFormData({ ...formData, new_password: e.target.value })
                   }
-                  className="w-full px-4 py-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pr-10 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="كلمة المرور الجديدة"
+                  dir="rtl"
                   required
                 />
               </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                يجب أن تكون 8 أحرف على الأقل
+              </p>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  تأكيد كلمة المرور الجديدة *
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                تأكيد كلمة المرور
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Icon
+                    icon="material-symbols:lock"
+                    className="w-5 h-5 text-gray-400"
+                  />
+                </div>
                 <input
                   type="password"
                   value={formData.confirm_password}
@@ -276,27 +264,31 @@ const ForgotPasswordPage = () => {
                       confirm_password: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pr-10 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="تأكيد كلمة المرور"
+                  dir="rtl"
                   required
                 />
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                {loading ? (
-                  <Icon
-                    icon="solar:loading-bold"
-                    className="w-5 h-5 animate-spin"
-                  />
-                ) : (
-                  <Icon icon="solar:refresh-circle-bold" className="w-5 h-5" />
-                )}
-                إعادة تعيين كلمة المرور
-              </button>
-            </form>
+            <button
+              onClick={handleResetPassword}
+              disabled={loading}
+              className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>جاري إعادة التعيين...</span>
+                </>
+              ) : (
+                <>
+                  <Icon icon="material-symbols:refresh" className="w-5 h-5" />
+                  إعادة تعيين كلمة المرور
+                </>
+              )}
+            </button>
           </div>
         );
 
@@ -306,53 +298,122 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        {/* Progress Indicator */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {[1, 2, 3].map((stepNumber) => (
-              <div key={stepNumber} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    step >= stepNumber
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                  }`}
-                >
-                  {stepNumber}
-                </div>
-                {stepNumber < 3 && (
-                  <div
-                    className={`w-12 h-1 mx-2 ${
-                      step > stepNumber
-                        ? "bg-blue-600"
-                        : "bg-gray-200 dark:bg-gray-700"
-                    }`}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900" dir="rtl">
+      <div className="flex min-h-screen">
+        {/* Main Container */}
+        <div className="w-full flex">
+          {/* Left Side - Form */}
+          <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-gray-800">
+            <div className="w-full max-w-md">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-4 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center">
+                  <Image
+                    src="/images/logo.png"
+                    alt="Logo"
+                    width={32}
+                    height={32}
+                    className="filter brightness-0 invert"
                   />
-                )}
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  إعادة تعيين كلمة المرور
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  {step === 1 && "أدخل رقم هاتفك لاستعادة كلمة المرور"}
+                  {step === 2 && "أدخل الرمز المرسل إلى تيليجرام"}
+                  {step === 3 && "أدخل كلمة المرور الجديدة"}
+                </p>
               </div>
-            ))}
+
+              {/* Progress Indicator */}
+              <div className="flex items-center justify-center mb-8">
+                <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                  {[1, 2, 3].map((stepNumber) => (
+                    <div key={stepNumber} className="flex items-center">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-200 ${
+                          step >= stepNumber
+                            ? "bg-blue-600 dark:bg-blue-500 text-white"
+                            : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
+                        {stepNumber}
+                      </div>
+                      {stepNumber < 3 && (
+                        <div
+                          className={`w-8 h-1 mx-1 transition-all duration-200 ${
+                            step > stepNumber
+                              ? "bg-blue-600 dark:bg-blue-500"
+                              : "bg-gray-200 dark:bg-gray-700"
+                          }`}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Step Content */}
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                {renderStepContent()}
+              </div>
+
+              {/* Footer Links */}
+              <div className="mt-8 text-center border-t border-gray-200 dark:border-gray-700 pt-6">
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  تذكرت كلمة المرور؟
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-blue-600 dark:text-blue-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon icon="material-symbols:login" className="w-4 h-4" />
+                    تسجيل الدخول
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 px-4 py-2 rounded-lg text-blue-600 dark:text-blue-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon
+                      icon="material-symbols:person-add"
+                      className="w-4 h-4"
+                    />
+                    إنشاء حساب جديد
+                  </Link>
+
+                  <Link
+                    href="/"
+                    className="inline-flex items-center justify-center gap-2 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon icon="material-symbols:home" className="w-4 h-4" />
+                    العودة للرئيسية
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-          {renderStepContent()}
-        </div>
-
-        {/* Back to Login */}
-        <div className="text-center mt-6">
-          <Link
-            href="/login"
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center justify-center gap-2"
-          >
-            <Icon
-              icon="solar:arrow-right-bold"
-              className="w-4 h-4 rotate-180"
-            />
-            العودة إلى تسجيل الدخول
-          </Link>
+          {/* Right Side - Info */}
+          <div className="hidden lg:flex lg:w-1/2 bg-red-600 dark:bg-red-700 items-center justify-center p-8">
+            <div className="text-center text-white max-w-md">
+              <div className="w-20 h-20 mx-auto mb-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="filter brightness-0 invert"
+                />
+              </div>
+              <h1 className="text-4xl font-bold mb-6">استعادة كلمة المرور</h1>
+              <p className="text-red-100 mb-8 text-lg">
+                اتبع الخطوات البسيطة لاستعادة الوصول إلى حسابك
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

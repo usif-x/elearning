@@ -81,56 +81,6 @@ const ProfileOverviewTab = ({ user }) => {
             مميزات قادمة قريباً
           </h3>
         </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-              <Icon
-                icon="solar:chart-2-bold"
-                className="w-5 h-5 text-green-600"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                إحصائيات مفصلة للأداء والتقدم
-              </span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-              <Icon
-                icon="solar:calendar-bold"
-                className="w-5 h-5 text-purple-600"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                تتبع الجدول الزمني والمواعيد
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-              <Icon
-                icon="solar:medal-bold"
-                className="w-5 h-5 text-yellow-600"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                شهادات وإنجازات المستخدم
-              </span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-              <Icon
-                icon="solar:settings-bold"
-                className="w-5 h-5 text-gray-600"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                إعدادات متقدمة للتخصيص
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-200 text-center">
-            🚀 نحن نعمل باستمرار على إضافة مميزات جديدة لتحسين تجربتك في المنصة
-          </p>
-        </div>
       </div>
     </div>
   );
