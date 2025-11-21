@@ -6,7 +6,7 @@ const ProfileOverviewTab = ({ user }) => {
   return (
     <div className="space-y-6">
       {/* Welcome Message */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-2xl shadow-lg">
+      <div className="bg-sky-800 text-white p-8 rounded-2xl shadow-lg">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
             <Icon icon="solar:user-bold" className="w-8 h-8" />

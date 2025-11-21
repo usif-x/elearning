@@ -227,7 +227,7 @@ const CreateQuestionSetPage = () => {
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg">
+            <div className="p-4 bg-sky-600 rounded-2xl shadow-lg">
               <Icon
                 icon="solar:add-circle-bold-duotone"
                 className="w-12 h-12 text-white"
@@ -256,7 +256,7 @@ const CreateQuestionSetPage = () => {
                 disabled={loadingProgress.isLoading}
                 className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex-1 ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                    ? "bg-sky-600 text-white shadow-lg"
                     : loadingProgress.isLoading
                     ? "text-gray-400 dark:text-gray-500 cursor-not-allowed"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -291,7 +291,7 @@ const CreateQuestionSetPage = () => {
               {/* Progress Bar */}
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500 ease-out"
+                  className="bg-sky-600 h-4 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${loadingProgress.progress}%` }}
                 ></div>
               </div>
@@ -647,12 +647,12 @@ const CreateQuestionSetPage = () => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    عدد الأسئلة
+                    عدد الأسئلة ) 1-15 (*
                   </label>
                   <input
                     type="number"
                     min="1"
-                    max="50"
+                    max="15"
                     value={pdfData.count}
                     onChange={(e) =>
                       setPdfData({

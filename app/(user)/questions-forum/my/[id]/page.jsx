@@ -312,7 +312,7 @@ const QuestionSetDetailPage = () => {
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+            <div className="p-4 bg-sky-600 rounded-2xl shadow-lg">
               <Icon
                 icon="solar:document-bold-duotone"
                 className="w-12 h-12 text-white"

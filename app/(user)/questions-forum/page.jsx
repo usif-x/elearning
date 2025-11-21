@@ -466,7 +466,7 @@ const QuestionsForumPage = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+              <div className="p-4 text-sky-600 rounded-2xl shadow-lg">
                 <Icon
                   icon="solar:question-circle-bold-duotone"
                   className="w-12 h-12 text-white"
@@ -483,7 +483,7 @@ const QuestionsForumPage = () => {
             </div>
             <Link
               href="/questions-forum/create"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
+              className="bg-sky-600 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
             >
               <Icon icon="solar:add-circle-bold" className="w-6 h-6" />
               <span>إنشاء أسئلة جديدة</span>
@@ -493,21 +493,25 @@ const QuestionsForumPage = () => {
 
         {/* Tabs */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-2 mb-8 border border-gray-100 dark:border-gray-700">
-          <div className="flex flex-wrap gap-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex-1 min-w-0 ${
-                  activeTab === tab.id
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-                }`}
-              >
-                <Icon icon={tab.icon} className="w-5 h-5" />
-                <span className="truncate">{tab.label}</span>
-              </button>
-            ))}
+          {/* Mobile: scrollable — Desktop: normal */}
+          <div className="overflow-x-auto md:overflow-visible scrollbar-hide">
+            {/* Mobile: no wrap + min width / Desktop: normal wrap */}
+            <div className="flex gap-2 min-w-max md:min-w-0 md:flex-wrap">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                    activeTab === tab.id
+                      ? "bg-blue-500 text-white shadow-lg"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <Icon icon={tab.icon} className="w-5 h-5" />
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

@@ -390,7 +390,7 @@ const Navbar = ({ children }) => {
 
           {/* Mobile Menu Dropdown */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
               <div className="space-y-3">
                 {isAuthenticated ? (
                   <>
