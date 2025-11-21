@@ -37,14 +37,15 @@ const CreateQuestionSetPage = () => {
 
     const updateProgress = () => {
       if (currentStepIndex >= steps.length) {
-        setLoadingProgress({
-          isLoading: false,
+        // Keep the progress visible (stop at 95%) and wait for the backend response
+        setLoadingProgress((prev) => ({
+          ...prev,
           currentStep: "",
-          progress: 100,
+          progress: 95,
           currentQuestion: questionCount,
           totalQuestions: questionCount,
           estimatedTimeRemaining: 0,
-        });
+        }));
         return;
       }
 
@@ -142,6 +143,15 @@ const CreateQuestionSetPage = () => {
     try {
       const result = await generateQuestionsFromTopic(topicData);
       toast.success("تم إنشاء مجموعة الأسئلة بنجاح!");
+      // Mark progress complete now that backend responded
+      setLoadingProgress({
+        isLoading: false,
+        currentStep: "",
+        progress: 100,
+        currentQuestion: topicData.count,
+        totalQuestions: topicData.count,
+        estimatedTimeRemaining: 0,
+      });
       router.push(`/questions-forum/my/${result.id}`);
     } catch (error) {
       console.error("Error generating questions:", error);
@@ -194,6 +204,15 @@ const CreateQuestionSetPage = () => {
 
       const result = await generateQuestionsFromPdf(formData);
       toast.success("تم إنشاء مجموعة الأسئلة من ملف PDF بنجاح!");
+      // Mark progress complete now that backend responded
+      setLoadingProgress({
+        isLoading: false,
+        currentStep: "",
+        progress: 100,
+        currentQuestion: pdfData.count,
+        totalQuestions: pdfData.count,
+        estimatedTimeRemaining: 0,
+      });
       router.push(`/questions-forum/my/${result.id}`);
     } catch (error) {
       console.error("Error generating questions from PDF:", error);

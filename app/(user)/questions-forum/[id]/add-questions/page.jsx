@@ -37,14 +37,15 @@ const AddQuestionsPage = () => {
 
     const updateProgress = () => {
       if (currentStepIndex >= steps.length) {
-        setLoadingProgress({
-          isLoading: false,
+        // Keep the progress visible (stop at 95%) and wait for the backend response
+        setLoadingProgress((prev) => ({
+          ...prev,
           currentStep: "",
-          progress: 100,
+          progress: 95,
           currentQuestion: questionCount,
           totalQuestions: questionCount,
           estimatedTimeRemaining: 0,
-        });
+        }));
         return;
       }
 
@@ -122,6 +123,15 @@ const AddQuestionsPage = () => {
     try {
       await addQuestionsToSet(questionSetId, formData);
       toast.success("تم إضافة الأسئلة بنجاح!");
+      // Mark progress complete now that backend responded
+      setLoadingProgress({
+        isLoading: false,
+        currentStep: "",
+        progress: 100,
+        currentQuestion: formData.count,
+        totalQuestions: formData.count,
+        estimatedTimeRemaining: 0,
+      });
       router.push(`/questions-forum/my/${questionSetId}`);
     } catch (error) {
       console.error("Error adding questions:", error);
