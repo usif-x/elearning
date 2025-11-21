@@ -17,6 +17,145 @@ const PracticeQuizResultPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState({});
   const [activeFilter, setActiveFilter] = useState("all");
 
+  const scoreMessages = {
+    "0-10": [
+      "بلاش خالص… الكراسة رفضت تكتبلك 😭",
+      "زفت… حتى الغلطة فيها أكتر منك 😅",
+      "خرا… الورقة نفسها عيطت لما شافت درجتك 😂",
+      "محتاج تشد حيلك… جامد 😬",
+      "لا حول ولا قوة… ده ولا امتحان 😭",
+      "نكتة مش امتحان 🤣",
+      "البلاعة نفسها عايزة ترمي الورقة منك 😂",
+      "صفر على الشمال… ومستنيك تقوم 😴",
+      "الكراسة مستسلمة 😆",
+      "المرة الجاية حظك هيبقى أحسن 😅",
+    ],
+    "11-20": [
+      "نص نص… بس النص الفاضل كله فشل 😅",
+      "زفت… بس فيه بصيص أمل صغير 😬",
+      "محتاج تشد حيلك جامد 💪",
+      "الورقة نفسها مش قادرة تصدقك 🤯",
+      "حاولت… بس ده مش كفاية 😭",
+      "البلاصة فاضية… ضيعناها 😂",
+      "خرا… بس فيه نص نقطة حلوة 😆",
+      "المرة الجاية هتبقى أحسن 😎",
+      "محتاج تعمل review سريع 📚",
+      "اللي مكتوب على الورقة بيعيط عليك 😭",
+    ],
+    "21-30": [
+      "حاولت… بس البلاصة لسه فاضية 😬",
+      "خرا… بس فيه لمحة أمل 🤏",
+      "محتاج تشد حيلك أكتر 💪",
+      "الورقة نفسها بتحاول تصبر عليك 😂",
+      "زفت… محتاج تركيز شوية",
+      "نص نقطة ضاعت منك 😅",
+      "البلاصة فاضية… خالص 😭",
+      "ده لسه الطريق طويل 😎",
+      "حاول… المرة الجاية هيبقى أحسن",
+      "الكراسة مستنية منك مجهود أكتر 😆",
+    ],
+    "31-40": [
+      "لسه تحت المتوسط… محتاج مجهود 😅",
+      "شوية كده… بس لسه زفت 😬",
+      'الورقة نفسها بتقول: "فيه شغل على نفسك" 🤦‍♂️',
+      "البلاصة لسه مش مليانة 😂",
+      "حاولت… بس مش كفاية 😭",
+      "محتاج تعمل revision سريع 💪",
+      "خرا… بس مش وحش أوي",
+      "نص الطريق… نص البلاصة فاضي 😆",
+      "التجربة حلوة… بس محتاجة تحسين",
+      "ده مش فشل كامل… شوية زيادة وهتبقى تمام 😎",
+    ],
+    "41-50": [
+      "نص نص… نص كويس ونص زفت 😅",
+      "البلاصة بدأت تملي شوية 💪",
+      "الورقة نفسها مبسوطة شوية 😆",
+      "محتاج تركيز زيادة",
+      "زفت… بس فيه أمل 😬",
+      "نص الدرجات فاضية… محتاج تعب شوية",
+      "مش وحش… بس لسه محتاج مجهود 😭",
+      "كده نص تمام… نص محتاج شغل 😆",
+      "البلاصة شوية شوية بتملا",
+      "المرة الجاية هتبقى أحسن 😎",
+    ],
+    "51-60": [
+      "تمام… مش وحش أوي 😅",
+      "البلاصة ابتدت تملي 💪",
+      "زفت… بس فيه improvement 😬",
+      "الورقة نفسها مبسوطة بيك 😆",
+      "محتاج شوية تركيز زيادة",
+      "مش وحش… بس ممكن تبقى أحسن 😎",
+      "مجهودك باين… وده كويس",
+      "حافظ على المستوى ده",
+      "شوية review وهتبقى top",
+      "نص البلاصة بقيت حلوة 😆",
+    ],
+    "61-70": [
+      "تمام… مستوى كويس 💪",
+      "البلاصة تملى… performance حلوة 😎",
+      "زفت… بس مش أوي 😂",
+      "الورقة نفسها مبسوطة بيك 😆",
+      "شغل مرتب… استمر كده",
+      "مش ممتاز… بس كويس جدًا",
+      "شوية زيادة وهتبقى ممتاز",
+      "الأداء جيد جدًا",
+      "حافظ على المستوى ده",
+      "المرة الجاية هتعدي بلاصة أكتر 😎",
+    ],
+    "71-80": [
+      "ممتاز… أدائك حلو جدًا 😎🔥",
+      'الورقة نفسها بتقول: "برافو عليك!" 😆',
+      "شغل جامد… استمر كده 💪",
+      "الأداء ممتاز… شوية تحسينات بسيطة",
+      "تمام جدًا… قريب من الكمال",
+      "شغلك واضح إنه مرتب جدًا",
+      "حلو جدًا… حافظ على المستوى ده",
+      "تحسن كبير… keep going! 😎",
+      "الأداء كويس جدًا… مبسوطين بيك",
+      "قريب جدًا من التميز… كمل كده",
+    ],
+    "81-90": [
+      "ممتاز جدًا… شغل رائع 🔥",
+      "الورقة نفسها فخورة بيك 😆",
+      "الأداء ممتاز جدًا… keep it up! 💪",
+      "مستوى عالي جدًا",
+      "قريب جدًا من الدرجة الكاملة",
+      "شغل مرتب ومنظم جدًا",
+      "رائع جدًا… كمل بنفس الوتيرة",
+      "performance ممتاز جدًا 😎",
+      "شوية تحسينات بسيطة وهتبقى 100%",
+      "مستوى ممتاز… ماشاء الله عليك 😆",
+    ],
+    "91-100": [
+      "أسطورة… درجة كاملة 🔥",
+      'الورقة نفسها بتقول: "ده معلم!" 😎',
+      "ممتاز جدًا… performance خرافي",
+      "keep shining… ممتاز جدًا",
+      "مستوى عالي جدًا… تحفة",
+      "مفيش كلام… ده top 👑",
+      "ممتاز… شكلك هتكون بطل المرة الجاية كمان",
+      "كمال الأداء… 100% 😆",
+      "درجة خرافية… مبروك 💪",
+      "ممتاز… كل حاجة تمام تمام",
+    ],
+  };
+
+  const getScoreMessage = (score) => {
+    let range;
+    if (score <= 10) range = "0-10";
+    else if (score <= 20) range = "11-20";
+    else if (score <= 30) range = "21-30";
+    else if (score <= 40) range = "31-40";
+    else if (score <= 50) range = "41-50";
+    else if (score <= 60) range = "51-60";
+    else if (score <= 70) range = "61-70";
+    else if (score <= 80) range = "71-80";
+    else if (score <= 90) range = "81-90";
+    else range = "91-100";
+    const messages = scoreMessages[range];
+    return messages[Math.floor(Math.random() * messages.length)];
+  };
+
   const filterTabs = [
     { id: "all", label: "جميع الأسئلة", icon: "solar:document-text-bold" },
     {
@@ -34,15 +173,19 @@ const PracticeQuizResultPage = () => {
 
   const filterQuestions = (questions) => {
     if (!questions) return [];
+    const filtered = questions.map((question, index) => ({
+      question,
+      originalIndex: index,
+    }));
     switch (activeFilter) {
       case "correct":
-        return questions.filter((q) => q.is_correct);
+        return filtered.filter((item) => item.question.is_correct);
       case "wrong":
-        return questions.filter((q) => !q.is_correct);
+        return filtered.filter((item) => !item.question.is_correct);
       case "unanswered":
-        return questions.filter((q) => q.user_answer === null);
+        return filtered.filter((item) => item.question.user_answer === null);
       default:
-        return questions;
+        return filtered;
     }
   };
 
@@ -182,7 +325,13 @@ const PracticeQuizResultPage = () => {
                 {quizData.score}%
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 sm:mt-2">
-                {isPassed ? "نجحت ✓" : "راسب ✗"}
+                {isPassed ? "ناجح ✓" : "ساقط ✗"}
+              </p>
+              <p
+                className="text-xs text-gray-500 dark:text-gray-400 mt-1 sm:mt-2"
+                dir="rtl"
+              >
+                {getScoreMessage(quizData.score)}
               </p>
             </div>
 
@@ -260,9 +409,9 @@ const PracticeQuizResultPage = () => {
           {quizData.questions_with_results &&
           quizData.questions_with_results.length > 0 ? (
             filterQuestions(quizData.questions_with_results).map(
-              (question, index) => (
+              (item, index) => (
                 <div
-                  key={index}
+                  key={item.originalIndex}
                   className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
                 >
                   {/* Question Header */}
@@ -270,9 +419,9 @@ const PracticeQuizResultPage = () => {
                     <div className="flex-1 w-full">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
                         <span className="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 font-bold px-3 py-1 rounded-lg">
-                          سؤال {index + 1}
+                          سؤال {item.originalIndex + 1}
                         </span>
-                        {question.is_correct ? (
+                        {item.question.is_correct ? (
                           <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-1">
                             <Icon
                               icon="solar:check-circle-bold"
@@ -294,17 +443,18 @@ const PracticeQuizResultPage = () => {
                         className="text-base sm:text-lg text-gray-900 dark:text-white leading-relaxed break-words"
                         dir="rtl"
                       >
-                        {question.question}
+                        {item.question.question}
                       </p>
                     </div>
                   </div>
 
                   {/* Options */}
                   <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                    {question.options.map((option, optionIndex) => {
-                      const isUserAnswer = question.user_answer === optionIndex;
+                    {item.question.options.map((option, optionIndex) => {
+                      const isUserAnswer =
+                        item.question.user_answer === optionIndex;
                       const isCorrectAnswer =
-                        question.correct_answer === optionIndex;
+                        item.question.correct_answer === optionIndex;
 
                       return (
                         <div
@@ -312,7 +462,7 @@ const PracticeQuizResultPage = () => {
                           className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
                             isCorrectAnswer
                               ? "bg-green-50 dark:bg-green-900/20 border-green-500"
-                              : isUserAnswer && !question.is_correct
+                              : isUserAnswer && !item.question.is_correct
                               ? "bg-red-50 dark:bg-red-900/20 border-red-500"
                               : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600"
                           }`}
@@ -322,7 +472,7 @@ const PracticeQuizResultPage = () => {
                               className={`flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center ${
                                 isCorrectAnswer
                                   ? "bg-green-500 border-green-500"
-                                  : isUserAnswer && !question.is_correct
+                                  : isUserAnswer && !item.question.is_correct
                                   ? "bg-red-500 border-red-500"
                                   : "border-gray-300 dark:border-gray-600"
                               }`}
@@ -333,7 +483,7 @@ const PracticeQuizResultPage = () => {
                                   className="w-5 h-5 text-white"
                                 />
                               )}
-                              {isUserAnswer && !question.is_correct && (
+                              {isUserAnswer && !item.question.is_correct && (
                                 <Icon
                                   icon="solar:close-circle-bold"
                                   className="w-5 h-5 text-white"
@@ -344,7 +494,7 @@ const PracticeQuizResultPage = () => {
                               className={`text-sm sm:text-base flex-1 break-words ${
                                 isCorrectAnswer
                                   ? "text-green-900 dark:text-green-100 font-semibold"
-                                  : isUserAnswer && !question.is_correct
+                                  : isUserAnswer && !item.question.is_correct
                                   ? "text-red-900 dark:text-red-100 font-semibold"
                                   : "text-gray-700 dark:text-gray-300"
                               }`}
@@ -369,7 +519,8 @@ const PracticeQuizResultPage = () => {
                   </div>
 
                   {/* Explanation */}
-                  {(question.explanation_ar || question.explanation_en) && (
+                  {(item.question.explanation_ar ||
+                    item.question.explanation_en) && (
                     <div className="bg-sky-50 dark:bg-sky-900/20 border-r-4 border-sky-500 p-3 sm:p-4 rounded-lg mb-4">
                       <div className="flex items-start gap-2 sm:gap-3">
                         <Icon
@@ -381,13 +532,14 @@ const PracticeQuizResultPage = () => {
                             <p className="font-semibold text-sky-900 dark:text-sky-100 text-sm sm:text-base">
                               التوضيح:
                             </p>
-                            {question.explanation_ar &&
-                              question.explanation_en && (
+                            {item.question.explanation_ar &&
+                              item.question.explanation_en && (
                                 <button
                                   onClick={() =>
                                     toggleLanguage(
-                                      index,
-                                      selectedLanguage[index] === "en"
+                                      item.originalIndex,
+                                      selectedLanguage[item.originalIndex] ===
+                                        "en"
                                         ? "ar"
                                         : "en"
                                     )
@@ -399,7 +551,8 @@ const PracticeQuizResultPage = () => {
                                     className="w-3 h-3 sm:w-4 sm:h-4"
                                   />
                                   <span>
-                                    {selectedLanguage[index] === "en"
+                                    {selectedLanguage[item.originalIndex] ===
+                                    "en"
                                       ? "عربي"
                                       : "English"}
                                   </span>
@@ -409,13 +562,15 @@ const PracticeQuizResultPage = () => {
                           <p
                             className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed break-words"
                             dir={
-                              selectedLanguage[index] === "en" ? "ltr" : "rtl"
+                              selectedLanguage[item.originalIndex] === "en"
+                                ? "ltr"
+                                : "rtl"
                             }
                           >
-                            {selectedLanguage[index] === "en"
-                              ? question.explanation_en
-                              : question.explanation_ar ||
-                                question.explanation_en}
+                            {selectedLanguage[item.originalIndex] === "en"
+                              ? item.question.explanation_en
+                              : item.question.explanation_ar ||
+                                item.question.explanation_en}
                           </p>
                         </div>
                       </div>
@@ -423,8 +578,8 @@ const PracticeQuizResultPage = () => {
                   )}
 
                   {/* Source Info */}
-                  {(question.source_quiz_title ||
-                    question.source_course_id) && (
+                  {(item.question.source_quiz_title ||
+                    item.question.source_course_id) && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs bg-gray-100 dark:bg-gray-700/50 px-3 py-2 rounded-lg">
                       <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 flex-1 min-w-0">
                         <Icon
@@ -432,17 +587,17 @@ const PracticeQuizResultPage = () => {
                           className="w-4 h-4 flex-shrink-0"
                         />
                         <span className="truncate">
-                          {question.source_quiz_title
-                            ? `المصدر: ${question.source_quiz_title}`
+                          {item.question.source_quiz_title
+                            ? `المصدر: ${item.question.source_quiz_title}`
                             : ""}
-                          {question.source_course_id &&
-                            ` - كورس رقم ${question.source_course_id}`}
+                          {item.question.source_course_id &&
+                            ` - كورس رقم ${item.question.source_course_id}`}
                         </span>
                       </div>
-                      {question.source_course_id &&
-                        question.source_lecture_id && (
+                      {item.question.source_course_id &&
+                        item.question.source_lecture_id && (
                           <Link
-                            href={`/courses/${question.source_course_id}/lecture/${question.source_lecture_id}`}
+                            href={`/courses/${item.question.source_course_id}/lecture/${item.question.source_lecture_id}`}
                             className="flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
                           >
                             <Icon
