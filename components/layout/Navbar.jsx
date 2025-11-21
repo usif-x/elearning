@@ -1,11 +1,12 @@
 "use client";
 
 import { useAuthStore } from "@/hooks/useAuth";
+import { getSearchAutocomplete } from "@/services/Courses";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react"; // Import useRef and useEffect
+import { useCallback, useEffect, useState } from "react"; // Import useRef and useEffect
 import Button from "../ui/Button";
 import DarkModeSwitcher from "../ui/DarkModeSwitcher";
 import Input from "../ui/Input";
@@ -26,12 +27,17 @@ const Navbar = ({ children }) => {
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
     if (!isSearchOpen) {
       // Clear search when opening
       setSearchQuery("");
+      setAutocompleteSuggestions([]);
+      setShowSuggestions(false);
     }
   };
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -98,9 +104,45 @@ const Navbar = ({ children }) => {
     }
   };
 
+  // Get autocomplete suggestions
+  const getAutocompleteSuggestions = useCallback(async (query) => {
+    if (!query.trim() || query.length < 2) {
+      setAutocompleteSuggestions([]);
+      return;
+    }
+
+    try {
+      const suggestions = await getSearchAutocomplete(query, 8);
+      setAutocompleteSuggestions(suggestions);
+    } catch (err) {
+      console.error("Autocomplete error:", err);
+      setAutocompleteSuggestions([]);
+    }
+  }, []);
+
+  // Handle search input change with autocomplete
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setShowSuggestions(true);
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Set new timeout for autocomplete
+    const newTimeout = setTimeout(() => {
+      getAutocompleteSuggestions(value);
+    }, 300);
+
+    setSearchTimeout(newTimeout);
+  };
+
   // Handle search submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setShowSuggestions(false);
     if (searchQuery.trim()) {
       // Navigate to search page with query
       router.push(
@@ -108,8 +150,29 @@ const Navbar = ({ children }) => {
       );
       setIsSearchOpen(false);
       setSearchQuery("");
+      setAutocompleteSuggestions([]);
     }
   };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+    setAutocompleteSuggestions([]);
+    // Navigate to search page with suggestion
+    router.push(`/courses/search?q=${encodeURIComponent(suggestion)}`);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
 
   const getMainContentMarginClass = () => {
     if (!isAuthenticated) {
@@ -897,16 +960,48 @@ const Navbar = ({ children }) => {
                 />
               </button>
             </div>
-            <form onSubmit={handleSearchSubmit}>
-              <Input
-                type="text"
-                placeholder="ابحث عن كورسات الطب، البرمجة، إلخ..."
-                icon={"solar:magnifer-bold"}
-                className="w-full"
-                dir="rtl"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <form onSubmit={handleSearchSubmit} className="relative">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="ابحث عن كورسات"
+                  icon={"solar:magnifer-bold"}
+                  className="w-full"
+                  dir="rtl"
+                  value={searchQuery}
+                  onChange={handleSearchInputChange}
+                />
+                <button
+                  type="submit"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  disabled={!searchQuery.trim()}
+                >
+                  <Icon icon="material-symbols:search" className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Autocomplete Suggestions */}
+              {showSuggestions && autocompleteSuggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                  {autocompleteSuggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full px-4 py-3 text-right hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon
+                          icon="material-symbols:search"
+                          className="w-5 h-5 text-gray-400"
+                        />
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {suggestion}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="mt-4 flex justify-center gap-3">
                 <Button
                   type="submit"
