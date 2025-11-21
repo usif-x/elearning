@@ -2,7 +2,7 @@ import { getData, postData } from "@/libs/axios";
 
 export const getFeaturedCourses = async () => {
   try {
-    const response = await getData("courses", true);
+    const response = await getData("courses/", true);
     return response.courses || [];
   } catch (error) {
     console.error("Error fetching featured courses:", error);
