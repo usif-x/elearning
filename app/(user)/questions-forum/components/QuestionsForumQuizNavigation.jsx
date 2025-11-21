@@ -88,13 +88,16 @@ const QuestionsForumQuizNavigation = ({
             <button
               key={index}
               onClick={() => setCurrentQuestionIndex(index)}
-              className={`aspect-square rounded font-semibold text-xs sm:text-[15px] transition-all duration-200 relative p-0.5 ${
-                currentQuestionIndex === index
-                  ? "bg-sky-500 text-white ring-2 ring-sky-200 dark:ring-sky-900 scale-105 shadow-md"
-                  : answers[index] !== undefined && answers[index] !== null
-                  ? "bg-green-500 text-white hover:bg-green-600 shadow-sm"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-              }`}
+              className={`aspect-square rounded font-semibold 
+  text-[10px] sm:text-[11px] md:text-[12px]
+  transition-all duration-200 relative p-[2px]
+  ${
+    currentQuestionIndex === index
+      ? "bg-sky-500 text-white ring-2 ring-sky-200 dark:ring-sky-900 scale-105 shadow-md"
+      : answers[index] !== undefined && answers[index] !== null
+      ? "bg-green-500 text-white hover:bg-green-600 shadow-sm"
+      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+  }`}
             >
               {index + 1}
               {flaggedQuestions.has(index) && (
