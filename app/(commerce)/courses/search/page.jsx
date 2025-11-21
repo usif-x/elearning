@@ -6,10 +6,6 @@ import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-export const metadata = {
-  title: "البحث في الكورسات",
-};
-
 export default function CourseSearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
