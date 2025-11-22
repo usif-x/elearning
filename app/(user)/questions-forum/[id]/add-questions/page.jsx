@@ -112,8 +112,8 @@ const AddQuestionsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.count < 1 || formData.count > 30) {
-      toast.error("عدد الأسئلة يجب أن يكون بين 1 و 30");
+    if (formData.count < 1 || formData.count > 20) {
+      toast.error("عدد الأسئلة يجب أن يكون بين 1 و 20");
       return;
     }
 
@@ -280,7 +280,7 @@ const AddQuestionsPage = () => {
                   <input
                     type="range"
                     min="1"
-                    max="30"
+                    max="20"
                     value={formData.count}
                     onChange={(e) =>
                       setFormData({
@@ -303,7 +303,7 @@ const AddQuestionsPage = () => {
 
                 <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 px-2">
                   <span>الحد الأدنى: 1</span>
-                  <span>الحد الأقصى: 30</span>
+                  <span>الحد الأقصى: 20</span>
                 </div>
               </div>
 

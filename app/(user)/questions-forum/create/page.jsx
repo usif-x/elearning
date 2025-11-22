@@ -467,12 +467,12 @@ const CreateQuestionSetPage = () => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    عدد الأسئلة ) 1-30 (*
+                    عدد الأسئلة ) 1-20 (*
                   </label>
                   <input
                     type="number"
                     min="1"
-                    max="30"
+                    max="20"
                     value={topicData.count}
                     onChange={(e) =>
                       setTopicData({
@@ -666,12 +666,12 @@ const CreateQuestionSetPage = () => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    عدد الأسئلة ) 1-15 (*
+                    عدد الأسئلة ) 1-20 (*
                   </label>
                   <input
                     type="number"
                     min="1"
-                    max="15"
+                    max="20"
                     value={pdfData.count}
                     onChange={(e) =>
                       setPdfData({
