@@ -18,6 +18,11 @@ const AdminSidebar = () => {
       href: "/admin/dashboard",
     },
     {
+      title: "إدارة الدورات",
+      icon: "solar:book-bold-duotone",
+      href: "/admin/dashboard/courses",
+    },
+    {
       title: "إدارة المنتدى",
       icon: "solar:users-group-rounded-bold-duotone",
       isDropdown: true,
