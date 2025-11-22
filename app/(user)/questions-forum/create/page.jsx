@@ -181,9 +181,9 @@ const CreateQuestionSetPage = () => {
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (pdfData.file.size > 10 * 1024 * 1024) {
-      toast.error("حجم الملف يجب أن يكون أقل من 10 ميجابايت");
+    // Validate file size (max 50MB)
+    if (pdfData.file.size > 50 * 1024 * 1024) {
+      toast.error("حجم الملف يجب أن يكون أقل من 50 ميجابايت");
       return;
     }
 
@@ -593,7 +593,7 @@ const CreateQuestionSetPage = () => {
                           : "انقر لاختيار ملف PDF"}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        الحد الأقصى: 10 ميجابايت • PDF فقط
+                        الحد الأقصى: 50 ميجابايت • PDF فقط
                       </p>
                     </label>
                   </div>
