@@ -1,15 +1,20 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
-import LoadingSpinner from "../../../../../components/ui/LoadingSpinner";
-import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
 import {
   deleteCourse,
   listCourses,
   updateCourse,
-} from "../../../../../services/admin/Course";
+} from "@/services/admin/Course";
+import { Icon } from "@iconify/react";
+import {
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import LoadingSpinner from "../../../../../components/ui/LoadingSpinner";
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
@@ -174,12 +179,19 @@ const CoursesPage = () => {
                 />
               ) : (
                 <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon icon="solar:book-bold" className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  <Icon
+                    icon="solar:book-bold"
+                    className="w-5 h-5 text-red-600 dark:text-red-400"
+                  />
                 </div>
               )}
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">{course.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">ID: {course.id}</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {course.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  ID: {course.id}
+                </p>
               </div>
             </div>
           );
@@ -213,10 +225,15 @@ const CoursesPage = () => {
           const course = row.original;
           return (
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">${course.price || 0}</p>
-              {course.price_before_discount > 0 && course.price_before_discount !== course.price && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 line-through">${course.price_before_discount}</p>
-              )}
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                ${course.price || 0}
+              </p>
+              {course.price_before_discount > 0 &&
+                course.price_before_discount !== course.price && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 line-through">
+                    ${course.price_before_discount}
+                  </p>
+                )}
             </div>
           );
         },
@@ -494,19 +511,34 @@ const CoursesPage = () => {
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <th key={header.id} className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white">
+                      <th
+                        key={header.id}
+                        className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white"
+                      >
                         {header.isPlaceholder ? null : (
                           <button
                             className="inline-flex items-center gap-2"
                             onClick={header.column.getToggleSortingHandler()}
                           >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                             {header.column.getIsSorted() === "asc" ? (
-                              <Icon icon="solar:arrow-up-bold" className="w-4 h-4" />
+                              <Icon
+                                icon="solar:arrow-up-bold"
+                                className="w-4 h-4"
+                              />
                             ) : header.column.getIsSorted() === "desc" ? (
-                              <Icon icon="solar:arrow-down-bold" className="w-4 h-4" />
+                              <Icon
+                                icon="solar:arrow-down-bold"
+                                className="w-4 h-4"
+                              />
                             ) : (
-                              <Icon icon="solar:sort-outline" className="w-4 h-4 text-gray-400" />
+                              <Icon
+                                icon="solar:sort-outline"
+                                className="w-4 h-4 text-gray-400"
+                              />
                             )}
                           </button>
                         )}
@@ -517,10 +549,16 @@ const CoursesPage = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-6 py-4">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </td>
                     ))}
                   </tr>
