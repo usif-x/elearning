@@ -20,7 +20,7 @@ export const getCommunityById = async (id) => {
 };
 
 export const createCommunity = async (data) => {
-  return await postData("/communities", data, true);
+  return await postData("/communities/", data, true);
 };
 
 export const updateCommunity = async (id, data) => {

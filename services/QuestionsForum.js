@@ -110,7 +110,7 @@ export const deleteMyQuestionSet = async (questionSetId) => {
 };
 
 /**
- * Get all public question sets
+ * Get all public question sets (for unauthenticated users)
  * @param {Object} params - Query parameters
  * @param {number} [params.page] - Page number (default: 1)
  * @param {number} [params.size] - Page size (default: 20, max: 100)
@@ -125,11 +125,87 @@ export const getPublicQuestionSets = async (params = {}) => {
   const endpoint = `/user-questions/public${
     queryString ? `?${queryString}` : ""
   }`;
-  return await getData(endpoint, true);
+  return await getData(endpoint, false); // false for no auth
 };
 
+/**
+ * Get public question set detail (for unauthenticated users)
+ * @param {number} questionSetId - Question set ID
+ * @returns {Promise<Object>} Question set details
+ */
 export const getPublicQuestionSetDetail = async (questionSetId) => {
-  return await getData(`/user-questions/public/${questionSetId}`, true);
+  return await getData(`/user-questions/public/${questionSetId}`, false);
+};
+
+/**
+ * Start a guest attempt on a public question set
+ * @param {number} questionSetId - Question set ID
+ * @param {Object} data - Guest data
+ * @param {string} data.phone_number - Guest phone number
+ * @param {string} data.guest_name - Guest name
+ * @returns {Promise<Object>} Guest attempt data
+ */
+export const startGuestAttempt = async (questionSetId, data) => {
+  return await postData(
+    `/user-questions/${questionSetId}/guest-attempt`,
+    data,
+    false
+  );
+};
+
+/**
+ * Submit guest attempt answers
+ * @param {Object} data - Submission data
+ * @param {number} data.attempt_id - Guest attempt ID
+ * @param {string} data.phone_number - Guest phone number
+ * @param {string} data.answers - JSON string of answers array
+ * @param {number} data.time_taken - Time taken in seconds
+ * @returns {Promise<Object>} Guest attempt results
+ */
+export const submitGuestAttempt = async (data) => {
+  const formData = new FormData();
+  formData.append("attempt_id", data.attempt_id);
+  formData.append("phone_number", data.phone_number);
+  formData.append("answers", data.answers);
+  formData.append("time_taken", data.time_taken);
+
+  return await postData(
+    "/user-questions/guest-attempt-result",
+    formData,
+    false
+  );
+};
+
+/**
+ * Get guest attempt detail by attempt ID and phone number
+ * @param {number} attemptId - Attempt ID
+ * @param {string} phoneNumber - Guest phone number
+ * @returns {Promise<Object>} Guest attempt details
+ */
+export const getGuestAttemptDetail = async (attemptId, phoneNumber) => {
+  const queryString = new URLSearchParams({
+    phone_number: "+20" + phoneNumber,
+  }).toString();
+  return await getData(
+    `/user-questions/guest-attempt-result/${attemptId}?${queryString}`,
+    false
+  );
+};
+
+/**
+ * Get all guest attempts by phone number
+ * @param {string} phoneNumber - Guest phone number
+ * @param {Object} params - Query parameters
+ * @param {number} [params.page] - Page number (default: 1)
+ * @param {number} [params.size] - Page size (default: 20, max: 100)
+ * @returns {Promise<Object>} Guest attempts
+ */
+export const getGuestAttempts = async (phoneNumber, params = {}) => {
+  const queryParams = new URLSearchParams({
+    phone_number: "+20" + phoneNumber,
+    ...params,
+  }).toString();
+  return await getData(`/user-questions/guest-attempts?${queryParams}`, false);
 };
 
 /**
