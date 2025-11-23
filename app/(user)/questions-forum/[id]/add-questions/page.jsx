@@ -24,9 +24,9 @@ const AddQuestionsPage = () => {
 
   const simulateProgress = (questionCount) => {
     const steps = [
-      { text: "جاري تحليل المجموعة الحالية...", duration: 2000 },
+      { text: "جاري تحليل المجموعة الحالية...", duration: 45000 }, // 45 seconds for processing content
       { text: "إعداد الأسئلة الجديدة...", duration: 1500 },
-      { text: "توليد الأسئلة الإضافية...", duration: questionCount * 6000 }, // 6 seconds per question
+      { text: "توليد الأسئلة الإضافية...", duration: questionCount * 15000 }, // 15 seconds per question
       { text: "دمج الأسئلة مع المجموعة...", duration: 2000 },
       { text: "إنهاء العملية...", duration: 1000 },
     ];
@@ -56,14 +56,14 @@ const AddQuestionsPage = () => {
         isLoading: true,
         currentStep: currentStep.text,
         progress: Math.min(
-          (totalElapsed / (questionCount * 6000 + 6500)) * 100,
+          (totalElapsed / (questionCount * 15000 + 66500)) * 100,
           95
         ),
         currentQuestion: Math.min(questionProgress, questionCount),
         totalQuestions: questionCount,
         estimatedTimeRemaining: Math.max(
           0,
-          questionCount * 6000 + 6500 - totalElapsed
+          questionCount * 15000 + 66500 - totalElapsed
         ),
       });
 
@@ -76,7 +76,7 @@ const AddQuestionsPage = () => {
             currentQuestion: Math.min(questionProgress, questionCount),
             progress: Math.min(
               ((totalElapsed + (Date.now() - stepStartTime)) /
-                (questionCount * 6000 + 6500)) *
+                (questionCount * 15000 + 66500)) *
                 100,
               95
             ),
@@ -85,7 +85,7 @@ const AddQuestionsPage = () => {
           if (questionProgress >= questionCount) {
             clearInterval(questionInterval);
           }
-        }, 6000); // Update every 6 seconds per question
+        }, 15000); // Update every 15 seconds per question
 
         setTimeout(() => {
           clearInterval(questionInterval);

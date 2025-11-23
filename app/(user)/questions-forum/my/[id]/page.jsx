@@ -139,6 +139,8 @@ const QuestionSetDetailPage = () => {
       explanation_en: question.explanation_en || "",
       explanation_ar: question.explanation_ar || "",
       question_type: question.question_type || getQuestionType(question),
+      question_category: question.question_category || "",
+      cognitive_level: question.cognitive_level || "",
     });
   };
 
@@ -839,6 +841,53 @@ const QuestionSetDetailPage = () => {
                       </div>
                     )}
 
+                    {/* Question Category and Cognitive Level */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          فئة السؤال
+                        </label>
+                        <select
+                          value={editQuestionData.question_category}
+                          onChange={(e) =>
+                            setEditQuestionData((prev) => ({
+                              ...prev,
+                              question_category: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">اختر الفئة</option>
+                          <option value="standard">قياسي</option>
+                          <option value="critical">حرج</option>
+                          <option value="linking">ربط</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          المستوى المعرفي
+                        </label>
+                        <select
+                          value={editQuestionData.cognitive_level}
+                          onChange={(e) =>
+                            setEditQuestionData((prev) => ({
+                              ...prev,
+                              cognitive_level: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">اختر المستوى</option>
+                          <option value="remember">تذكر</option>
+                          <option value="understand">فهم</option>
+                          <option value="apply">تطبيق</option>
+                          <option value="analyze">تحليل</option>
+                          <option value="evaluate">تقييم</option>
+                          <option value="create">إنشاء</option>
+                        </select>
+                      </div>
+                    </div>
+
                     {/* Explanations Editing */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -1035,6 +1084,82 @@ const QuestionSetDetailPage = () => {
                       </div>
                     )}
 
+                    {/* Question Metadata */}
+                    {(question.question_category ||
+                      question.cognitive_level) && (
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg">
+                            <Icon
+                              icon="solar:tag-bold"
+                              className="w-6 h-6 text-purple-500"
+                            />
+                          </div>
+                          <h4 className="font-bold text-gray-900 dark:text-white text-lg">
+                            تصنيف السؤال
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {question.question_category && (
+                            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                              <div className="flex items-center gap-3">
+                                <Icon
+                                  icon="solar:category-bold"
+                                  className="w-5 h-5 text-purple-600"
+                                />
+                                <div>
+                                  <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
+                                    فئة السؤال
+                                  </p>
+                                  <p className="text-purple-800 dark:text-purple-200 font-bold">
+                                    {question.question_category === "standard"
+                                      ? "قياسي"
+                                      : question.question_category ===
+                                        "critical"
+                                      ? "حرج"
+                                      : question.question_category === "linking"
+                                      ? "ربط"
+                                      : question.question_category}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          {question.cognitive_level && (
+                            <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl border border-indigo-200 dark:border-indigo-700">
+                              <div className="flex items-center gap-3">
+                                <Icon
+                                  icon="solar:brain-bold"
+                                  className="w-5 h-5 text-indigo-600"
+                                />
+                                <div>
+                                  <p className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
+                                    المستوى المعرفي
+                                  </p>
+                                  <p className="text-indigo-800 dark:text-indigo-200 font-bold">
+                                    {question.cognitive_level === "remember"
+                                      ? "تذكر"
+                                      : question.cognitive_level ===
+                                        "understand"
+                                      ? "فهم"
+                                      : question.cognitive_level === "apply"
+                                      ? "تطبيق"
+                                      : question.cognitive_level === "analyze"
+                                      ? "تحليل"
+                                      : question.cognitive_level === "evaluate"
+                                      ? "تقييم"
+                                      : question.cognitive_level === "create"
+                                      ? "إنشاء"
+                                      : question.cognitive_level}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Explanations */}
                     {(question.explanation_en || question.explanation_ar) && (
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
@@ -1067,23 +1192,23 @@ const QuestionSetDetailPage = () => {
                               >
                                 <Icon
                                   icon={
-                                    explanationLanguages[globalIndex]
-                                      ? "solar:global-bold"
-                                      : "solar:chat-square-bold"
+                                    !explanationLanguages[globalIndex]
+                                      ? "solar:chat-square-bold"
+                                      : "solar:global-bold"
                                   }
                                   className="w-4 h-4"
                                 />
                                 <span>
-                                  {explanationLanguages[globalIndex]
-                                    ? "English"
-                                    : "العربية"}
+                                  {!explanationLanguages[globalIndex]
+                                    ? "العربية"
+                                    : "English"}
                                 </span>
                               </button>
                             )}
                         </div>
 
                         {/* Show selected language explanation */}
-                        {explanationLanguages[globalIndex]
+                        {!explanationLanguages[globalIndex]
                           ? question.explanation_en && (
                               <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
                                 <p className="text-blue-800 dark:text-blue-200 text-lg leading-relaxed">
@@ -1100,7 +1225,7 @@ const QuestionSetDetailPage = () => {
                             )}
 
                         {/* Fallback: show available explanation if preferred language not available */}
-                        {explanationLanguages[globalIndex] &&
+                        {!explanationLanguages[globalIndex] &&
                           !question.explanation_en &&
                           question.explanation_ar && (
                             <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
@@ -1110,7 +1235,7 @@ const QuestionSetDetailPage = () => {
                             </div>
                           )}
 
-                        {!explanationLanguages[globalIndex] &&
+                        {explanationLanguages[globalIndex] &&
                           !question.explanation_ar &&
                           question.explanation_en && (
                             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-700">

@@ -30,6 +30,8 @@ const AdminCommunityDashboard = () => {
     name: "",
     description: "",
     is_public: true,
+    allow_member_posts: true,
+    require_approval: false,
   });
   const [search, setSearch] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
@@ -57,7 +59,13 @@ const AdminCommunityDashboard = () => {
   };
 
   const openCreate = () => {
-    setForm({ name: "", description: "", is_public: true });
+    setForm({
+      name: "",
+      description: "",
+      is_public: true,
+      allow_member_posts: true,
+      require_approval: false,
+    });
     setShowCreateModal(true);
   };
 
@@ -96,6 +104,11 @@ const AdminCommunityDashboard = () => {
       name: community.name || "",
       description: community.description || "",
       is_public: !!community.is_public,
+      allow_member_posts:
+        community.allow_member_posts !== undefined
+          ? !!community.allow_member_posts
+          : true,
+      require_approval: !!community.require_approval,
     });
     setShowEditModal(true);
   };
@@ -363,14 +376,32 @@ const AdminCommunityDashboard = () => {
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                           {c.name}
                         </h3>
-                        <div
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${
-                            c.is_public
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                          }`}
-                        >
-                          {c.is_public ? "عام" : "خاص"}
+                        <div className="flex gap-2">
+                          <div
+                            className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              c.is_public
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                            }`}
+                          >
+                            {c.is_public ? "عام" : "خاص"}
+                          </div>
+                          <div
+                            className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              c.allow_member_posts
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                : "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                            }`}
+                          >
+                            {c.allow_member_posts
+                              ? "النشر مفتوح"
+                              : "النشر مقيد"}
+                          </div>
+                          {c.require_approval && (
+                            <div className="text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                              يتطلب موافقة
+                            </div>
+                          )}
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
@@ -534,6 +565,42 @@ const AdminCommunityDashboard = () => {
                   />
                   <span className="font-medium">مجتمع عام</span>
                 </label>
+                <label className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={form.allow_member_posts}
+                    onChange={(e) =>
+                      setForm((s) => ({
+                        ...s,
+                        allow_member_posts: e.target.checked,
+                      }))
+                    }
+                    className="w-4 h-4"
+                  />
+                  <Icon
+                    icon="solar:pen-new-square-bold"
+                    className="w-5 h-5 text-blue-500"
+                  />
+                  <span className="font-medium">السماح للأعضاء بالنشر</span>
+                </label>
+                <label className="flex items-center gap-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={form.require_approval}
+                    onChange={(e) =>
+                      setForm((s) => ({
+                        ...s,
+                        require_approval: e.target.checked,
+                      }))
+                    }
+                    className="w-4 h-4"
+                  />
+                  <Icon
+                    icon="solar:shield-check-bold"
+                    className="w-5 h-5 text-orange-500"
+                  />
+                  <span className="font-medium">يتطلب موافقة</span>
+                </label>
                 <div className="flex-1" />
                 <label className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
                   <Icon icon="solar:gallery-add-bold" className="w-5 h-5" />
@@ -643,6 +710,42 @@ const AdminCommunityDashboard = () => {
                     className="w-5 h-5 text-green-500"
                   />
                   <span className="font-medium">مجتمع عام</span>
+                </label>
+                <label className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={form.allow_member_posts}
+                    onChange={(e) =>
+                      setForm((s) => ({
+                        ...s,
+                        allow_member_posts: e.target.checked,
+                      }))
+                    }
+                    className="w-4 h-4"
+                  />
+                  <Icon
+                    icon="solar:pen-new-square-bold"
+                    className="w-5 h-5 text-blue-500"
+                  />
+                  <span className="font-medium">السماح للأعضاء بالنشر</span>
+                </label>
+                <label className="flex items-center gap-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={form.require_approval}
+                    onChange={(e) =>
+                      setForm((s) => ({
+                        ...s,
+                        require_approval: e.target.checked,
+                      }))
+                    }
+                    className="w-4 h-4"
+                  />
+                  <Icon
+                    icon="solar:shield-check-bold"
+                    className="w-5 h-5 text-orange-500"
+                  />
+                  <span className="font-medium">يتطلب موافقة</span>
                 </label>
                 <div className="flex-1" />
                 <label className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
