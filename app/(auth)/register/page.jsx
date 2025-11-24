@@ -1,6 +1,5 @@
 "use client";
 import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
 import { useAuthStore } from "@/hooks/useAuth";
 import { postData } from "@/libs/axios";
 import { Icon } from "@iconify/react";
@@ -25,16 +24,9 @@ export default function TelegramRegisterPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
-    gender: "",
-    email: "",
     password: "",
     confirmPassword: "",
   });
-
-  const genderOptions = [
-    { value: "Male", label: "ذكر" },
-    { value: "Female", label: "أنثى" },
-  ];
 
   // Load Telegram Login Widget script
   useEffect(() => {
@@ -150,15 +142,9 @@ export default function TelegramRegisterPage() {
         if (!validatePhoneNumber(formData.phoneNumber)) {
           newErrors.phoneNumber = "يرجى إدخال رقم هاتف صالح";
         }
-        if (!formData.gender) {
-          newErrors.gender = "يرجى اختيار النوع";
-        }
         break;
 
       case 3:
-        if (!validateEmail(formData.email)) {
-          newErrors.email = "يرجى إدخال بريد إلكتروني صالح";
-        }
         if (!validatePassword(formData.password)) {
           newErrors.password = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
         }
@@ -197,11 +183,9 @@ export default function TelegramRegisterPage() {
       const registrationData = {
         telegram_hash: telegramHash, // Use the hash from verification response
         full_name: formData.fullName,
-        email: formData.email,
         phone_number: formData.phoneNumber,
         password: formData.password,
         confirm_password: formData.confirmPassword,
-        sex: formData.gender,
       };
 
       const registerResponse = await postData(
@@ -392,16 +376,6 @@ export default function TelegramRegisterPage() {
                       dir="rtl"
                       type="tel"
                     />
-
-                    <Select
-                      icon="material-symbols:person"
-                      placeholder="اختر النوع"
-                      options={genderOptions}
-                      value={formData.gender}
-                      onChange={handleInputChange("gender")}
-                      error={errors.gender}
-                      dir="rtl"
-                    />
                   </div>
 
                   <div className="flex gap-3 pt-4">
@@ -439,21 +413,11 @@ export default function TelegramRegisterPage() {
                       معلومات الأمان
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      اختر بريد إلكتروني وكلمة مرور قوية
+                      اختر كلمة مرور قوية
                     </p>
                   </div>
 
                   <div className="space-y-4">
-                    <Input
-                      icon="material-symbols:mail"
-                      placeholder="البريد الإلكتروني (مثل: ahmed@example.com)"
-                      value={formData.email}
-                      onChange={handleInputChange("email")}
-                      error={errors.email}
-                      dir="rtl"
-                      type="email"
-                    />
-
                     <Input
                       icon="material-symbols:lock"
                       placeholder="كلمة المرور (8 أحرف على الأقل)"

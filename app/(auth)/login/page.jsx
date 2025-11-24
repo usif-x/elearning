@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 // Main Login Component
 export default function TelegramLoginPage() {
   const router = useRouter();
-  const [expandedMethod, setExpandedMethod] = useState(null); // 'phone' or 'email'
+  const [expandedMethod, setExpandedMethod] = useState(null); // 'phone'
   const [telegramData, setTelegramData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +23,6 @@ export default function TelegramLoginPage() {
   // Form data
   const [formData, setFormData] = useState({
     phoneNumber: "",
-    email: "",
     password: "",
   });
 
@@ -110,11 +109,6 @@ export default function TelegramLoginPage() {
     return phoneRegex.test(phone.replace(/\s+/g, ""));
   };
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleInputChange = (field) => (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -149,18 +143,6 @@ export default function TelegramLoginPage() {
         loginResponse = await postData("/auth/direct-login", {
           login_method: "phone",
           phone_number: formData.phoneNumber,
-          password: formData.password,
-        });
-      } else if (method === "email") {
-        if (!validateEmail(formData.email)) {
-          throw new Error("يرجى إدخال بريد إلكتروني صالح");
-        }
-        if (!formData.password) {
-          throw new Error("يرجى إدخال كلمة المرور");
-        }
-        loginResponse = await postData("/auth/direct-login", {
-          login_method: "email",
-          email: formData.email,
           password: formData.password,
         });
       }
@@ -380,80 +362,6 @@ export default function TelegramLoginPage() {
                         onClick={() => handleLogin("phone")}
                         disabled={isLoading}
                         className="w-full py-3 px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            <span>جاري التسجيل...</span>
-                          </div>
-                        ) : (
-                          "تسجيل الدخول"
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Method 3: Email Login */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                  <button
-                    onClick={() =>
-                      setExpandedMethod(
-                        expandedMethod === "email" ? null : "email"
-                      )
-                    }
-                    className="w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors text-right"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-500 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                        <Icon
-                          icon="material-symbols:mail"
-                          className="w-5 h-5 text-white"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-800 dark:text-gray-200 text-sm">
-                          البريد الإلكتروني
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          تسجيل دخول بالبريد الإلكتروني وكلمة المرور
-                        </p>
-                      </div>
-                      <Icon
-                        icon={
-                          expandedMethod === "email"
-                            ? "material-symbols:expand-less"
-                            : "material-symbols:expand-more"
-                        }
-                        className="w-6 h-6 text-gray-400"
-                      />
-                    </div>
-                  </button>
-
-                  {expandedMethod === "email" && (
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
-                      <Input
-                        icon="material-symbols:mail"
-                        placeholder="البريد الإلكتروني"
-                        value={formData.email}
-                        onChange={handleInputChange("email")}
-                        error={error}
-                        dir="rtl"
-                        type="email"
-                      />
-                      <Input
-                        icon="material-symbols:lock"
-                        placeholder="كلمة المرور"
-                        value={formData.password}
-                        onChange={handleInputChange("password")}
-                        error={error}
-                        dir="rtl"
-                        type="password"
-                      />
-                      <button
-                        onClick={() => handleLogin("email")}
-                        disabled={isLoading}
-                        className="w-full py-3 px-4 bg-gray-600 dark:bg-gray-500 text-white rounded-xl hover:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                       >
                         {isLoading ? (
                           <div className="flex items-center justify-center gap-2">
