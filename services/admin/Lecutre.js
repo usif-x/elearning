@@ -253,8 +253,9 @@ export const deleteContent = async (courseId, lectureId, contentId) => {
  */
 export const generateQuizFromTopic = async (courseId, payload) => {
   try {
+    // Payload must include lecture_id inside the body as per Swagger
     const response = await postData(
-      `courses/${courseId}/lectures/ai/generate-quiz`,
+      `/courses/${courseId}/lectures/ai/generate-quiz`,
       payload,
       true
     );
@@ -265,44 +266,32 @@ export const generateQuizFromTopic = async (courseId, payload) => {
   }
 };
 
-/**
- * Generate quiz questions from a PDF file using AI
- * @param {number} courseId - Course ID
- * @param {File} file - PDF file
- * @param {object} params - Generation parameters
- * @param {number} params.lecture_id - Lecture ID
- * @param {string} params.difficulty - Difficulty level: easy, medium, hard (default: medium)
- * @param {number} params.count - Number of questions (1-20, default: 5)
- * @param {string} params.notes - Custom instructions (optional)
- * @param {array} params.previous_questions - Previously generated questions to avoid (optional)
- */
+// 2. Fixed PDF Generation (Moves params to URL Query)
 export const generateQuizFromPDF = async (courseId, file, params) => {
   try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("lecture_id", params.lecture_id);
-
-    if (params.difficulty) {
-      formData.append("difficulty", params.difficulty);
-    }
-    if (params.count) {
-      formData.append("count", params.count);
-    }
-    if (params.notes) {
-      formData.append("notes", params.notes);
-    }
-    if (params.previous_questions && params.previous_questions.length > 0) {
-      formData.append(
+    // Construct Query Parameters string
+    const queryParams = new URLSearchParams();
+    queryParams.append("lecture_id", params.lecture_id);
+    if (params.difficulty) queryParams.append("difficulty", params.difficulty);
+    if (params.count) queryParams.append("count", params.count);
+    if (params.notes) queryParams.append("notes", params.notes);
+    if (params.previous_questions) {
+      // Only append if it exists, API might expect comma separated or repeated keys depending on framework
+      // Usually JSON stringified in query is rare, but if Swagger says (query) for array, it usually means &previous_questions=A&previous_questions=B
+      // If your backend expects simple string:
+      queryParams.append(
         "previous_questions",
         JSON.stringify(params.previous_questions)
       );
     }
 
-    const response = await postData(
-      `courses/${courseId}/lectures/ai/generate-quiz-from-pdf`,
-      formData,
-      true
-    );
+    const endpoint = `/courses/${courseId}/lectures/ai/generate-quiz-from-pdf?${queryParams.toString()}`;
+
+    // FormData only contains the file
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await postData(endpoint, formData, true);
     return response;
   } catch (error) {
     console.error("Error generating quiz from PDF:", error);
@@ -477,8 +466,6 @@ export const deleteQuizQuestion = async (
   }
 };
 
-
-
 /**
  * Generate more quiz questions from a previously saved PDF source
  * @param {number} courseId - Course ID
@@ -490,11 +477,15 @@ export const deleteQuizQuestion = async (
  * @param {string} params.notes - Custom instructions (optional)
  * @param {array} params.previous_questions - Previously generated questions to avoid (optional)
  */
-export const generateMoreQuestionsFromSource = async (courseId, sourceId, params) => {
+export const generateMoreQuestionsFromSource = async (
+  courseId,
+  sourceId,
+  params
+) => {
   try {
     // Build query string
     let url = `courses/${courseId}/lectures/ai/generate-more-from-source/${sourceId}?lecture_id=${params.lecture_id}`;
-    
+
     if (params.difficulty) {
       url += `&difficulty=${params.difficulty}`;
     }
@@ -505,7 +496,7 @@ export const generateMoreQuestionsFromSource = async (courseId, sourceId, params
       url += `&notes=${encodeURIComponent(params.notes)}`;
     }
     if (params.previous_questions && params.previous_questions.length > 0) {
-      params.previous_questions.forEach(q => {
+      params.previous_questions.forEach((q) => {
         url += `&previous_questions=${encodeURIComponent(q)}`;
       });
     }
@@ -517,9 +508,6 @@ export const generateMoreQuestionsFromSource = async (courseId, sourceId, params
     throw error;
   }
 };
-
-
-
 
 // ============================================
 // EXPORTS
@@ -552,4 +540,3 @@ export default {
   updateQuizQuestion,
   deleteQuizQuestion,
 };
-

@@ -28,6 +28,11 @@ const AdminSidebar = () => {
       href: "/admin/dashboard/admins",
     },
     {
+      title: "إدارة المستخدمين",
+      icon: "solar:users-group-rounded-bold-duotone",
+      href: "/admin/dashboard/users",
+    },
+    {
       title: "إدارة المنتدى",
       icon: "solar:users-group-rounded-bold-duotone",
       isDropdown: true,

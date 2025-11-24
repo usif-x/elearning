@@ -555,6 +555,19 @@ const Navbar = ({ children }) => {
                       </Link>
 
                       <Link
+                        href="/ai-explain"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          pathname === "/ai-explain"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon icon="mdi:magic" className="w-5 h-5" />
+                        <span>شرح محتوى </span>
+                      </Link>
+
+                      <Link
                         href="/courses"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -822,6 +835,8 @@ const Navbar = ({ children }) => {
               )}
             </Link>
 
+            {/* AI Explain */}
+
             {/* Community */}
             <Link
               href="/community"
@@ -837,6 +852,23 @@ const Navbar = ({ children }) => {
               <Icon icon="solar:users-group-rounded-bold" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">منتدى الطلاب</span>
+              )}
+            </Link>
+
+            <Link
+              href="/ai-explain"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/ai-explain"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "شرح محتوى " : ""}
+            >
+              <Icon icon="mdi:magic" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">شرح محتوى </span>
               )}
             </Link>
 
