@@ -45,13 +45,6 @@ const Hero = () => {
                 دحيحة ميديكال منصة معمولة مخصوص علشان تساعد طلاب التخصصات الطبيه
                 يفهموا المذاكرة من غير تعقيد.
               </p>
-              <p className="text-base sm:text-lg lg:text-xl text-sky-50 dark:text-sky-100 leading-relaxed">
-                هتلاقي فيها شروحات بسيطة، امتحانات أونلاين، ومصادر تساعدك تذاكر
-                بطريقتك.
-              </p>
-              <p className="text-base sm:text-lg lg:text-xl text-sky-50 dark:text-sky-100 leading-relaxed font-semibold">
-                يعني باختصار… المذاكرة بقت أسهل...
-              </p>
             </div>
 
             {/* CTA Button with improved responsiveness */}
