@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/context/ThemeProvider";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,6 +11,7 @@ const AdminSidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState([]);
   const pathname = usePathname();
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   const menuItems = [
     {
@@ -260,6 +262,47 @@ const AdminSidebar = () => {
                 </Link>
               );
             })}
+
+            {/* Theme Toggle Button */}
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={toggleDarkMode}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  isCollapsed ? "justify-center" : ""
+                }`}
+                title={
+                  isCollapsed
+                    ? isDarkMode
+                      ? "الوضع النهاري"
+                      : "الوضع الليلي"
+                    : ""
+                }
+              >
+                <div className="relative w-6 h-6 flex-shrink-0">
+                  <Icon
+                    icon="solar:sun-bold"
+                    className={`w-6 h-6 absolute inset-0 transition-all duration-300 ${
+                      isDarkMode
+                        ? "opacity-0 rotate-90 scale-0"
+                        : "opacity-100 rotate-0 scale-100"
+                    }`}
+                  />
+                  <Icon
+                    icon="solar:moon-bold"
+                    className={`w-6 h-6 absolute inset-0 transition-all duration-300 ${
+                      isDarkMode
+                        ? "opacity-100 rotate-0 scale-100"
+                        : "opacity-0 -rotate-90 scale-0"
+                    }`}
+                  />
+                </div>
+                {!isCollapsed && (
+                  <span className="font-medium">
+                    {isDarkMode ? "الوضع النهاري" : "الوضع الليلي"}
+                  </span>
+                )}
+              </button>
+            </div>
           </nav>
 
           {/* Footer */}
