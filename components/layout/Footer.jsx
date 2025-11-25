@@ -19,21 +19,9 @@ const Footer = ({ isSidebarCollapsed }) => {
 
   const socialLinks = [
     {
-      name: "يوتيوب",
-      href: "https://youtube.com/",
-      icon: "line-md:youtube-twotone",
-      color: "hover:text-red-500",
-    },
-    {
-      name: "إنستغرام",
-      href: "https://instagram.com/",
-      icon: "line-md:instagram",
-      color: "hover:text-pink-500",
-    },
-    {
       name: "تيليجرام",
-      href: "https://facebook.com",
-      icon: "line-md:facebook",
+      href: "https://t.me/DahhehetMedical",
+      icon: "line-md:telegram",
       color: "hover:text-sky-500",
     },
   ];
