@@ -1,334 +1,483 @@
 "use client";
 
-import Button from "@/components/ui/Button";
-import Switcher from "@/components/ui/Switcher";
 import {
+  createContent,
   deleteContent,
-  deleteQuizQuestion,
-  getContent,
-  getQuizQuestions,
+  generateQuizFromPDF,
+  generateQuizFromTopic,
+  listContents,
   updateContent,
-  updateQuizQuestion,
 } from "@/services/admin/Lecutre";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
-const AdminContentDetailPage = () => {
+const AdminLectureContentPage = () => {
   const params = useParams();
   const router = useRouter();
   const courseId = params?.id;
   const lectureId = params?.lectureId;
-  const contentId = params?.contentId;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [content, setContent] = useState(null);
+  const [contents, setContents] = useState([]);
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  const [form, setForm] = useState({
+  const [formOpen, setFormOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+
+  // Main Content Form
+  // [UPDATED] Set default values for duration and attempts
+  const [contentForm, setContentForm] = useState({
     content_type: "video",
     source: "",
     video_platform: "youtube",
     title: "",
     description: "",
     position: 1,
-    quiz_duration: null,
-    max_attempts: null,
-    passing_score: null,
+    quiz_duration: 10, // Default 10 mins
+    max_attempts: 1, // Default 1 attempt
+    passing_score: 50, // Default 50%
     show_correct_answers: 1,
     randomize_questions: 0,
     randomize_options: 0,
   });
 
-  // Quiz Questions State
-  const [quizQuestions, setQuizQuestions] = useState([]);
-  const [loadingQuestions, setLoadingQuestions] = useState(false);
-  const [editingQuestion, setEditingQuestion] = useState(null);
-  const [editQuestionData, setEditQuestionData] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showOptions, setShowOptions] = useState({}); // Options shown by default for all questions
-  const questionsPerPage = 5;
+  // AI Quiz Generation States
+  const [activeTab, setActiveTab] = useState("topic");
+  const [generating, setGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressText, setProgressText] = useState("");
 
-  const fetchContent = async () => {
-    if (!courseId || !lectureId || !contentId) return;
+  // Store generated data before saving
+  const [generatedQuestions, setGeneratedQuestions] = useState([]);
+  const [generatedSourceId, setGeneratedSourceId] = useState(null);
+
+  const [reviewMode, setReviewMode] = useState(false);
+  const [currentQuizSettings, setCurrentQuizSettings] = useState({});
+
+  // Topic Form State
+  const [topicForm, setTopicForm] = useState({
+    title: "",
+    description: "",
+    topic: "",
+    num_questions: 5,
+    difficulty: "medium",
+    quiz_duration: 10,
+    max_attempts: 1,
+    passing_score: 50,
+    show_correct_answers: 1,
+    randomize_questions: 0,
+    randomize_options: 0,
+  });
+
+  // PDF Form State
+  const [pdfForm, setPdfForm] = useState({
+    title: "",
+    description: "",
+    pdf_file: null,
+    num_questions: 5,
+    difficulty: "medium",
+    quiz_duration: 10,
+    max_attempts: 1,
+    passing_score: 50,
+    show_correct_answers: 1,
+    randomize_questions: 0,
+    randomize_options: 0,
+  });
+
+  const fetchContents = async () => {
+    if (!courseId || !lectureId) return;
     setLoading(true);
     setError("");
     try {
-      const data = await getContent(courseId, lectureId, contentId);
-      setContent(data);
-      setForm({
-        content_type: data?.content_type || "video",
-        source: data?.source || "",
-        video_platform: data?.video_platform || "youtube",
-        title: data?.title || "",
-        description: data?.description || "",
-        position: Number(data?.position) || 1,
-        quiz_duration: data?.quiz_duration ?? null,
-        max_attempts: data?.max_attempts ?? null,
-        passing_score: data?.passing_score ?? null,
-        show_correct_answers: data?.show_correct_answers ?? 1,
-        randomize_questions: data?.randomize_questions ?? 0,
-        randomize_options: data?.randomize_options ?? 0,
-      });
+      const data = await listContents(courseId, lectureId, 1, 100);
+
+      const items = Array.isArray(data?.contents)
+        ? data.contents
+        : Array.isArray(data?.items)
+        ? data.items
+        : [];
+
+      const sorted = [...items].sort(
+        (a, b) => (a.position ?? 0) - (b.position ?? 0)
+      );
+      setContents(sorted);
     } catch (e) {
       console.error(e);
-      setError("فشل تحميل بيانات المحتوى");
-      toast.error("فشل تحميل بيانات المحتوى");
+      setError("فشل تحميل المحتوى");
+      toast.error("فشل تحميل المحتوى");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchContent();
-  }, [courseId, lectureId, contentId]);
+    fetchContents();
+  }, [courseId, lectureId]);
 
-  const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const openCreate = () => {
+    setEditMode(false);
+    setCurrentItem(null);
+    // [UPDATED] Initialize with defaults
+    setContentForm({
+      content_type: "video",
+      source: "",
+      video_platform: "youtube",
+      title: "",
+      description: "",
+      position: contents.length + 1,
+      quiz_duration: 10,
+      max_attempts: 1,
+      passing_score: 50,
+      show_correct_answers: 1,
+      randomize_questions: 0,
+      randomize_options: 0,
+    });
+
+    // Reset AI States
+    setActiveTab("topic");
+    setGenerating(false);
+    setProgress(0);
+    setProgressText("");
+    setGeneratedQuestions([]);
+    setReviewMode(false);
+
+    setFormOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!courseId || !lectureId || !contentId) return;
-    if (!form.title?.trim()) {
+  const openEdit = (item) => {
+    setEditMode(true);
+    setCurrentItem(item);
+    // [UPDATED] Use existing values or fallback to defaults
+    setContentForm({
+      content_type: item?.content_type || "video",
+      source: item?.source || "",
+      video_platform: item?.video_platform || "youtube",
+      title: item?.title || "",
+      description: item?.description || "",
+      position: Number(item?.position) || 1,
+      quiz_duration: item?.quiz_duration ?? 10,
+      max_attempts: item?.max_attempts ?? 1,
+      passing_score: item?.passing_score ?? 50,
+      show_correct_answers: item?.show_correct_answers ?? 1,
+      randomize_questions: item?.randomize_questions ?? 0,
+      randomize_options: item?.randomize_options ?? 0,
+    });
+    setReviewMode(false);
+    setGeneratedQuestions([]);
+    setFormOpen(true);
+  };
+
+  const handleFormChange = (field, value) => {
+    setContentForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // ==========================================
+  // MANUAL CREATION / UPDATE
+  // ==========================================
+  const handleSubmit = async () => {
+    if (!courseId || !lectureId) return;
+    if (!contentForm.title?.trim()) {
       toast.error("يرجى إدخال عنوان المحتوى");
       return;
     }
     setSaving(true);
     try {
-      const payload = { ...form };
-      payload.show_correct_answers = Number(payload.show_correct_answers) || 0;
-      payload.randomize_questions = Number(payload.randomize_questions) || 0;
-      payload.randomize_options = Number(payload.randomize_options) || 0;
-      await updateContent(courseId, lectureId, contentId, payload);
-      toast.success("تم حفظ بيانات المحتوى");
-      await fetchContent();
+      const payload = { ...contentForm };
+
+      // [UPDATED] Ensure defaults are sent for ALL content types (Video, Audio, etc.)
+      // We do NOT zero these out anymore.
+      payload.quiz_duration = Number(payload.quiz_duration) || 10;
+      payload.max_attempts = Number(payload.max_attempts) || 1;
+      payload.passing_score = Number(payload.passing_score) || 50;
+
+      // Only clear questions array if it's not a quiz
+      if (payload.content_type !== "quiz") {
+        payload.questions = [];
+      }
+
+      if (editMode && currentItem?.id) {
+        await updateContent(courseId, lectureId, currentItem.id, payload);
+        toast.success("تم تحديث المحتوى");
+      } else {
+        await createContent(courseId, lectureId, payload);
+        toast.success("تم إنشاء المحتوى");
+      }
+      setFormOpen(false);
+      await fetchContents();
     } catch (e) {
       console.error(e);
-      toast.error("فشل حفظ بيانات المحتوى");
+      toast.error("فشل حفظ المحتوى");
     } finally {
       setSaving(false);
     }
   };
 
-  const confirmDelete = async () => {
-    if (!courseId || !lectureId || !contentId) return;
-    const ok = window.confirm("هل تريد حذف هذا المحتوى؟");
+  // ==========================================
+  // AI GENERATION LOGIC
+  // ==========================================
+
+  const runGenerationProgress = (steps, apiCall) => {
+    setGenerating(true);
+    setProgress(0);
+    setProgressText(steps[0]);
+
+    let currentStep = 0;
+    const totalSteps = steps.length;
+
+    const interval = setInterval(() => {
+      currentStep++;
+      if (currentStep < totalSteps - 1) {
+        setProgressText(steps[currentStep]);
+        setProgress(Math.round((currentStep / totalSteps) * 90));
+      }
+    }, 1500);
+
+    apiCall()
+      .then((response) => {
+        clearInterval(interval);
+        setProgress(100);
+        setProgressText("تم الانتهاء!");
+
+        if (response && response.questions && response.questions.length > 0) {
+          setGeneratedQuestions(response.questions);
+          setGeneratedSourceId(response.source_id);
+          setReviewMode(true);
+          toast.success(`تم توليد ${response.questions.length} سؤال`);
+        } else {
+          toast.warn("لم يقم الذكاء الاصطناعي بتوليد أي أسئلة.");
+        }
+      })
+      .catch((err) => {
+        clearInterval(interval);
+        console.error(err);
+        toast.error(
+          err?.response?.data?.detail?.[0]?.msg || "فشل في توليد الأسئلة"
+        );
+      })
+      .finally(() => {
+        setGenerating(false);
+      });
+  };
+
+  // GENERATE FROM TOPIC
+  const handleGenerateFromTopic = () => {
+    if (!topicForm.topic?.trim() || !topicForm.title?.trim()) {
+      toast.error("يرجى إدخال الموضوع والعنوان");
+      return;
+    }
+
+    setCurrentQuizSettings({
+      title: topicForm.title,
+      description: topicForm.description,
+      quiz_duration: parseInt(topicForm.quiz_duration),
+      max_attempts: parseInt(topicForm.max_attempts),
+      passing_score: parseInt(topicForm.passing_score),
+      show_correct_answers: parseInt(topicForm.show_correct_answers),
+      randomize_questions: parseInt(topicForm.randomize_questions),
+      randomize_options: parseInt(topicForm.randomize_options),
+      position: contents.length + 1,
+    });
+
+    const steps = [
+      "تحليل الموضوع...",
+      "توليد الأسئلة...",
+      "تنسيق الإجابات...",
+      "المراجعة النهائية...",
+    ];
+
+    const apiCall = async () => {
+      const payload = {
+        lecture_id: parseInt(lectureId),
+        topic: topicForm.topic,
+        count: parseInt(topicForm.num_questions),
+        difficulty: topicForm.difficulty,
+      };
+      return await generateQuizFromTopic(courseId, payload);
+    };
+
+    runGenerationProgress(steps, apiCall);
+  };
+
+  // GENERATE FROM PDF
+  const handleGenerateFromPDF = () => {
+    if (!pdfForm.pdf_file || !pdfForm.title?.trim()) {
+      toast.error("يرجى اختيار ملف PDF وإدخال العنوان");
+      return;
+    }
+
+    setCurrentQuizSettings({
+      title: pdfForm.title,
+      description: pdfForm.description,
+      quiz_duration: parseInt(pdfForm.quiz_duration),
+      max_attempts: parseInt(pdfForm.max_attempts),
+      passing_score: parseInt(pdfForm.passing_score),
+      show_correct_answers: parseInt(pdfForm.show_correct_answers),
+      randomize_questions: parseInt(pdfForm.randomize_questions),
+      randomize_options: parseInt(pdfForm.randomize_options),
+      position: contents.length + 1,
+    });
+
+    const steps = [
+      "جاري رفع الملف...",
+      "استخراج النصوص...",
+      "توليد الأسئلة...",
+      "جاري الانتهاء...",
+    ];
+
+    const apiCall = async () => {
+      const params = {
+        lecture_id: parseInt(lectureId),
+        count: parseInt(pdfForm.num_questions),
+        difficulty: pdfForm.difficulty,
+      };
+      return await generateQuizFromPDF(courseId, pdfForm.pdf_file, params);
+    };
+
+    runGenerationProgress(steps, apiCall);
+  };
+
+  // FINAL SAVE
+  const handleCreateFromReviewedQuestions = async () => {
+    if (generatedQuestions.length === 0) {
+      toast.error("لا توجد أسئلة للإنشاء");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        content_type: "quiz",
+        ...currentQuizSettings,
+        questions: generatedQuestions,
+        source: generatedSourceId ? String(generatedSourceId) : "",
+        video_platform: "",
+      };
+
+      await createContent(courseId, lectureId, payload);
+
+      toast.success("تم نشر الاختبار بنجاح!");
+      setFormOpen(false);
+      setReviewMode(false);
+      setGeneratedQuestions([]);
+      setCurrentQuizSettings({});
+      await fetchContents();
+    } catch (error) {
+      console.error("Error creating quiz content:", error);
+      toast.error(
+        error?.response?.data?.detail?.[0]?.msg ||
+          "حدث خطأ أثناء إنشاء الاختبار"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const confirmDelete = async (item) => {
+    if (!courseId || !lectureId || !item?.id) return;
+    const ok = window.confirm(
+      `هل تريد حذف المحتوى: ${item.title || item.content_type}?`
+    );
     if (!ok) return;
     try {
-      await deleteContent(courseId, lectureId, contentId);
+      await deleteContent(courseId, lectureId, item.id);
       toast.success("تم حذف المحتوى");
-      router.push(
-        `/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content`
-      );
+      await fetchContents();
     } catch (e) {
       console.error(e);
       toast.error("فشل حذف المحتوى");
     }
   };
 
-  // Quiz Questions Functions
-  const fetchQuizQuestions = async () => {
-    if (
-      !courseId ||
-      !lectureId ||
-      !contentId ||
-      content?.content_type !== "quiz"
-    )
-      return;
-    setLoadingQuestions(true);
+  const moveUp = async (index) => {
+    if (index <= 0) return;
+    const a = contents[index - 1];
+    const b = contents[index];
     try {
-      const data = await getQuizQuestions(courseId, lectureId, contentId);
-      setQuizQuestions(Array.isArray(data) ? data : []);
+      await updateContent(courseId, lectureId, a.id, { position: b.position });
+      await updateContent(courseId, lectureId, b.id, { position: a.position });
+      toast.success("تم تعديل ترتيب المحتوى");
+      await fetchContents();
     } catch (e) {
       console.error(e);
-      toast.error("فشل تحميل أسئلة الاختبار");
-    } finally {
-      setLoadingQuestions(false);
+      toast.error("فشل تعديل الترتيب");
     }
   };
 
-  const startEditQuestion = (question, index) => {
-    setEditingQuestion(index);
-    setEditQuestionData({
-      question: question.question || "",
-      options: [...(question.options || [])],
-      correct_answer: question.correct_answer || 0,
-      explanation_en: question.explanation_en || "",
-      explanation_ar: question.explanation_ar || "",
-      question_type: question.question_type || "multiple_choice",
-    });
-  };
-
-  const cancelEditQuestion = () => {
-    setEditingQuestion(null);
-    setEditQuestionData(null);
-  };
-
-  const toggleShowOptions = (questionIndex) => {
-    setShowOptions((prev) => ({
-      ...prev,
-      [questionIndex]: prev[questionIndex] === false,
-    }));
-  };
-
-  const handleEditQuestion = async (index) => {
-    if (!editQuestionData?.question?.trim()) {
-      toast.error("يرجى إدخال السؤال");
-      return;
-    }
-
-    // Validate options for multiple choice and true/false
-    if (
-      editQuestionData.question_type === "multiple_choice" ||
-      editQuestionData.question_type === "true_false"
-    ) {
-      if (editQuestionData.options.length < 2) {
-        toast.error("يجب أن يكون هناك خياران على الأقل");
-        return;
-      }
-      if (editQuestionData.options.some((opt) => !opt?.trim())) {
-        toast.error("يرجى ملء جميع الخيارات");
-        return;
-      }
-    }
-
-    // Validate correct answer for short answer
-    if (
-      editQuestionData.question_type === "short_answer" &&
-      !editQuestionData.options[editQuestionData.correct_answer]?.trim()
-    ) {
-      toast.error("يرجى إدخال الإجابة الصحيحة");
-      return;
-    }
-
+  const moveDown = async (index) => {
+    if (index >= contents.length - 1) return;
+    const a = contents[index];
+    const b = contents[index + 1];
     try {
-      const globalIndex = (currentPage - 1) * questionsPerPage + index;
-      await updateQuizQuestion(
-        courseId,
-        lectureId,
-        contentId,
-        globalIndex, // Use globalIndex as questionIndex (0-based)
-        editQuestionData
-      );
-      toast.success("تم تحديث السؤال");
-      setEditingQuestion(null);
-      setEditQuestionData(null);
-      await fetchQuizQuestions();
+      await updateContent(courseId, lectureId, a.id, { position: b.position });
+      await updateContent(courseId, lectureId, b.id, { position: a.position });
+      toast.success("تم تعديل ترتيب المحتوى");
+      await fetchContents();
     } catch (e) {
       console.error(e);
-      toast.error("فشل تحديث السؤال");
+      toast.error("فشل تعديل الترتيب");
     }
   };
 
-  const handleDeleteQuestion = async (index) => {
-    if (quizQuestions.length <= 1) {
-      toast.error("يجب أن يحتوي الاختبار على سؤال واحد على الأقل");
-      return;
-    }
-
-    const result = window.confirm("هل تريد حذف هذا السؤال؟");
-    if (!result) return;
-
-    try {
-      const globalIndex = (currentPage - 1) * questionsPerPage + index;
-      await deleteQuizQuestion(
-        courseId,
-        lectureId,
-        contentId,
-        globalIndex // Use globalIndex as questionIndex (0-based)
-      );
-      toast.success("تم حذف السؤال");
-      await fetchQuizQuestions();
-    } catch (e) {
-      console.error(e);
-      toast.error("فشل حذف السؤال");
+  const contentIcon = (type) => {
+    switch ((type || "").toLowerCase()) {
+      case "video":
+        return "solar:videocamera-bold";
+      case "photo":
+        return "solar:gallery-bold";
+      case "file":
+        return "solar:document-bold";
+      case "audio":
+        return "solar:music-note-2-bold";
+      case "link":
+        return "solar:link-bold";
+      case "quiz":
+        return "solar:checklist-minimalistic-bold";
+      default:
+        return "solar:menu-dots-bold";
     }
   };
 
-  // Helper functions for question editing
-  const addOption = () => {
-    setEditQuestionData((prev) => ({
-      ...prev,
-      options: [...prev.options, ""],
-    }));
-  };
-
-  const updateOption = (optionIndex, value) => {
-    setEditQuestionData((prev) => ({
-      ...prev,
-      options: prev.options.map((opt, idx) =>
-        idx === optionIndex ? value : opt
-      ),
-    }));
-  };
-
-  const removeOption = (optionIndex) => {
-    if (editQuestionData.options.length <= 2) {
-      toast.error("يجب أن يكون هناك خياران على الأقل");
-      return;
-    }
-
-    setEditQuestionData((prev) => ({
-      ...prev,
-      options: prev.options.filter((_, idx) => idx !== optionIndex),
-      correct_answer:
-        prev.correct_answer >= optionIndex && prev.correct_answer > 0
-          ? prev.correct_answer - 1
-          : prev.correct_answer,
-    }));
-  };
-
-  // Calculate pagination
-  const indexOfLastQuestion = currentPage * questionsPerPage;
-  const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
-  const currentQuestions = quizQuestions.slice(
-    indexOfFirstQuestion,
-    indexOfLastQuestion
-  );
-  const totalPages = Math.ceil(quizQuestions.length / questionsPerPage);
-
-  // Fetch quiz questions when content is loaded and is quiz type
-  useEffect(() => {
-    if (content?.content_type === "quiz") {
-      fetchQuizQuestions();
-    }
-  }, [content?.content_type]);
-
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-          <Icon icon="svg-spinners:ring-resize" className="w-5 h-5" />
-          جاري تحميل بيانات المحتوى...
-        </div>
-      </div>
+  const displayedContents = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = q
+      ? contents.filter((c) => (c?.title || "").toLowerCase().includes(q))
+      : contents;
+    if (typeFilter === "all") return list;
+    return list.filter(
+      (c) => (c?.content_type || "").toLowerCase() === typeFilter
     );
-  }
+  }, [contents, query, typeFilter]);
 
-  if (error) {
+  if (loading && contents.length === 0) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-4 rounded-xl">
-          {error}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 flex items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="text-gray-700 dark:text-gray-300 font-medium">
+            جاري تحميل المحتوى...
+          </span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Enhanced Header */}
+        {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.back()}
                 className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
-                aria-label="رجوع"
               >
                 <Icon
                   icon="solar:arrow-right-outline"
@@ -337,873 +486,697 @@ const AdminContentDetailPage = () => {
               </button>
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
-                    <Icon
-                      icon={
-                        content?.content_type === "video"
-                          ? "solar:videocamera-bold"
-                          : content?.content_type === "photo"
-                          ? "solar:gallery-bold"
-                          : content?.content_type === "file"
-                          ? "solar:document-bold"
-                          : content?.content_type === "audio"
-                          ? "solar:music-note-2-bold"
-                          : content?.content_type === "link"
-                          ? "solar:link-bold"
-                          : "solar:checklist-minimalistic-bold"
-                      }
-                      className="w-6 h-6 text-blue-600 dark:text-blue-400"
-                    />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {content?.title || "بدون عنوان"}
-                    </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium">
-                        {content?.content_type === "video"
-                          ? "فيديو"
-                          : content?.content_type === "photo"
-                          ? "صورة"
-                          : content?.content_type === "file"
-                          ? "ملف"
-                          : content?.content_type === "audio"
-                          ? "صوت"
-                          : content?.content_type === "link"
-                          ? "رابط"
-                          : "اختبار"}
-                      </span>
-                      {content?.content_type === "quiz" && (
-                        <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-sm font-medium">
-                          {quizQuestions.length} سؤال
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    إدارة محتوى المحاضرة
+                  </h1>
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-sm font-medium">
+                    {contents.length} محتوى
+                  </span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400">
-                  إدارة وتحرير تفاصيل المحتوى التدريبي
+                  إضافة وتحرير وتنظيم محتوى المحاضرة التدريبية
                 </p>
-                <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <Link
-                    href="/admin/dashboard/courses"
-                    className="hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    الدورات
-                  </Link>
-                  <Icon
-                    icon="solar:alt-arrow-left-bold"
-                    className="w-4 h-4 mx-2"
-                  />
-                  <Link
-                    href={`/admin/dashboard/courses/${courseId}/lectures`}
-                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    المحاضرات
-                  </Link>
-                  <Icon
-                    icon="solar:alt-arrow-left-bold"
-                    className="w-4 h-4 mx-2"
-                  />
-                  <Link
-                    href={`/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content`}
-                    className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                  >
-                    المحتوى
-                  </Link>
-                  <Icon
-                    icon="solar:alt-arrow-left-bold"
-                    className="w-4 h-4 mx-2"
-                  />
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    تفاصيل المحتوى
-                  </span>
-                </nav>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex gap-3">
-                <button
-                  onClick={() =>
-                    router.push(
-                      `/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content`
-                    )
-                  }
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Icon icon="solar:arrow-right-outline" className="w-5 h-5" />
-                  العودة للمحتوى
-                </button>
-
-                <Button
-                  color="red"
-                  shade={500}
-                  darkShade={600}
-                  icon="solar:trash-bold"
-                  text="حذف المحتوى"
-                  onClick={confirmDelete}
-                />
+              {/* Search */}
+              <div className="relative hidden md:block">
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                  <Icon
+                    icon="solar:search-bold"
+                    className="w-5 h-5 text-gray-500 dark:text-gray-400"
+                  />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="البحث..."
+                    className="bg-transparent outline-none flex-1 text-gray-900 dark:text-white placeholder-gray-500"
+                  />
+                </div>
               </div>
+
+              {/* Filter */}
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="all">جميع الأنواع</option>
+                <option value="video">فيديو</option>
+                <option value="audio">صوت</option> {/* Added Audio Filter */}
+                <option value="photo">صورة</option>
+                <option value="file">ملف</option>
+                <option value="link">رابط</option>
+                <option value="quiz">اختبار</option>
+              </select>
+
+              {/* Add Button */}
+              <button
+                onClick={openCreate}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium shadow-lg transform hover:-translate-y-0.5 transition-all"
+              >
+                <Icon icon="solar:add-circle-bold" className="w-5 h-5" /> إضافة
+                محتوى
+              </button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-lg space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                    نوع المحتوى
-                  </label>
-                  <select
-                    value={form.content_type}
-                    onChange={(e) =>
-                      handleChange("content_type", e.target.value)
-                    }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                  >
-                    <option value="video">فيديو</option>
-                    <option value="photo">صورة</option>
-                    <option value="file">ملف</option>
-                    <option value="audio">صوت</option>
-                    <option value="link">رابط</option>
-                    <option value="quiz">اختبار</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                    العنوان
-                  </label>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => handleChange("title", e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                    placeholder="عنوان المحتوى"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                    الوصف
-                  </label>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) =>
-                      handleChange("description", e.target.value)
-                    }
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 min-h-[100px]"
-                    placeholder="وصف المحتوى"
-                  />
-                </div>
-                {form.content_type !== "quiz" && (
-                  <>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        المصدر (رابط)
-                      </label>
-                      <input
-                        type="text"
-                        value={form.source}
-                        onChange={(e) => handleChange("source", e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                        placeholder="https://..."
-                      />
-                    </div>
-                    {form.content_type === "video" && (
-                      <div>
-                        <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                          منصة الفيديو
-                        </label>
-                        <input
-                          type="text"
-                          value={form.video_platform}
-                          onChange={(e) =>
-                            handleChange("video_platform", e.target.value)
-                          }
-                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                          placeholder="youtube"
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
-                {form.content_type === "quiz" && (
-                  <>
-                    <div>
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        مدة الاختبار (دقيقة)
-                      </label>
-                      <input
-                        type="number"
-                        value={form.quiz_duration ?? ""}
-                        onChange={(e) =>
-                          handleChange("quiz_duration", Number(e.target.value))
-                        }
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                        placeholder="10"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        أقصى محاولات
-                      </label>
-                      <input
-                        type="number"
-                        value={form.max_attempts ?? ""}
-                        onChange={(e) =>
-                          handleChange("max_attempts", Number(e.target.value))
-                        }
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                        placeholder="1"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        درجة النجاح (0-100)
-                      </label>
-                      <input
-                        type="number"
-                        value={form.passing_score ?? ""}
-                        onChange={(e) =>
-                          handleChange("passing_score", Number(e.target.value))
-                        }
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                        placeholder="50"
-                      />
-                    </div>
-                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/60">
-                        <Switcher
-                          checked={Boolean(form.show_correct_answers)}
-                          onChange={(checked) =>
-                            handleChange(
-                              "show_correct_answers",
-                              checked ? 1 : 0
-                            )
-                          }
-                          label="إظهار الإجابات الصحيحة"
-                          labelPosition="left"
-                          color="emerald"
-                        />
-                      </div>
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/60">
-                        <Switcher
-                          checked={Boolean(form.randomize_questions)}
-                          onChange={(checked) =>
-                            handleChange("randomize_questions", checked ? 1 : 0)
-                          }
-                          label="ترتيب الأسئلة عشوائي"
-                          labelPosition="left"
-                          color="blue"
-                        />
-                      </div>
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/60">
-                        <Switcher
-                          checked={Boolean(form.randomize_options)}
-                          onChange={(checked) =>
-                            handleChange("randomize_options", checked ? 1 : 0)
-                          }
-                          label="ترتيب الخيارات عشوائي"
-                          labelPosition="left"
-                          color="purple"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-                <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                    الترتيب
-                  </label>
-                  <input
-                    type="number"
-                    value={form.position}
-                    onChange={(e) =>
-                      handleChange("position", Number(e.target.value))
-                    }
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                    placeholder="1"
-                    min={1}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-4">
-                <Button
-                  color="green"
-                  shade={600}
-                  darkShade={700}
-                  text={saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-                  icon={saving ? undefined : "solar:check-circle-bold"}
-                  isLoading={saving}
-                  onClick={handleSave}
-                />
-                <Button
-                  color="gray"
-                  shade={200}
-                  darkShade={300}
-                  text="إلغاء"
-                  icon="solar:close-circle-bold"
-                  onClick={() =>
-                    router.push(
-                      `/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content`
-                    )
-                  }
+        {/* Content List */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {contents.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Icon
+                  icon="solar:book-bold"
+                  className="w-10 h-10 text-blue-600 dark:text-blue-400"
                 />
               </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                لا يوجد محتوى
+              </h3>
+              <button
+                onClick={openCreate}
+                className="inline-flex items-center gap-2 px-6 py-3 mt-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium shadow-lg"
+              >
+                <Icon icon="solar:add-circle-bold" className="w-5 h-5" /> إضافة
+                المحتوى الأول
+              </button>
             </div>
-          </div>
+          ) : displayedContents.length === 0 ? (
+            <div className="p-12 text-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                لا توجد نتائج
+              </h3>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {displayedContents.map((c, idx) => (
+                <div
+                  key={c.id}
+                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-3">
+                        {/* Sorting */}
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => moveUp(idx)}
+                            disabled={idx === 0}
+                            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
+                          >
+                            <Icon
+                              icon="solar:arrow-up-bold"
+                              className="w-4 h-4"
+                            />
+                          </button>
+                          <button
+                            onClick={() => moveDown(idx)}
+                            disabled={idx === displayedContents.length - 1}
+                            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
+                          >
+                            <Icon
+                              icon="solar:arrow-down-bold"
+                              className="w-4 h-4"
+                            />
+                          </button>
+                        </div>
 
-          {/* Quiz Questions Management */}
-          {content?.content_type === "quiz" && (
-            <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl">
-                      <Icon
-                        icon="solar:question-circle-bold"
-                        className="w-8 h-8 text-purple-600"
-                      />
+                        <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium">
+                          #{c.position}
+                        </span>
+
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <Icon
+                            icon={contentIcon(c.content_type)}
+                            className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {c.title || c.content_type}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium">
+                              {c.content_type}
+                            </span>
+                            {/* Show duration for Quiz OR Video/Audio if stored */}
+                            {c.quiz_duration > 0 && (
+                              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                {c.quiz_duration} دقيقة
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      {c.description && (
+                        <p className="text-gray-600 dark:text-gray-400 mb-3">
+                          {c.description}
+                        </p>
+                      )}
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        أسئلة الاختبار
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        إدارة وتحرير أسئلة الاختبار ({quizQuestions.length}{" "}
-                        سؤال)
-                      </p>
+
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => openEdit(c)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-md transition-all"
+                      >
+                        <Icon icon="solar:pen-bold" className="w-4 h-4" /> تعديل
+                      </button>
+                      <Link
+                        href={`/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content/${c.id}`}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md transition-all"
+                      >
+                        <Icon icon="solar:eye-bold" className="w-4 h-4" /> عرض
+                      </Link>
+                      <button
+                        onClick={() => confirmDelete(c)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium shadow-md transition-all"
+                      >
+                        <Icon icon="solar:trash-bold" className="w-4 h-4" /> حذف
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={fetchQuizQuestions}
-                      disabled={loadingQuestions}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 transition-all duration-200"
-                    >
-                      <Icon
-                        icon={
-                          loadingQuestions
-                            ? "svg-spinners:ring-resize"
-                            : "solar:refresh-bold"
-                        }
-                        className="w-4 h-4"
-                      />
-                      تحديث
-                    </button>
                   </div>
                 </div>
-
-                {loadingQuestions ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-                      <Icon
-                        icon="svg-spinners:ring-resize"
-                        className="w-5 h-5"
-                      />
-                      جاري تحميل الأسئلة...
-                    </div>
-                  </div>
-                ) : quizQuestions.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Icon
-                        icon="solar:question-circle-bold"
-                        className="w-8 h-8 text-yellow-600 dark:text-yellow-400"
-                      />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      لا توجد أسئلة
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      لم يتم العثور على أسئلة لهذا الاختبار
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {currentQuestions.map((question, index) => {
-                      const globalIndex = indexOfFirstQuestion + index;
-                      const isEditing = editingQuestion === globalIndex;
-
-                      return (
-                        <div
-                          key={question.id || globalIndex}
-                          className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-gray-50 dark:bg-gray-700/50"
-                        >
-                          {isEditing ? (
-                            <div className="space-y-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                                  السؤال *
-                                </label>
-                                <textarea
-                                  value={editQuestionData.question}
-                                  onChange={(e) =>
-                                    setEditQuestionData((prev) => ({
-                                      ...prev,
-                                      question: e.target.value,
-                                    }))
-                                  }
-                                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                  rows={3}
-                                  placeholder="اكتب السؤال هنا..."
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                                  نوع السؤال
-                                </label>
-                                <select
-                                  value={editQuestionData.question_type}
-                                  onChange={(e) =>
-                                    setEditQuestionData((prev) => ({
-                                      ...prev,
-                                      question_type: e.target.value,
-                                    }))
-                                  }
-                                  className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                >
-                                  <option value="multiple_choice">
-                                    اختيار متعدد
-                                  </option>
-                                  <option value="true_false">صح/خطأ</option>
-                                  <option value="short_answer">
-                                    إجابة قصيرة
-                                  </option>
-                                </select>
-                              </div>
-
-                              {(editQuestionData.question_type ===
-                                "multiple_choice" ||
-                                editQuestionData.question_type ===
-                                  "true_false") && (
-                                <div>
-                                  <div className="flex items-center justify-between mb-3">
-                                    <label className="block text-sm font-medium text-gray-900 dark:text-white">
-                                      الخيارات
-                                    </label>
-                                    <button
-                                      onClick={addOption}
-                                      className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-800/50 text-green-700 dark:text-green-300 text-sm transition-all"
-                                    >
-                                      <Icon
-                                        icon="solar:add-circle-bold"
-                                        className="w-4 h-4"
-                                      />
-                                      إضافة خيار
-                                    </button>
-                                  </div>
-                                  <div className="space-y-3">
-                                    {editQuestionData.options.map(
-                                      (option, optionIndex) => (
-                                        <div
-                                          key={optionIndex}
-                                          className="flex items-center gap-3"
-                                        >
-                                          <input
-                                            type="radio"
-                                            name={`correct-${globalIndex}`}
-                                            checked={
-                                              editQuestionData.correct_answer ===
-                                              optionIndex
-                                            }
-                                            onChange={() =>
-                                              setEditQuestionData((prev) => ({
-                                                ...prev,
-                                                correct_answer: optionIndex,
-                                              }))
-                                            }
-                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                                          />
-                                          <input
-                                            type="text"
-                                            value={option}
-                                            onChange={(e) =>
-                                              updateOption(
-                                                optionIndex,
-                                                e.target.value
-                                              )
-                                            }
-                                            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                            placeholder={`الخيار ${
-                                              optionIndex + 1
-                                            }`}
-                                          />
-                                          {editQuestionData.options.length >
-                                            2 && (
-                                            <button
-                                              onClick={() =>
-                                                removeOption(optionIndex)
-                                              }
-                                              className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-all"
-                                            >
-                                              <Icon
-                                                icon="solar:trash-bold"
-                                                className="w-4 h-4"
-                                              />
-                                            </button>
-                                          )}
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {editQuestionData.question_type ===
-                                "short_answer" && (
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                                    الإجابة الصحيحة *
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={
-                                      editQuestionData.options[
-                                        editQuestionData.correct_answer
-                                      ] || ""
-                                    }
-                                    onChange={(e) =>
-                                      setEditQuestionData((prev) => ({
-                                        ...prev,
-                                        options: prev.options.map((opt, idx) =>
-                                          idx === prev.correct_answer
-                                            ? e.target.value
-                                            : opt
-                                        ),
-                                      }))
-                                    }
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="اكتب الإجابة الصحيحة..."
-                                  />
-                                </div>
-                              )}
-
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                                    الشرح (عربي)
-                                  </label>
-                                  <textarea
-                                    value={editQuestionData.explanation_ar}
-                                    onChange={(e) =>
-                                      setEditQuestionData((prev) => ({
-                                        ...prev,
-                                        explanation_ar: e.target.value,
-                                      }))
-                                    }
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    rows={3}
-                                    placeholder="شرح الإجابة باللغة العربية..."
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                                    الشرح (إنجليزي)
-                                  </label>
-                                  <textarea
-                                    value={editQuestionData.explanation_en}
-                                    onChange={(e) =>
-                                      setEditQuestionData((prev) => ({
-                                        ...prev,
-                                        explanation_en: e.target.value,
-                                      }))
-                                    }
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    rows={3}
-                                    placeholder="Explanation in English..."
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
-                                <button
-                                  onClick={() => handleEditQuestion(index)}
-                                  className="inline-flex items-center gap-2 px-6 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-                                >
-                                  <Icon
-                                    icon="solar:check-circle-bold"
-                                    className="w-4 h-4"
-                                  />
-                                  حفظ
-                                </button>
-                                <button
-                                  onClick={cancelEditQuestion}
-                                  className="inline-flex items-center gap-2 px-6 py-2 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium transition-all duration-200"
-                                >
-                                  <Icon
-                                    icon="solar:close-circle-bold"
-                                    className="w-4 h-4"
-                                  />
-                                  إلغاء
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="flex items-start justify-between mb-4">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-3 mb-3">
-                                    <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium">
-                                      سؤال {globalIndex + 1}
-                                    </span>
-                                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs">
-                                      {question.question_type ===
-                                      "multiple_choice"
-                                        ? "اختيار متعدد"
-                                        : question.question_type ===
-                                          "true_false"
-                                        ? "صح/خطأ"
-                                        : "إجابة قصيرة"}
-                                    </span>
-                                  </div>
-                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                                    {question.question}
-                                  </h3>
-
-                                  {(question.question_type ===
-                                    "multiple_choice" ||
-                                    question.question_type ===
-                                      "true_false") && (
-                                    <div className="mb-4">
-                                      <button
-                                        onClick={() =>
-                                          toggleShowOptions(globalIndex)
-                                        }
-                                        className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 text-sm transition-all"
-                                      >
-                                        <Icon
-                                          icon={
-                                            showOptions[globalIndex] === false
-                                              ? "solar:eye-bold"
-                                              : "solar:eye-closed-bold"
-                                          }
-                                          className="w-4 h-4"
-                                        />
-                                        {showOptions[globalIndex] === false
-                                          ? "إظهار الخيارات"
-                                          : "إخفاء الخيارات"}
-                                      </button>
-                                    </div>
-                                  )}
-
-                                  {(question.question_type ===
-                                    "multiple_choice" ||
-                                    question.question_type === "true_false") &&
-                                    showOptions[globalIndex] !== false && (
-                                      <div className="space-y-2 mb-4">
-                                        {question.options?.map(
-                                          (option, optionIndex) => (
-                                            <div
-                                              key={optionIndex}
-                                              className={`flex items-center gap-3 p-3 rounded-lg ${
-                                                optionIndex ===
-                                                question.correct_answer
-                                                  ? "bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700"
-                                                  : "bg-gray-100 dark:bg-gray-700"
-                                              }`}
-                                            >
-                                              <div
-                                                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                                                  optionIndex ===
-                                                  question.correct_answer
-                                                    ? "border-green-600 bg-green-600"
-                                                    : "border-gray-400"
-                                                }`}
-                                              >
-                                                {optionIndex ===
-                                                  question.correct_answer && (
-                                                  <Icon
-                                                    icon="solar:check-bold"
-                                                    className="w-3 h-3 text-white"
-                                                  />
-                                                )}
-                                              </div>
-                                              <span className="text-gray-900 dark:text-white">
-                                                {option}
-                                              </span>
-                                            </div>
-                                          )
-                                        )}
-                                      </div>
-                                    )}
-
-                                  {question.question_type ===
-                                    "short_answer" && (
-                                    <div className="mb-4">
-                                      <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700">
-                                        <div className="flex items-center gap-2">
-                                          <Icon
-                                            icon="solar:check-circle-bold"
-                                            className="w-4 h-4 text-green-600"
-                                          />
-                                          <span className="font-medium text-green-800 dark:text-green-300">
-                                            الإجابة الصحيحة:
-                                          </span>
-                                          <span className="text-green-700 dark:text-green-400">
-                                            {
-                                              question.options?.[
-                                                question.correct_answer
-                                              ]
-                                            }
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {(question.explanation_ar ||
-                                    question.explanation_en) && (
-                                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Icon
-                                          icon="solar:info-circle-bold"
-                                          className="w-4 h-4 text-blue-600"
-                                        />
-                                        <span className="font-medium text-blue-800 dark:text-blue-300">
-                                          الشرح:
-                                        </span>
-                                      </div>
-                                      {question.explanation_ar && (
-                                        <p className="text-blue-700 dark:text-blue-300 mb-2">
-                                          {question.explanation_ar}
-                                        </p>
-                                      )}
-                                      {question.explanation_en && (
-                                        <p className="text-blue-600 dark:text-blue-400 text-sm">
-                                          {question.explanation_en}
-                                        </p>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="flex flex-col gap-2 ml-6">
-                                  <button
-                                    onClick={() =>
-                                      startEditQuestion(question, globalIndex)
-                                    }
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all duration-200 shadow-md hover:shadow-lg"
-                                  >
-                                    <Icon
-                                      icon="solar:pen-bold"
-                                      className="w-4 h-4"
-                                    />
-                                    تعديل
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteQuestion(index)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-all duration-200 shadow-md hover:shadow-lg"
-                                  >
-                                    <Icon
-                                      icon="solar:trash-bold"
-                                      className="w-4 h-4"
-                                    />
-                                    حذف
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <div className="flex justify-center items-center gap-4 mt-8">
-                        <button
-                          onClick={() =>
-                            setCurrentPage(Math.max(1, currentPage - 1))
-                          }
-                          disabled={currentPage === 1}
-                          className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-2"
-                        >
-                          <Icon
-                            icon="solar:alt-arrow-left-bold"
-                            className="w-5 h-5"
-                          />
-                          <span>السابق</span>
-                        </button>
-
-                        <div className="flex gap-2">
-                          {Array.from(
-                            { length: totalPages },
-                            (_, i) => i + 1
-                          ).map((page) => (
-                            <button
-                              key={page}
-                              onClick={() => setCurrentPage(page)}
-                              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg ${
-                                page === currentPage
-                                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white"
-                                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={() =>
-                            setCurrentPage(
-                              Math.min(totalPages, currentPage + 1)
-                            )
-                          }
-                          disabled={currentPage === totalPages}
-                          className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-2"
-                        >
-                          <span>التالي</span>
-                          <Icon
-                            icon="solar:alt-arrow-right-bold"
-                            className="w-5 h-5"
-                          />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
           )}
+        </div>
 
-          <div className="lg:col-span-1">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-lg">
-              <h2 className="font-medium mb-3">تفاصيل</h2>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">المعرف</span>
-                  <span className="font-mono">{content?.id}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">النوع</span>
-                  <span className="font-medium">{content?.content_type}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">أنشئت</span>
-                  <span className="font-medium">{content?.created_at}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">حدثت</span>
-                  <span className="font-medium">{content?.updated_at}</span>
-                </div>
-                {content?.source && (
-                  <div className="mt-2">
-                    <span className="block text-gray-500">المصدر</span>
-                    <div className="text-xs break-all">{content?.source}</div>
+        {/* Modal Form */}
+        {formOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <Icon
+                      icon={
+                        reviewMode
+                          ? "solar:clipboard-check-bold"
+                          : editMode
+                          ? "solar:pen-bold"
+                          : "solar:add-circle-bold"
+                      }
+                      className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                    />
                   </div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {reviewMode
+                      ? "مراجعة الاختبار"
+                      : editMode
+                      ? "تعديل المحتوى"
+                      : "إضافة محتوى"}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setFormOpen(false)}
+                  className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Icon
+                    icon="solar:close-circle-bold"
+                    className="w-6 h-6 text-gray-500"
+                  />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                {reviewMode ? (
+                  // --- REVIEW MODE ---
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-100 dark:border-blue-800">
+                      <h4 className="font-bold text-blue-900 dark:text-blue-200 mb-2 text-lg">
+                        ملخص: {currentQuizSettings.title}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm text-blue-800 dark:text-blue-300">
+                        <p>
+                          عدد الأسئلة:{" "}
+                          <span className="font-bold">
+                            {generatedQuestions.length}
+                          </span>
+                        </p>
+                        <p>
+                          المدة:{" "}
+                          <span className="font-bold">
+                            {currentQuizSettings.quiz_duration} دقيقة
+                          </span>
+                        </p>
+                        <p>
+                          درجة النجاح:{" "}
+                          <span className="font-bold">
+                            {currentQuizSettings.passing_score}%
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {generatedQuestions.map((q, i) => (
+                        <div
+                          key={i}
+                          className="border border-gray-200 dark:border-gray-700 p-5 rounded-xl bg-white dark:bg-gray-800 shadow-sm"
+                        >
+                          <div className="flex gap-3">
+                            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-sm">
+                              {i + 1}
+                            </span>
+                            <div className="flex-1">
+                              <p className="font-bold text-gray-900 dark:text-white mb-3 text-lg">
+                                {q.question}
+                              </p>
+                              <div className="space-y-2">
+                                {q.options.map((opt, oi) => (
+                                  <div
+                                    key={oi}
+                                    className={`flex items-center p-3 rounded-lg border ${
+                                      oi === q.correct_answer
+                                        ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                                        : "border-gray-100 dark:border-gray-700"
+                                    }`}
+                                  >
+                                    <div
+                                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 ${
+                                        oi === q.correct_answer
+                                          ? "border-green-500 bg-green-500 text-white"
+                                          : "border-gray-300"
+                                      }`}
+                                    >
+                                      {oi === q.correct_answer && (
+                                        <Icon icon="solar:check-read-linear" />
+                                      )}
+                                    </div>
+                                    <span
+                                      className={
+                                        oi === q.correct_answer
+                                          ? "font-medium text-green-900 dark:text-green-300"
+                                          : "text-gray-700 dark:text-gray-300"
+                                      }
+                                    >
+                                      {opt}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  // --- FORM MODE ---
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-gray-900 dark:text-white">
+                        نوع المحتوى
+                      </label>
+                      <select
+                        value={contentForm.content_type}
+                        onChange={(e) => {
+                          handleFormChange("content_type", e.target.value);
+                          if (e.target.value !== "quiz") {
+                            setGenerating(false);
+                            setActiveTab("topic");
+                          }
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 transition-all"
+                      >
+                        <option value="video">فيديو</option>
+                        <option value="audio">صوت</option> {/* Added option */}
+                        <option value="photo">صورة</option>
+                        <option value="file">ملف</option>
+                        <option value="link">رابط</option>
+                        <option value="quiz">اختبار (AI)</option>
+                      </select>
+                    </div>
+
+                    {/* Normal Content Form */}
+                    {contentForm.content_type !== "quiz" && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">العنوان</label>
+                          <input
+                            type="text"
+                            placeholder="عنوان المحتوى"
+                            value={contentForm.title}
+                            onChange={(e) =>
+                              handleFormChange("title", e.target.value)
+                            }
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">الوصف</label>
+                          <textarea
+                            placeholder="وصف المحتوى"
+                            value={contentForm.description}
+                            onChange={(e) =>
+                              handleFormChange("description", e.target.value)
+                            }
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 min-h-[100px]"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            المصدر / الرابط
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="https://..."
+                            value={contentForm.source}
+                            onChange={(e) =>
+                              handleFormChange("source", e.target.value)
+                            }
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                          />
+                        </div>
+                        {contentForm.content_type === "video" && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                              منصة الفيديو
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="youtube, vimeo..."
+                              value={contentForm.video_platform}
+                              onChange={(e) =>
+                                handleFormChange(
+                                  "video_platform",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                            />
+                          </div>
+                        )}
+
+                        {/* Note: Duration and Attempts inputs are hidden for non-quiz, 
+                            but will be sent with defaults (10 and 1) */}
+                      </div>
+                    )}
+
+                    {/* Quiz AI Form */}
+                    {contentForm.content_type === "quiz" && (
+                      <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                          <button
+                            onClick={() => setActiveTab("topic")}
+                            className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                              activeTab === "topic"
+                                ? "bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-300"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            موضوع
+                          </button>
+                          <button
+                            onClick={() => setActiveTab("pdf")}
+                            className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                              activeTab === "pdf"
+                                ? "bg-white dark:bg-gray-600 shadow-sm text-purple-600 dark:text-purple-300"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            ملف PDF
+                          </button>
+                        </div>
+
+                        {generating ? (
+                          <div className="text-center py-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                            <div className="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <p className="font-medium text-blue-800 dark:text-blue-300">
+                              {progressText}
+                            </p>
+                            <div className="w-64 h-2 bg-blue-200 dark:bg-blue-800 rounded-full mx-auto mt-4 overflow-hidden">
+                              <div
+                                className="h-full bg-blue-600 transition-all duration-300"
+                                style={{ width: `${progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ) : activeTab === "topic" ? (
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">
+                                العنوان
+                              </label>
+                              <input
+                                type="text"
+                                value={topicForm.title}
+                                onChange={(e) =>
+                                  setTopicForm({
+                                    ...topicForm,
+                                    title: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">
+                                موضوع الاختبار
+                              </label>
+                              <textarea
+                                value={topicForm.topic}
+                                onChange={(e) =>
+                                  setTopicForm({
+                                    ...topicForm,
+                                    topic: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 min-h-[120px]"
+                                placeholder="اكتب الموضوع أو النص هنا..."
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">
+                                  عدد الأسئلة
+                                </label>
+                                <select
+                                  value={topicForm.num_questions}
+                                  onChange={(e) =>
+                                    setTopicForm({
+                                      ...topicForm,
+                                      num_questions: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                                >
+                                  <option value="5">5 أسئلة</option>
+                                  <option value="10">10 أسئلة</option>
+                                  <option value="15">15 سؤال</option>
+                                  <option value="20">20 سؤال</option>
+                                  <option value="25">25 سؤال</option>
+                                  <option value="30">30 سؤال</option>
+                                  <option value="35">35 سؤال</option>
+                                  <option value="40">40 سؤال</option>
+                                  <option value="45">45 سؤال</option>
+                                  <option value="50">50 سؤال</option>
+                                  <option value="55">55 سؤال</option>
+                                  <option value="60">60 سؤال</option>
+                                </select>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">
+                                  الصعوبة
+                                </label>
+                                <select
+                                  value={topicForm.difficulty}
+                                  onChange={(e) =>
+                                    setTopicForm({
+                                      ...topicForm,
+                                      difficulty: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                                >
+                                  <option value="easy">سهل</option>
+                                  <option value="medium">متوسط</option>
+                                  <option value="hard">صعب</option>
+                                </select>
+                              </div>
+                            </div>
+                            <button
+                              onClick={handleGenerateFromTopic}
+                              className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2"
+                            >
+                              <Icon
+                                icon="solar:magic-stick-3-bold-duotone"
+                                className="w-6 h-6"
+                              />{" "}
+                              توليد الأسئلة (AI)
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">
+                                العنوان
+                              </label>
+                              <input
+                                type="text"
+                                value={pdfForm.title}
+                                onChange={(e) =>
+                                  setPdfForm({
+                                    ...pdfForm,
+                                    title: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">
+                                ملف PDF
+                              </label>
+                              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-purple-500 transition-colors bg-gray-50 dark:bg-gray-700">
+                                <input
+                                  type="file"
+                                  accept=".pdf"
+                                  onChange={(e) =>
+                                    setPdfForm({
+                                      ...pdfForm,
+                                      pdf_file: e.target.files[0],
+                                    })
+                                  }
+                                  className="hidden"
+                                  id="pdf-upload"
+                                />
+                                <label
+                                  htmlFor="pdf-upload"
+                                  className="cursor-pointer flex flex-col items-center"
+                                >
+                                  <Icon
+                                    icon="solar:file-text-bold-duotone"
+                                    className="w-10 h-10 text-purple-500 mb-2"
+                                  />
+                                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                                    {pdfForm.pdf_file
+                                      ? pdfForm.pdf_file.name
+                                      : "اضغط لرفع ملف PDF"}
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">
+                                  عدد الأسئلة
+                                </label>
+                                <select
+                                  value={pdfForm.num_questions}
+                                  onChange={(e) =>
+                                    setPdfForm({
+                                      ...pdfForm,
+                                      num_questions: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                                >
+                                  <option value="5">5 أسئلة</option>
+                                  <option value="10">10 أسئلة</option>
+                                  <option value="15">15 سؤال</option>
+                                  <option value="20">20 سؤال</option>
+                                  <option value="25">25 سؤال</option>
+                                  <option value="30">30 سؤال</option>
+                                  <option value="35">35 سؤال</option>
+                                  <option value="40">40 سؤال</option>
+                                  <option value="45">45 سؤال</option>
+                                  <option value="50">50 سؤال</option>
+                                  <option value="55">55 سؤال</option>
+                                  <option value="60">60 سؤال</option>
+                                </select>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">
+                                  الصعوبة
+                                </label>
+                                <select
+                                  value={pdfForm.difficulty}
+                                  onChange={(e) =>
+                                    setPdfForm({
+                                      ...pdfForm,
+                                      difficulty: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700"
+                                >
+                                  <option value="easy">سهل</option>
+                                  <option value="medium">متوسط</option>
+                                  <option value="hard">صعب</option>
+                                </select>
+                              </div>
+                            </div>
+                            <button
+                              onClick={handleGenerateFromPDF}
+                              className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2"
+                            >
+                              <Icon
+                                icon="solar:magic-stick-3-bold-duotone"
+                                className="w-6 h-6"
+                              />{" "}
+                              توليد من PDF (AI)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
+                {reviewMode ? (
+                  <>
+                    <button
+                      onClick={() => setReviewMode(false)}
+                      className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300"
+                    >
+                      تعديل الإعدادات
+                    </button>
+                    <button
+                      onClick={handleCreateFromReviewedQuestions}
+                      disabled={saving}
+                      className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium shadow-lg transition-all flex items-center gap-2"
+                    >
+                      {saving && <Icon icon="line-md:loading-loop" />}
+                      {saving ? "جاري النشر..." : "نشر الاختبار"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setFormOpen(false)}
+                      className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300"
+                    >
+                      إلغاء
+                    </button>
+                    {contentForm.content_type !== "quiz" && (
+                      <button
+                        onClick={handleSubmit}
+                        disabled={saving}
+                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg transition-all flex items-center gap-2"
+                      >
+                        {saving && <Icon icon="line-md:loading-loop" />}
+                        {saving ? "جاري الحفظ..." : "حفظ"}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default AdminContentDetailPage;
+export default AdminLectureContentPage;
