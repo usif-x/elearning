@@ -182,6 +182,46 @@ const ContentPage = () => {
         );
 
       case "audio":
+        // Check if it's an Adilo audio link
+        if (content.source && content.source.includes("adilo.bigcommand.com")) {
+          return (
+            <div className="flex justify-center">
+              <div className="bg-black rounded-xl overflow-hidden w-full max-w-4xl">
+                <div
+                  style={{
+                    maxWidth: "100%",
+                    width: "auto",
+                    height: "null",
+                    position: "relative",
+                    paddingTop: "95px",
+                  }}
+                >
+                  <iframe
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                    }}
+                    allowTransparency="true"
+                    src={`${content.source}?minified=true`}
+                    frameBorder="0"
+                    allowFullScreen
+                    mozallowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    oallowfullscreen="true"
+                    msallowfullscreen="true"
+                    scrolling="no"
+                    title={content.title}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // Default audio player for uploaded files
         return (
           <div className="flex justify-center">
             <div className="bg-gradient-to-br from-sky-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-8 w-full max-w-3xl">
