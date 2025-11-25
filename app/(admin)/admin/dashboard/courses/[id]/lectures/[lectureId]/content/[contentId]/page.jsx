@@ -283,7 +283,7 @@ const AdminContentDetailPage = () => {
     }));
   };
 
-  // AI Generation Handler
+  // AI Generation Handler with Update Request
   const handleGenerateQuestions = async () => {
     if (!content?.source) {
       toast.error("لا يوجد مصدر مرتبط بهذا الاختبار");
@@ -292,26 +292,80 @@ const AdminContentDetailPage = () => {
 
     setIsGenerating(true);
     try {
-      // Collect existing questions to avoid duplicates
+      // 1. Get existing question texts for duplication avoidance
       const previousQuestions = quizQuestions.map((q) => q.question);
 
-      await generateMoreQuestionsFromSource(courseId, content.source, {
-        lecture_id: parseInt(lectureId),
-        difficulty: generateParams.difficulty,
-        count: generateParams.count,
-        notes: generateParams.notes,
-        previous_questions: previousQuestions,
-      });
+      // 2. Call AI Service
+      const response = await generateMoreQuestionsFromSource(
+        courseId,
+        content.source,
+        {
+          lecture_id: parseInt(lectureId),
+          difficulty: generateParams.difficulty,
+          count: generateParams.count,
+          notes: generateParams.notes,
+          previous_questions: previousQuestions,
+        }
+      );
 
-      toast.success("تم توليد الأسئلة بنجاح");
-      setShowGenerateModal(false);
-      // Reset params except maybe difficulty
-      setGenerateParams((prev) => ({ ...prev, notes: "" }));
-      // Refresh questions list
-      await fetchQuizQuestions();
+      if (response && response.questions) {
+        // 3. Format Existing Questions to match Payload Schema
+        // We strip ID, timestamps etc. and keep only necessary fields
+        const formattedExistingQuestions = quizQuestions.map((q) => ({
+          question: q.question,
+          options: q.options || [],
+          correct_answer: q.correct_answer || 0,
+          explanation_en: q.explanation_en || "",
+          explanation_ar: q.explanation_ar || "",
+          question_type: q.question_type || "multiple_choice",
+          question_category: q.question_category || "standard",
+          cognitive_level: q.cognitive_level || "remember",
+        }));
+
+        // 4. Format New AI Questions
+        // AI response doesn't usually send question_type, so we default to multiple_choice
+        const formattedNewQuestions = response.questions.map((q) => ({
+          ...q,
+          question_type: "multiple_choice",
+          options: q.options || [],
+        }));
+
+        // 5. Concatenate
+        const allQuestions = [
+          ...formattedExistingQuestions,
+          ...formattedNewQuestions,
+        ];
+
+        // 6. Construct Full Payload
+        const payload = {
+          ...form,
+          // Ensure numerical values
+          quiz_duration: Number(form.quiz_duration),
+          max_attempts: Number(form.max_attempts),
+          passing_score: Number(form.passing_score),
+          show_correct_answers: Number(form.show_correct_answers) || 0,
+          randomize_questions: Number(form.randomize_questions) || 0,
+          randomize_options: Number(form.randomize_options) || 0,
+          position: Number(form.position),
+          // Add the concatenated questions
+          questions: allQuestions,
+        };
+
+        // 7. Send Update Request to Backend
+        await updateContent(courseId, lectureId, contentId, payload);
+
+        toast.success(
+          `تم إضافة ${formattedNewQuestions.length} سؤال جديد وحفظ الاختبار`
+        );
+        setShowGenerateModal(false);
+        setGenerateParams((prev) => ({ ...prev, notes: "" }));
+
+        // 8. Refresh Data
+        await fetchQuizQuestions();
+      }
     } catch (e) {
       console.error(e);
-      toast.error("فشل توليد الأسئلة، يرجى المحاولة مرة أخرى");
+      toast.error("فشل عملية التوليد أو الحفظ، يرجى المحاولة مرة أخرى");
     } finally {
       setIsGenerating(false);
     }
@@ -355,7 +409,7 @@ const AdminContentDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header Section (Unchanged) */}
+        {/* Header Section */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -400,7 +454,6 @@ const AdminContentDetailPage = () => {
                 <p className="text-gray-600 dark:text-gray-400">
                   إدارة وتحرير تفاصيل المحتوى التدريبي
                 </p>
-                {/* Breadcrumbs (Unchanged) */}
                 <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <Link href="/admin/dashboard/courses">الدورات</Link>
                   <Icon
@@ -443,9 +496,7 @@ const AdminContentDetailPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            {/* General Settings Form (Same as original) */}
             <div className="p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-lg space-y-4">
-              {/* ... [Previous form inputs remain exactly the same] ... */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
@@ -722,20 +773,17 @@ const AdminContentDetailPage = () => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {/* ... [Question list rendering remains exactly the same] ... */}
                     {currentQuestions.map((question, index) => {
                       const globalIndex = indexOfFirstQuestion + index;
                       const isEditing = editingQuestion === globalIndex;
-                      // ... (Keep existing question rendering code)
+
                       return (
                         <div
                           key={question.id || globalIndex}
                           className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-gray-50 dark:bg-gray-700/50"
                         >
-                          {/* ... (Keep existing question item content) ... */}
                           {isEditing ? (
                             <div className="space-y-4">
-                              {/* Copy previous Edit inputs here or keep them as is */}
                               <div>
                                 <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                                   السؤال *
@@ -752,7 +800,7 @@ const AdminContentDetailPage = () => {
                                   rows={3}
                                 />
                               </div>
-                              {/* ... (Rest of edit logic) ... */}
+
                               <div>
                                 <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                                   نوع السؤال
@@ -939,7 +987,6 @@ const AdminContentDetailPage = () => {
                             </div>
                           ) : (
                             <div>
-                              {/* View Mode */}
                               <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3 mb-3">
@@ -1277,7 +1324,7 @@ const AdminContentDetailPage = () => {
                 color="purple"
                 shade={600}
                 darkShade={700}
-                text={isGenerating ? "جاري التوليد..." : "توليد الأسئلة"}
+                text={isGenerating ? "جاري التوليد والحفظ..." : "توليد الأسئلة"}
                 icon={isGenerating ? undefined : "solar:magic-stick-3-bold"}
                 isLoading={isGenerating}
                 onClick={handleGenerateQuestions}
