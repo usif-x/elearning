@@ -81,9 +81,7 @@ const Footer = ({ isSidebarCollapsed }) => {
           {/* Footer Bottom */}
           <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-              <p>
-                © {new Date().getFullYear()} دحيحة ميديكال. جميع الحقوق محفوظة.
-              </p>
+              <p>© {new Date().getFullYear()} دحيحة ميديكال</p>
               <div className="flex items-center gap-2">
                 <span>تطوير</span>
                 <Icon
@@ -91,7 +89,7 @@ const Footer = ({ isSidebarCollapsed }) => {
                   className="w-4 h-4 text-blue-500"
                 />
                 <Link
-                  href={"https://yousseif.xyz"}
+                  href={"https://t.me/yousseifmuhammed"}
                   className="text-gray-700 dark:text-gray-300 font-medium bg-gray-200 smooth dark:bg-gray-800 p-2 px-4 rounded-md hover:bg-opacity-60"
                 >
                   يوسف
