@@ -32,6 +32,7 @@ const AdminLectureContentPage = () => {
   const [currentItem, setCurrentItem] = useState(null);
 
   // Main Content Form
+  // [UPDATED] Set default values for duration and attempts
   const [contentForm, setContentForm] = useState({
     content_type: "video",
     source: "",
@@ -39,9 +40,9 @@ const AdminLectureContentPage = () => {
     title: "",
     description: "",
     position: 1,
-    quiz_duration: null,
-    max_attempts: null,
-    passing_score: null,
+    quiz_duration: 10, // Default 10 mins
+    max_attempts: 1, // Default 1 attempt
+    passing_score: 50, // Default 50%
     show_correct_answers: 1,
     randomize_questions: 0,
     randomize_options: 0,
@@ -125,6 +126,7 @@ const AdminLectureContentPage = () => {
   const openCreate = () => {
     setEditMode(false);
     setCurrentItem(null);
+    // [UPDATED] Initialize with defaults
     setContentForm({
       content_type: "video",
       source: "",
@@ -132,9 +134,9 @@ const AdminLectureContentPage = () => {
       title: "",
       description: "",
       position: contents.length + 1,
-      quiz_duration: null,
-      max_attempts: null,
-      passing_score: null,
+      quiz_duration: 10, // Default
+      max_attempts: 1, // Default
+      passing_score: 50, // Default
       show_correct_answers: 1,
       randomize_questions: 0,
       randomize_options: 0,
@@ -154,6 +156,7 @@ const AdminLectureContentPage = () => {
   const openEdit = (item) => {
     setEditMode(true);
     setCurrentItem(item);
+    // [UPDATED] Use existing values or fallback to defaults
     setContentForm({
       content_type: item?.content_type || "video",
       source: item?.source || "",
@@ -161,9 +164,9 @@ const AdminLectureContentPage = () => {
       title: item?.title || "",
       description: item?.description || "",
       position: Number(item?.position) || 1,
-      quiz_duration: item?.quiz_duration ?? null,
-      max_attempts: item?.max_attempts ?? null,
-      passing_score: item?.passing_score ?? null,
+      quiz_duration: item?.quiz_duration ?? 10,
+      max_attempts: item?.max_attempts ?? 1,
+      passing_score: item?.passing_score ?? 50,
       show_correct_answers: item?.show_correct_answers ?? 1,
       randomize_questions: item?.randomize_questions ?? 0,
       randomize_options: item?.randomize_options ?? 0,
@@ -190,11 +193,14 @@ const AdminLectureContentPage = () => {
     try {
       const payload = { ...contentForm };
 
-      // Clean up payload based on type
+      // [UPDATED] Ensure defaults are sent for ALL content types (Video, Audio, etc.)
+      // We do NOT zero these out anymore.
+      payload.quiz_duration = Number(payload.quiz_duration) || 10;
+      payload.max_attempts = Number(payload.max_attempts) || 1;
+      payload.passing_score = Number(payload.passing_score) || 50;
+
+      // Only clear questions array if it's not a quiz
       if (payload.content_type !== "quiz") {
-        payload.quiz_duration = 0;
-        payload.max_attempts = 0;
-        payload.passing_score = 0;
         payload.questions = [];
       }
 
@@ -522,6 +528,7 @@ const AdminLectureContentPage = () => {
               >
                 <option value="all">جميع الأنواع</option>
                 <option value="video">فيديو</option>
+                <option value="audio">صوت</option> {/* Added Audio Option */}
                 <option value="photo">صورة</option>
                 <option value="file">ملف</option>
                 <option value="link">رابط</option>
@@ -620,11 +627,10 @@ const AdminLectureContentPage = () => {
                             <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium">
                               {c.content_type}
                             </span>
-                            {c.content_type === "quiz" && (
+                            {/* Display duration for any type if it exists (Quizzes, Videos, Audio) */}
+                            {c.quiz_duration > 0 && (
                               <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
-                                {c.quiz_duration
-                                  ? `${c.quiz_duration} دقيقة`
-                                  : "غير محدد"}
+                                {c.quiz_duration} دقيقة
                               </span>
                             )}
                           </div>
@@ -805,6 +811,8 @@ const AdminLectureContentPage = () => {
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 transition-all"
                       >
                         <option value="video">فيديو</option>
+                        <option value="audio">صوت</option>{" "}
+                        {/* Added Audio Option */}
                         <option value="photo">صورة</option>
                         <option value="file">ملف</option>
                         <option value="link">رابط</option>
