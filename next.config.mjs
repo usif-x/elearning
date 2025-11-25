@@ -16,6 +16,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "t.me",
       },
+      {
+        protocol: "https",
+        hostname: "api.dahhehet-medical.app",
+      },
     ],
   },
 };

@@ -230,7 +230,7 @@ export default function AIExplainPage() {
             />
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            الشرح الذكي
+            شرح المحتوى
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4">
             شرح باللهجة المصرية مع الحفاظ على المصطلحات الطبية، سواء من ملف PDF
