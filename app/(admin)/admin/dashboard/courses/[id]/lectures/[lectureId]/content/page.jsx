@@ -1075,6 +1075,16 @@ const AdminLectureContentPage = () => {
                                 >
                                   <option value="5">5 أسئلة</option>
                                   <option value="10">10 أسئلة</option>
+                                  <option value="15">15 سؤال</option>
+                                  <option value="20">20 سؤال</option>
+                                  <option value="25">25 سؤال</option>
+                                  <option value="30">30 سؤال</option>
+                                  <option value="35">35 سؤال</option>
+                                  <option value="40">40 سؤال</option>
+                                  <option value="45">45 سؤال</option>
+                                  <option value="50">50 سؤال</option>
+                                  <option value="55">55 سؤال</option>
+                                  <option value="60">60 سؤال</option>
                                 </select>
                               </div>
                               <div className="space-y-2">
