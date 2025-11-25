@@ -356,9 +356,11 @@ const ContentPage = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     المدة
                   </p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {content.quiz_duration} دقيقة
-                  </p>
+                  {content.content_type === "quiz" && content.quiz_duration && (
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      {content.quiz_duration} دقيقة
+                    </p>
+                  )}
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center">
                   <Icon

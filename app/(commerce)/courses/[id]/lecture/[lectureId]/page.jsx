@@ -239,17 +239,18 @@ const LectureDetailPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3 space-x-reverse">
-                        {content.quiz_duration && (
-                          <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                            <Icon
-                              icon="solar:clock-circle-bold"
-                              className="w-4 h-4"
-                            />
-                            <span className="text-xs">
-                              {content.quiz_duration} دقيقة
-                            </span>
-                          </div>
-                        )}
+                        {content.content_type === "quiz" &&
+                          content.quiz_duration && (
+                            <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                              <Icon
+                                icon="solar:clock-circle-bold"
+                                className="w-4 h-4"
+                              />
+                              <span className="text-xs">
+                                {content.quiz_duration} دقيقة
+                              </span>
+                            </div>
+                          )}
                         <div
                           className={`transform transition-transform duration-200 ${
                             isActive ? "rotate-180" : ""

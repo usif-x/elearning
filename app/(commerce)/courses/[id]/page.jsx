@@ -390,20 +390,21 @@ const CourseData = () => {
                                           ? "رابط"
                                           : content.content_type}
                                       </span>
-                                      {content.quiz_duration && (
-                                        <>
-                                          <span className="text-gray-400">
-                                            •
-                                          </span>
-                                          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                            <Icon
-                                              icon="solar:clock-circle-bold"
-                                              className="w-3 h-3"
-                                            />
-                                            {content.quiz_duration} دقيقة
-                                          </span>
-                                        </>
-                                      )}
+                                      {content.content_type === "quiz" &&
+                                        content.quiz_duration && (
+                                          <>
+                                            <span className="text-gray-400">
+                                              •
+                                            </span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                              <Icon
+                                                icon="solar:clock-circle-bold"
+                                                className="w-3 h-3"
+                                              />
+                                              {content.quiz_duration} دقيقة
+                                            </span>
+                                          </>
+                                        )}
                                     </div>
                                   </div>
                                 </div>
