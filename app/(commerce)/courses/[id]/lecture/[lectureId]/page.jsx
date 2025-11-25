@@ -163,6 +163,7 @@ const LectureDetailPage = () => {
                         label: "صورة",
                       };
                     case "file":
+                    case "pdf":
                       return {
                         icon: "solar:file-text-bold-duotone",
                         color: "text-blue-500",
@@ -177,6 +178,7 @@ const LectureDetailPage = () => {
                         label: "صوت",
                       };
                     case "quiz":
+                    case "exam":
                       return {
                         icon: "solar:clipboard-list-bold-duotone",
                         color: "text-indigo-500",
@@ -190,12 +192,26 @@ const LectureDetailPage = () => {
                         bg: "bg-amber-100 dark:bg-amber-900/30",
                         label: "رابط",
                       };
+                    case "book":
+                      return {
+                        icon: "solar:book-bold-duotone",
+                        color: "text-green-500",
+                        bg: "bg-green-100 dark:bg-green-900/30",
+                        label: "كتاب",
+                      };
                     default:
                       return {
                         icon: "solar:document-bold-duotone",
                         color: "text-gray-500",
                         bg: "bg-gray-100 dark:bg-gray-900/30",
-                        label: "محتوى",
+                        label:
+                          content.content_type === "pdf"
+                            ? "ملف PDF"
+                            : content.content_type === "book"
+                            ? "كتاب"
+                            : content.content_type === "exam"
+                            ? "امتحان"
+                            : "محتوى",
                       };
                   }
                 };
