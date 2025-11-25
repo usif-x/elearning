@@ -3,6 +3,7 @@
 import Button from "@/components/ui/Button";
 import Switcher from "@/components/ui/Switcher";
 import {
+  addQuizQuestions,
   deleteContent,
   deleteQuizQuestion,
   generateMoreQuestionsFromSource,
@@ -283,7 +284,7 @@ const AdminContentDetailPage = () => {
     }));
   };
 
-  // AI Generation Handler with Update Request
+  // AI Generation Handler (Using the new add-questions endpoint)
   const handleGenerateQuestions = async () => {
     if (!content?.source) {
       toast.error("لا يوجد مصدر مرتبط بهذا الاختبار");
@@ -292,10 +293,10 @@ const AdminContentDetailPage = () => {
 
     setIsGenerating(true);
     try {
-      // 1. Get existing question texts for duplication avoidance
+      // 1. Get existing question texts for duplication avoidance (Context for AI)
       const previousQuestions = quizQuestions.map((q) => q.question);
 
-      // 2. Call AI Service
+      // 2. Call AI Service to generate questions
       const response = await generateMoreQuestionsFromSource(
         courseId,
         content.source,
@@ -308,64 +309,42 @@ const AdminContentDetailPage = () => {
         }
       );
 
-      if (response && response.questions) {
-        // 3. Format Existing Questions to match Payload Schema
-        // We strip ID, timestamps etc. and keep only necessary fields
-        const formattedExistingQuestions = quizQuestions.map((q) => ({
+      if (response && response.questions && response.questions.length > 0) {
+        // 3. Format the NEW questions for the "add-questions" endpoint
+        // We set defaults here since AI might omit some fields
+        const formattedNewQuestions = response.questions.map((q) => ({
           question: q.question,
           options: q.options || [],
           correct_answer: q.correct_answer || 0,
           explanation_en: q.explanation_en || "",
           explanation_ar: q.explanation_ar || "",
-          question_type: q.question_type || "multiple_choice",
+          question_type: "multiple_choice", // Defaulting to multiple_choice for AI generated Qs
           question_category: q.question_category || "standard",
           cognitive_level: q.cognitive_level || "remember",
         }));
 
-        // 4. Format New AI Questions
-        // AI response doesn't usually send question_type, so we default to multiple_choice
-        const formattedNewQuestions = response.questions.map((q) => ({
-          ...q,
-          question_type: "multiple_choice",
-          options: q.options || [],
-        }));
-
-        // 5. Concatenate
-        const allQuestions = [
-          ...formattedExistingQuestions,
-          ...formattedNewQuestions,
-        ];
-
-        // 6. Construct Full Payload
-        const payload = {
-          ...form,
-          // Ensure numerical values
-          quiz_duration: Number(form.quiz_duration),
-          max_attempts: Number(form.max_attempts),
-          passing_score: Number(form.passing_score),
-          show_correct_answers: Number(form.show_correct_answers) || 0,
-          randomize_questions: Number(form.randomize_questions) || 0,
-          randomize_options: Number(form.randomize_options) || 0,
-          position: Number(form.position),
-          // Add the concatenated questions
-          questions: allQuestions,
-        };
-
-        // 7. Send Update Request to Backend
-        await updateContent(courseId, lectureId, contentId, payload);
+        // 4. Call the new endpoint to append questions
+        await addQuizQuestions(
+          courseId,
+          lectureId,
+          contentId,
+          formattedNewQuestions
+        );
 
         toast.success(
-          `تم إضافة ${formattedNewQuestions.length} سؤال جديد وحفظ الاختبار`
+          `تم إضافة ${formattedNewQuestions.length} سؤال جديد بنجاح`
         );
         setShowGenerateModal(false);
         setGenerateParams((prev) => ({ ...prev, notes: "" }));
 
-        // 8. Refresh Data
+        // 5. Refresh Data
         await fetchQuizQuestions();
+      } else {
+        toast.warning("لم يتم توليد أي أسئلة جديدة");
       }
     } catch (e) {
       console.error(e);
-      toast.error("فشل عملية التوليد أو الحفظ، يرجى المحاولة مرة أخرى");
+      toast.error("فشل عملية التوليد أو الإضافة، يرجى المحاولة مرة أخرى");
     } finally {
       setIsGenerating(false);
     }
@@ -1324,7 +1303,9 @@ const AdminContentDetailPage = () => {
                 color="purple"
                 shade={600}
                 darkShade={700}
-                text={isGenerating ? "جاري التوليد والحفظ..." : "توليد الأسئلة"}
+                text={
+                  isGenerating ? "جاري التوليد والإضافة..." : "توليد الأسئلة"
+                }
                 icon={isGenerating ? undefined : "solar:magic-stick-3-bold"}
                 isLoading={isGenerating}
                 onClick={handleGenerateQuestions}

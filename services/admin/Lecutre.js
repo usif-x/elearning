@@ -509,6 +509,29 @@ export const generateMoreQuestionsFromSource = async (
   }
 };
 
+/**
+ * Add new questions to an existing quiz
+ * Path: /courses/{course_id}/lectures/{lecture_id}/contents/{content_id}/add-questions
+ */
+export const addQuizQuestions = async (
+  courseId,
+  lectureId,
+  contentId,
+  questions
+) => {
+  try {
+    const response = await postData(
+      `courses/${courseId}/lectures/${lectureId}/contents/${contentId}/add-questions`,
+      { questions }, // Wrap array in object as per schema
+      true
+    );
+    return response;
+  } catch (error) {
+    console.error("Error adding quiz questions:", error);
+    throw error;
+  }
+};
+
 // ============================================
 // EXPORTS
 // ============================================
@@ -539,4 +562,5 @@ export default {
   getQuizQuestions,
   updateQuizQuestion,
   deleteQuizQuestion,
+  addQuizQuestions,
 };
