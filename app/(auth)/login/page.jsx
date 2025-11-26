@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 // Main Login Component
 export default function TelegramLoginPage() {
   const router = useRouter();
-  const [expandedMethod, setExpandedMethod] = useState(null); // 'phone'
+  const [expandedMethod, setExpandedMethod] = useState(null); // 'phone' or 'academic'
   const [telegramData, setTelegramData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +24,8 @@ export default function TelegramLoginPage() {
   const [formData, setFormData] = useState({
     phoneNumber: "",
     password: "",
+    academicId: "",
+    academicPassword: "",
   });
 
   // Load Telegram Login Widget script
@@ -144,6 +146,17 @@ export default function TelegramLoginPage() {
           login_method: "phone",
           phone_number: formData.phoneNumber,
           password: formData.password,
+        });
+      } else if (method === "academic") {
+        if (!formData.academicId) {
+          throw new Error("يرجى إدخال كود الطالب");
+        }
+        if (!formData.academicPassword) {
+          throw new Error("يرجى إدخال كلمة المرور");
+        }
+        loginResponse = await postData("/auth/academic/login", {
+          academic_id: formData.academicId,
+          password: formData.academicPassword,
         });
       }
 
@@ -375,6 +388,79 @@ export default function TelegramLoginPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Method 3: Academic Login */}
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                  <button
+                    onClick={() =>
+                      setExpandedMethod(
+                        expandedMethod === "academic" ? null : "academic"
+                      )
+                    }
+                    className="w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors text-right"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center">
+                        <Icon
+                          icon="material-symbols:school"
+                          className="w-5 h-5 text-white"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800 dark:text-gray-200 text-sm">
+                          تسجيل أكاديمي
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          تسجيل دخول بكود الطالب وكلمة المرور
+                        </p>
+                      </div>
+                      <Icon
+                        icon={
+                          expandedMethod === "academic"
+                            ? "material-symbols:expand-less"
+                            : "material-symbols:expand-more"
+                        }
+                        className="w-6 h-6 text-gray-400"
+                      />
+                    </div>
+                  </button>
+
+                  {expandedMethod === "academic" && (
+                    <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                      <Input
+                        icon="material-symbols:badge"
+                        placeholder="كود الطالب"
+                        value={formData.academicId}
+                        onChange={handleInputChange("academicId")}
+                        error={error}
+                        dir="rtl"
+                      />
+                      <Input
+                        icon="material-symbols:lock"
+                        placeholder="كلمة المرور"
+                        value={formData.academicPassword}
+                        onChange={handleInputChange("academicPassword")}
+                        error={error}
+                        dir="rtl"
+                        type="password"
+                      />
+                      <button
+                        onClick={() => handleLogin("academic")}
+                        disabled={isLoading}
+                        className="w-full py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>جاري التسجيل...</span>
+                          </div>
+                        ) : (
+                          "تسجيل الدخول الأكاديمي"
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Footer Links */}
@@ -393,6 +479,14 @@ export default function TelegramLoginPage() {
                       className="w-4 h-4"
                     />
                     إنشاء حساب جديد
+                  </Link>
+
+                  <Link
+                    href="/academic/register"
+                    className="inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-blue-600 dark:text-blue-400 font-medium transition-colors text-sm"
+                  >
+                    <Icon icon="material-symbols:badge" className="w-4 h-4" />
+                    تسجيل أكاديمي
                   </Link>
 
                   <Link

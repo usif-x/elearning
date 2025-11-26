@@ -10,577 +10,577 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
-// Main Register Component
-export default function TelegramRegisterPage() {
+export default function UnifiedRegisterPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
+
+  // State: 'selection' | 'telegram' | 'academic'
+  const [method, setMethod] = useState("selection");
   const [step, setStep] = useState(1);
-  const [telegramData, setTelegramData] = useState(null);
-  const [telegramHash, setTelegramHash] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Form Data
+  // Telegram Specific State
+  const [telegramData, setTelegramData] = useState(null);
+  const [telegramHash, setTelegramHash] = useState(null);
+
+  // Unified Form Data
   const [formData, setFormData] = useState({
     fullName: "",
-    phoneNumber: "",
+    phoneNumber: "", // For Telegram flow
+    academicId: "", // For Academic flow
     password: "",
     confirmPassword: "",
   });
 
-  // Load Telegram Login Widget script
+  // --- Telegram Widget Loader ---
   useEffect(() => {
-    if (step === 1 && !document.getElementById("telegram-login-script")) {
-      const script = document.createElement("script");
-      script.id = "telegram-login-script";
-      script.async = true;
-      script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", "DahhehetMedicalBot");
-      script.setAttribute("data-size", "large");
-      script.setAttribute("data-onauth", "onTelegramAuth(user)");
-      script.setAttribute("data-request-access", "write");
+    if (method === "telegram" && step === 1) {
+      // Small timeout to ensure DOM element exists
+      const timer = setTimeout(() => {
+        if (!document.getElementById("telegram-login-script")) {
+          const script = document.createElement("script");
+          script.id = "telegram-login-script";
+          script.async = true;
+          script.src = "https://telegram.org/js/telegram-widget.js?22";
+          script.setAttribute("data-telegram-login", "ElearningApplicationBot"); // Ensure this matches your bot name
+          script.setAttribute("data-size", "large");
+          script.setAttribute("data-onauth", "onTelegramAuth(user)");
+          script.setAttribute("data-request-access", "write");
 
-      const widgetContainer = document.getElementById("telegram-widget");
-      if (widgetContainer) {
-        widgetContainer.appendChild(script);
-      }
-    }
+          const widgetContainer = document.getElementById("telegram-widget");
+          if (widgetContainer) {
+            widgetContainer.innerHTML = ""; // Clear previous if any
+            widgetContainer.appendChild(script);
+          }
+        }
+      }, 100);
 
-    window.onTelegramAuth = async (user) => {
-      toast.success("تم التحقق من حساب تليجرام بنجاح!");
-      const authData = {
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        username: user.username,
-        photo_url: user.photo_url,
-        auth_date: user.auth_date,
-        hash: user.hash,
+      window.onTelegramAuth = async (user) => {
+        toast.success("تم التحقق من حساب تليجرام بنجاح!");
+        const authData = {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          photo_url: user.photo_url,
+          auth_date: user.auth_date,
+          hash: user.hash,
+        };
+
+        setTelegramData(authData);
+
+        try {
+          const data = await postData("/auth/telegram/verify", {
+            telegram_auth: authData,
+          });
+
+          if (data.error) {
+            toast.error(data.error || "خطأ في التحقق من تليجرام");
+            return;
+          }
+          if (data.next_step === "register") {
+            setTelegramHash(data.telegram_hash);
+            setStep(2); // Move to Personal Info
+          } else if (data.next_step === "login") {
+            toast.info("لديك حساب بالفعل. تسجيل الدخول الآن.");
+            router.push("/login");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("خطأ في الاتصال بالخادم");
+        }
       };
 
-      // Update state with Telegram data
-      setTelegramData(authData);
+      return () => clearTimeout(timer);
+    }
 
-      // Send verification to backend
-      try {
-        const data = await postData("/auth/telegram/verify", {
-          telegram_auth: authData,
-        });
-
-        if (data.error) {
-          console.error("Telegram verification error:", data);
-          toast.error(data.error || "خطأ في التحقق من تليجرام");
-          setErrors((prev) => ({ ...prev, telegram: data.error }));
-          return;
-        }
-        if (data.next_step === "register") {
-          setTelegramHash(data.telegram_hash); // Store the hash for registration
-          setStep(2); // Move to step 2 after successful auth
-        } else if (data.next_step === "login") {
-          toast.info("لديك حساب بالفعل. تسجيل الدخول الآن.");
-          router.push("/login");
-          return;
-        }
-
-        console.log("Telegram verified:", data);
-      } catch (err) {
-        console.error("Error sending telegram verification:", err);
-        setErrors((prev) => ({ ...prev, telegram: "خطأ في توصيل التحقق" }));
-      }
-    };
-
+    // Cleanup global function on unmount
     return () => {
-      delete window.onTelegramAuth;
+      // delete window.onTelegramAuth; // Optional: keep it if re-rendering causes issues
     };
-  }, [step, router]);
+  }, [method, step, router]);
 
-  // Validation functions
-  const validatePhoneNumber = (phone) => {
-    const phoneRegex = /^(?:\+20|0)(10|11|12|15)\d{8}$/;
-    return phoneRegex.test(phone.replace(/\s+/g, ""));
-  };
+  // --- Validation Helpers ---
+  const validatePhoneNumber = (phone) =>
+    /^(?:\+20|0)(10|11|12|15)\d{8}$/.test(phone?.replace(/\s+/g, ""));
+  const validateFullName = (name) =>
+    name && name.length >= 3 && /^[a-zA-Zأ-ي\s]+$/.test(name);
+  const validatePassword = (pass) => pass && pass.length >= 8;
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validateFullName = (name) => {
-    return name.length >= 3 && /^[a-zA-Zأ-ي\s]+$/.test(name);
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 8;
-  };
-
-  // Handle form input changes
   const handleInputChange = (field) => (e) => {
     const value = e.target ? e.target.value : e.value;
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
-    }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  // Validate current step
-  const validateStep = (stepNumber) => {
+  // --- Logic Control ---
+  const handleMethodSelect = (selectedMethod) => {
+    setMethod(selectedMethod);
+    setStep(1);
+    setErrors({});
+  };
+
+  const handleBackToSelection = () => {
+    setMethod("selection");
+    setStep(1);
+    setFormData({ ...formData, password: "", confirmPassword: "" }); // Reset sensitive data
+    setErrors({});
+  };
+
+  // --- Step Validation ---
+  const validateCurrentStep = () => {
     const newErrors = {};
 
-    switch (stepNumber) {
-      case 2:
-        if (!validateFullName(formData.fullName)) {
-          newErrors.fullName = "يرجى إدخال اسم صالح (3 أحرف على الأقل)";
-        }
-        if (!validatePhoneNumber(formData.phoneNumber)) {
-          newErrors.phoneNumber = "يرجى إدخال رقم هاتف صالح";
-        }
-        break;
-
-      case 3:
-        if (!validatePassword(formData.password)) {
-          newErrors.password = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
-        }
-        if (formData.password !== formData.confirmPassword) {
-          newErrors.confirmPassword = "كلمة المرور غير متطابقة";
-        }
-        break;
+    if (method === "telegram") {
+      // Telegram Steps: 1(Widget), 2(Name+Phone), 3(Password)
+      if (step === 2) {
+        if (!validateFullName(formData.fullName))
+          newErrors.fullName = "الاسم يجب أن يكون 3 أحرف على الأقل";
+        if (!validatePhoneNumber(formData.phoneNumber))
+          newErrors.phoneNumber = "رقم الهاتف غير صحيح";
+      } else if (step === 3) {
+        if (!validatePassword(formData.password))
+          newErrors.password = "كلمة المرور قصيرة جداً";
+        if (formData.password !== formData.confirmPassword)
+          newErrors.confirmPassword = "كلمات المرور غير متطابقة";
+      }
+    } else if (method === "academic") {
+      // Academic Steps: 1(Name+ID), 2(Password)
+      if (step === 1) {
+        if (!validateFullName(formData.fullName))
+          newErrors.fullName = "الاسم يجب أن يكون 3 أحرف على الأقل";
+        if (!formData.academicId)
+          newErrors.academicId = "رقم الهوية الأكاديمي مطلوب";
+      } else if (step === 2) {
+        if (!validatePassword(formData.password))
+          newErrors.password = "كلمة المرور قصيرة جداً";
+        if (formData.password !== formData.confirmPassword)
+          newErrors.confirmPassword = "كلمات المرور غير متطابقة";
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle next step
   const handleNext = () => {
-    // Validate the current step before moving to the next
-    if (validateStep(step)) {
-      setStep(step + 1);
+    if (validateCurrentStep()) setStep((prev) => prev + 1);
+  };
+
+  const handlePrevious = () => {
+    if (step === 1) {
+      handleBackToSelection();
+    } else {
+      setStep((prev) => prev - 1);
     }
   };
 
-  // Handle previous step
-  const handlePrevious = () => {
-    setStep(step - 1);
-  };
-
-  // Handle final registration
+  // --- Submission ---
   const handleRegister = async () => {
-    // Final validation before submitting
-    if (!validateStep(3)) return;
+    if (!validateCurrentStep()) return;
 
     setIsLoading(true);
     setErrors({});
 
-    try {
-      const registrationData = {
-        telegram_hash: telegramHash, // Use the hash from verification response
+    let endpoint = "";
+    let payload = {};
+
+    if (method === "telegram") {
+      endpoint = "/auth/register"; // Your standard register endpoint
+      payload = {
+        telegram_hash: telegramHash,
         full_name: formData.fullName,
         phone_number: formData.phoneNumber,
         password: formData.password,
         confirm_password: formData.confirmPassword,
       };
+    } else if (method === "academic") {
+      endpoint = "/auth/academic/register"; // Your academic endpoint
+      payload = {
+        full_name: formData.fullName,
+        academic_id: formData.academicId,
+        password: formData.password,
+        confirm_password: formData.confirmPassword,
+        role: "student",
+      };
+    }
 
-      const registerResponse = await postData(
-        "/auth/register",
-        registrationData
-      );
+    try {
+      const res = await postData(endpoint, payload);
 
-      if (registerResponse.error) {
-        // Handle backend validation errors
-        if (typeof registerResponse.error === "object") {
-          setErrors(registerResponse.error);
-          toast.error("يرجى مراجعة الحقول المدخلة.");
+      if (res.error) {
+        if (typeof res.error === "object") {
+          setErrors(res.error);
+          toast.error("يرجى مراجعة البيانات.");
         } else {
-          throw new Error(registerResponse.error);
+          throw new Error(res.error);
         }
         return;
       }
 
       login({
-        user: registerResponse.user,
-        token: registerResponse.access_token,
-        refresh_token: registerResponse.refresh_token,
+        user: res.user,
+        token: res.access_token,
+        refresh_token: res.refresh_token,
       });
 
       await Swal.fire({
         icon: "success",
-        title: "تم إنشاء الحساب بنجاح!",
-        text: "يرجي تسجيل الدخول للمتابعة.",
-        confirmButtonText: "حسناً",
+        title: "تم التسجيل بنجاح!",
+        text: "مرحباً بك في المنصة.",
+        confirmButtonText: "بدء التعلم",
       });
 
-      router.push("/login");
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast.error(error.message || "فشل التسجيل. يرجى المحاولة مرة أخرى.");
-      setErrors({
-        general: error.message || "فشل التسجيل. يرجى المحاولة مرة أخرى.",
-      });
+      router.push("/profile"); // Or dashboard
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "فشل التسجيل");
+      setErrors({ general: err.message || "فشل التسجيل" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Progress indicator
-  const getProgressWidth = () => {
-    // Adjusted for a 3-step process (0%, 50%, 100%)
-    return `${((step - 1) / 2) * 100}%`;
-  };
+  // --- Helper for Progress Bar ---
+  const getMaxSteps = () => (method === "telegram" ? 3 : 2);
+  const getProgressWidth = () => `${((step - 1) / (getMaxSteps() - 1)) * 100}%`;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900" dir="rtl">
       <div className="flex min-h-screen">
-        {/* Main Container */}
-        <div className="w-full flex">
-          {/* Left Side - Forms */}
-          <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-gray-800">
-            <div className="w-full max-w-md">
-              {/* Logo/Header */}
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto mb-4 bg-green-600 dark:bg-green-500 rounded-full flex items-center justify-center">
-                  <Image
-                    src="/images/logo.png"
-                    alt="Logo"
-                    width={32}
-                    height={32}
-                    className="filter brightness-0 invert"
-                  />
-                </div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  إنشاء حساب جديد
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  انضم إلى منصة التعلم الإلكتروني
-                </p>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    الخطوة {step} من 3
-                  </span>
-                  <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                    {Math.round(((step - 1) / 2) * 100)}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className="bg-green-600 dark:bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: getProgressWidth() }}
-                  ></div>
-                </div>
-
-                {/* Step Indicators */}
-                <div className="flex justify-between mt-3">
-                  {[1, 2, 3].map((stepNum) => (
-                    <div key={stepNum} className="flex flex-col items-center">
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
-                          stepNum <= step
-                            ? "bg-green-600 dark:bg-green-500 text-white"
-                            : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                        }`}
-                      >
-                        {stepNum <= step ? (
-                          <Icon
-                            icon="material-symbols:check"
-                            className="w-3 h-3"
-                          />
-                        ) : (
-                          stepNum
-                        )}
-                      </div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {stepNum === 1 && "تليجرام"}
-                        {stepNum === 2 && "شخصي"}
-                        {stepNum === 3 && "أمان"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Step 1: Telegram Authentication */}
-              {step === 1 && (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                    <div className="text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                        <Icon icon="logos:telegram" className="text-2xl" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        التحقق من تليجرام
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-                        ابدأ بالتحقق من هويتك باستخدام تليجرام
-                      </p>
-
-                      {/* Telegram Widget Container */}
-                      <div
-                        id="telegram-widget"
-                        className="flex justify-center mb-4"
-                      ></div>
-
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        🔒 آمن ومشفر
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Personal Information */}
-              {step === 2 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center">
-                      <Icon
-                        icon="material-symbols:person"
-                        className="w-6 h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      المعلومات الشخصية
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      أدخل بياناتك الشخصية الأساسية
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Input
-                      icon="material-symbols:person"
-                      placeholder="الاسم الكامل (مثل: أحمد محمد علي)"
-                      value={formData.fullName}
-                      onChange={handleInputChange("fullName")}
-                      error={errors.fullName}
-                      dir="rtl"
-                      type="text"
-                    />
-
-                    <Input
-                      icon="material-symbols:phone-android"
-                      placeholder="رقم الهاتف (مثل: 01012345678)"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange("phoneNumber")}
-                      error={errors.phoneNumber}
-                      dir="rtl"
-                      type="tel"
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handlePrevious}
-                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
-                    >
-                      رجوع
-                    </button>
-                    <button
-                      onClick={handleNext}
-                      className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center font-medium"
-                    >
-                      <Icon
-                        icon="material-symbols:arrow-forward"
-                        className="w-4 h-4 ml-2"
-                      />
-                      التالي
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Security Information */}
-              {step === 3 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center">
-                      <Icon
-                        icon="material-symbols:security"
-                        className="w-6 h-6 text-white"
-                      />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      معلومات الأمان
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      اختر كلمة مرور قوية
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Input
-                      icon="material-symbols:lock"
-                      placeholder="كلمة المرور (8 أحرف على الأقل)"
-                      value={formData.password}
-                      onChange={handleInputChange("password")}
-                      error={errors.password}
-                      dir="rtl"
-                      type="password"
-                    />
-
-                    <Input
-                      icon="material-symbols:lock-open"
-                      placeholder="تأكيد كلمة المرور"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange("confirmPassword")}
-                      error={errors.confirmPassword}
-                      dir="rtl"
-                      type="password"
-                    />
-                  </div>
-
-                  {errors.general && (
-                    <div className="text-red-500 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800">
-                      <Icon
-                        icon="material-symbols:error"
-                        className="w-4 h-4 mx-auto mb-1"
-                      />
-                      {errors.general}
-                    </div>
-                  )}
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handlePrevious}
-                      disabled={isLoading}
-                      className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    >
-                      رجوع
-                    </button>
-                    <button
-                      onClick={handleRegister}
-                      disabled={isLoading}
-                      className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-medium"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
-                          جاري التسجيل...
-                        </>
-                      ) : (
-                        <>
-                          <Icon
-                            icon="material-symbols:person-add"
-                            className="w-4 h-4 ml-2"
-                          />
-                          إنشاء الحساب
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Terms and Privacy */}
-                  <div className="text-center bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      بإنشاء حساب، أنت توافق على{" "}
-                      <a
-                        href="#"
-                        className="text-green-600 hover:text-green-700 font-medium underline"
-                      >
-                        الشروط والأحكام
-                      </a>{" "}
-                      و{" "}
-                      <a
-                        href="#"
-                        className="text-green-600 hover:text-green-700 font-medium underline"
-                      >
-                        سياسة الخصوصية
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Telegram Data Display */}
-              {telegramData && step > 1 && (
-                <div className="mt-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-                  <div className="flex items-center gap-3">
-                    {telegramData.photo_url ? (
-                      <img
-                        src={telegramData.photo_url}
-                        alt="Profile"
-                        className="w-10 h-10 rounded-full border-2 border-green-300 dark:border-green-600"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center">
-                        <Icon
-                          icon="material-symbols:person"
-                          className="w-5 h-5 text-white"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 text-right">
-                      <p className="font-medium text-gray-800 dark:text-gray-200 text-sm">
-                        {telegramData.first_name} {telegramData.last_name}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        @{telegramData.username}
-                      </p>
-                    </div>
-                    <Icon
-                      icon="material-symbols:check-circle"
-                      className="w-5 h-5 text-green-500 dark:text-green-400"
-                    />
-                  </div>
-                  <div className="text-center mt-2">
-                    <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                      ✅ تم التحقق من حساب تليجرام بنجاح
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Login Link */}
-              <div className="mt-8 text-center border-t border-gray-200 dark:border-gray-700 pt-6">
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  لديك حساب بالفعل؟
-                </p>
-
-                <div className="flex flex-col gap-2 items-center">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center text-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
-                  >
-                    <Icon icon="material-symbols:login" className="w-4 h-4" />
-                    تسجيل الدخول
-                  </Link>
-
-                  <Link
-                    href="/"
-                    className="inline-flex items-center justify-center gap-2 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 px-4 py-2 rounded-lg text-green-600 dark:text-green-400 font-medium transition-colors text-sm"
-                  >
-                    <Icon icon="material-symbols:home" className="w-4 h-4" />
-                    العودة للرئيسية
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Info */}
-          <div className="hidden lg:flex lg:w-1/2 bg-green-600 dark:bg-green-700 items-center justify-center p-8">
-            <div className="text-center text-white max-w-md">
-              <div className="w-20 h-20 mx-auto mb-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+        {/* Left Side - Forms Area */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-gray-800 transition-all duration-500">
+          <div className="w-full max-w-md">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-green-600 dark:bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                 <Image
                   src="/images/logo.png"
                   alt="Logo"
-                  width={48}
-                  height={48}
+                  width={32}
+                  height={32}
                   className="filter brightness-0 invert"
                 />
               </div>
-              <h1 className="text-4xl font-bold mb-6">انضم إلى عائلتنا!</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {method === "selection"
+                  ? "إنشاء حساب جديد"
+                  : method === "telegram"
+                  ? "تسجيل عبر تليجرام"
+                  : "تسجيل طالب أكاديمي"}
+              </h1>
+              {method === "selection" && (
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  اختر الطريقة المناسبة لك للتسجيل في المنصة
+                </p>
+              )}
             </div>
+
+            {/* --- VIEW 1: Selection Boxes --- */}
+            {method === "selection" && (
+              <div className="space-y-4 animate-fadeIn">
+                {/* Telegram Box */}
+                <button
+                  onClick={() => handleMethodSelect("telegram")}
+                  className="w-full p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-sky-500 dark:hover:border-sky-500 rounded-2xl bg-gray-50 dark:bg-gray-900 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all group text-right flex items-center gap-4"
+                >
+                  <div className="w-14 h-14 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">
+                    <Icon icon="logos:telegram" className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-sky-600 dark:group-hover:text-sky-400">
+                      التسجيل عبر تليجرام
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      للمستخدمين العامين، التحقق السريع عبر حساب تليجرام
+                    </p>
+                  </div>
+                </button>
+
+                {/* Academic Box */}
+                <button
+                  onClick={() => handleMethodSelect("academic")}
+                  className="w-full p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 rounded-2xl bg-gray-50 dark:bg-gray-900 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all group text-right flex items-center gap-4"
+                >
+                  <div className="w-14 h-14 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
+                    <Icon icon="material-symbols:school" className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-green-600 dark:group-hover:text-green-400">
+                      التسجيل الأكاديمي
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      لطلاب الكلية، باستخدام كود الطالب (Academic ID)
+                    </p>
+                  </div>
+                </button>
+
+                <div className="text-center pt-6">
+                  <p className="text-sm text-gray-500">
+                    لديك حساب بالفعل؟{" "}
+                    <Link
+                      href="/login"
+                      className="text-green-600 font-bold hover:underline"
+                    >
+                      تسجيل الدخول
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* --- VIEW 2: Registration Forms (Telegram OR Academic) --- */}
+            {method !== "selection" && (
+              <div className="animate-slideInUp">
+                {/* Progress Bar */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-gray-500">
+                      الخطوة {step} من {getMaxSteps()}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-green-600 dark:bg-green-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: getProgressWidth() }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* --- TELEGRAM FLOW CONTENT --- */}
+                {method === "telegram" && (
+                  <div className="space-y-6">
+                    {/* Step 1: Widget */}
+                    {step === 1 && (
+                      <div className="text-center bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg font-semibold mb-2 dark:text-white">
+                          التحقق من الهوية
+                        </h3>
+                        <p className="text-gray-500 text-sm mb-6">
+                          يرجى الضغط أدناه للمتابعة باستخدام تليجرام
+                        </p>
+                        <div
+                          id="telegram-widget"
+                          className="flex justify-center min-h-[50px]"
+                        ></div>
+                      </div>
+                    )}
+
+                    {/* Step 2: Personal Data (Tel) */}
+                    {step === 2 && (
+                      <div className="space-y-4">
+                        {telegramData && (
+                          <div className="flex items-center gap-3 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800 rounded-lg mb-4">
+                            <img
+                              src={
+                                telegramData.photo_url ||
+                                "/images/avatar-placeholder.png"
+                              }
+                              alt="User"
+                              className="w-10 h-10 rounded-full"
+                            />
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-sky-800 dark:text-sky-300">
+                                {telegramData.first_name}
+                              </p>
+                              <p className="text-xs text-sky-600 dark:text-sky-400">
+                                @{telegramData.username}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        <Input
+                          icon="material-symbols:person"
+                          placeholder="الاسم الكامل"
+                          value={formData.fullName}
+                          onChange={handleInputChange("fullName")}
+                          error={errors.fullName}
+                          dir="rtl"
+                        />
+                        <Input
+                          icon="material-symbols:phone-android"
+                          placeholder="رقم الهاتف"
+                          value={formData.phoneNumber}
+                          onChange={handleInputChange("phoneNumber")}
+                          error={errors.phoneNumber}
+                          dir="rtl"
+                          type="tel"
+                        />
+                      </div>
+                    )}
+
+                    {/* Step 3: Password (Tel) */}
+                    {step === 3 && (
+                      <div className="space-y-4">
+                        <Input
+                          icon="material-symbols:lock"
+                          placeholder="كلمة المرور"
+                          value={formData.password}
+                          onChange={handleInputChange("password")}
+                          error={errors.password}
+                          dir="rtl"
+                          type="password"
+                        />
+                        <Input
+                          icon="material-symbols:lock-open"
+                          placeholder="تأكيد كلمة المرور"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange("confirmPassword")}
+                          error={errors.confirmPassword}
+                          dir="rtl"
+                          type="password"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* --- ACADEMIC FLOW CONTENT --- */}
+                {method === "academic" && (
+                  <div className="space-y-6">
+                    {/* Step 1: Academic Data */}
+                    {step === 1 && (
+                      <div className="space-y-4">
+                        <Input
+                          icon="material-symbols:person"
+                          placeholder="الاسم الكامل"
+                          value={formData.fullName}
+                          onChange={handleInputChange("fullName")}
+                          error={errors.fullName}
+                          dir="rtl"
+                        />
+                        <Input
+                          icon="material-symbols:badge"
+                          placeholder="كود الطالب"
+                          value={formData.academicId}
+                          onChange={handleInputChange("academicId")}
+                          error={errors.academicId}
+                          dir="rtl"
+                        />
+                      </div>
+                    )}
+
+                    {/* Step 2: Password (Academic) */}
+                    {step === 2 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-lg mb-4">
+                          <div className="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center text-green-600">
+                            <Icon icon="material-symbols:person" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-green-800 dark:text-green-300">
+                              {formData.fullName}
+                            </p>
+                            <p className="text-xs text-green-600 dark:text-green-400">
+                              ID: {formData.academicId}
+                            </p>
+                          </div>
+                        </div>
+                        <Input
+                          icon="material-symbols:lock"
+                          placeholder="كلمة المرور"
+                          value={formData.password}
+                          onChange={handleInputChange("password")}
+                          error={errors.password}
+                          dir="rtl"
+                          type="password"
+                        />
+                        <Input
+                          icon="material-symbols:lock-open"
+                          placeholder="تأكيد كلمة المرور"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange("confirmPassword")}
+                          error={errors.confirmPassword}
+                          dir="rtl"
+                          type="password"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* --- SHARED BUTTONS --- */}
+                <div className="flex gap-3 pt-8">
+                  <button
+                    onClick={handlePrevious}
+                    disabled={isLoading}
+                    className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium"
+                  >
+                    رجوع
+                  </button>
+
+                  {/* Logic for Next/Submit Button */}
+                  {step < getMaxSteps() ? (
+                    // Hide "Next" button on Telegram Step 1 because the Widget handles the action
+                    method === "telegram" && step === 1 ? null : (
+                      <button
+                        onClick={handleNext}
+                        className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 font-medium flex items-center justify-center"
+                      >
+                        التالي{" "}
+                        <Icon
+                          icon="material-symbols:arrow-back"
+                          className="mr-2 rotate-180"
+                        />
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      onClick={handleRegister}
+                      disabled={isLoading}
+                      className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-green-600 font-medium flex items-center justify-center disabled:opacity-50"
+                    >
+                      {isLoading ? "جاري التسجيل..." : "إنشاء الحساب"}
+                    </button>
+                  )}
+                </div>
+
+                {errors.general && (
+                  <div className="mt-4 text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-200">
+                    {errors.general}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side - Info (Static/Dynamic based on method) */}
+        <div
+          className={`hidden lg:flex lg:w-1/2 items-center justify-center p-8 transition-colors duration-500 ${
+            method === "telegram"
+              ? "bg-sky-600 dark:bg-sky-800"
+              : "bg-green-600 dark:bg-green-800"
+          }`}
+        >
+          <div className="text-center text-white max-w-md animate-fadeIn">
+            <div className="w-24 h-24 mx-auto mb-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <Icon
+                icon={
+                  method === "telegram"
+                    ? "logos:telegram"
+                    : "material-symbols:school"
+                }
+                className={`w-12 h-12 ${
+                  method === "telegram" ? "grayscale-0" : "text-white"
+                }`}
+              />
+            </div>
+            <h1 className="text-4xl font-bold mb-4">
+              {method === "selection"
+                ? "مرحباً بك مجدداً!"
+                : method === "telegram"
+                ? "مجتمع تليجرام"
+                : "التميز الأكاديمي"}
+            </h1>
+            <p className="text-lg opacity-90">
+              {method === "selection"
+                ? "انضم إلى منصتنا التعليمية المتطورة. اختر الطريقة التي تناسبك للبدء."
+                : method === "telegram"
+                ? "استفد من سرعة التسجيل والمزامنة المباشرة مع بوت تليجرام الخاص بنا."
+                : "سجل ببياناتك الجامعية للوصول إلى المحتوى الأكاديمي المخصص لك."}
+            </p>
           </div>
         </div>
       </div>
