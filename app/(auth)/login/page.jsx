@@ -482,14 +482,6 @@ export default function TelegramLoginPage() {
                   </Link>
 
                   <Link
-                    href="/academic/register"
-                    className="inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 rounded-lg text-blue-600 dark:text-blue-400 font-medium transition-colors text-sm"
-                  >
-                    <Icon icon="material-symbols:badge" className="w-4 h-4" />
-                    تسجيل أكاديمي
-                  </Link>
-
-                  <Link
                     href="/forgot-password"
                     className="inline-flex items-center justify-center gap-2 bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700 px-4 py-2 rounded-lg text-red-600 dark:text-red-400 font-medium transition-colors text-sm"
                   >
