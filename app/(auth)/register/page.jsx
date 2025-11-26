@@ -425,7 +425,7 @@ export default function UnifiedRegisterPage() {
                       <div className="space-y-4">
                         <Input
                           icon="material-symbols:lock"
-                          placeholder="كلمة المرور"
+                          placeholder="كلمة المرور ) 8 أحرف على الأقل("
                           value={formData.password}
                           onChange={handleInputChange("password")}
                           error={errors.password}
@@ -489,7 +489,7 @@ export default function UnifiedRegisterPage() {
                         </div>
                         <Input
                           icon="material-symbols:lock"
-                          placeholder="كلمة المرور"
+                          placeholder="كلمة المرور (8 أحرف على الأقل)"
                           value={formData.password}
                           onChange={handleInputChange("password")}
                           error={errors.password}
