@@ -1,63 +1,178 @@
 "use client";
 
 import { useAuthStore } from "@/hooks/useAuth";
+import { getData } from "@/libs/axios"; // Ensure this path is correct
 import { getSearchAutocomplete } from "@/services/Courses";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react"; // Import useRef and useEffect
+import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "../ui/Button";
 import DarkModeSwitcher from "../ui/DarkModeSwitcher";
 import Input from "../ui/Input";
 
 const Navbar = ({ children }) => {
-  // Accept children to render inside the main content area
+  // --- UI States ---
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default to closed on mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isCoursesDropdownOpen, setIsCoursesDropdownOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const { isAuthenticated, user, userType } = useAuthStore();
-  const pathname = usePathname(); // Get current route
-  const router = useRouter(); // For navigation
-
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isScroll, setIsScroll] = useState(false);
+
+  // --- Search States ---
   const [searchQuery, setSearchQuery] = useState("");
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
 
+  // --- Notification States ---
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [hasNewNotifs, setHasNewNotifs] = useState(false);
+  const [notifSkip, setNotifSkip] = useState(0);
+  const [hasMoreNotifs, setHasMoreNotifs] = useState(true);
+  const notifDropdownRef = useRef(null);
+
+  // --- Hooks ---
+  const { isAuthenticated, user, userType } = useAuthStore();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // ----------------------------------------------------------------
+  // 1. Notification Logic
+  // ----------------------------------------------------------------
+
+  // Fetch Notifications
+  const fetchNotifications = async (reset = false) => {
+    try {
+      setNotifLoading(true);
+      const limit = 5;
+      const skip = reset ? 0 : notifSkip;
+
+      // Endpoint: GET /notifications/user?skip=0&limit=5
+      const data = await getData(
+        `/notifications/user?skip=${skip}&limit=${limit}`,
+        true
+      );
+
+      if (Array.isArray(data)) {
+        if (reset) {
+          setNotifications(data);
+          setNotifSkip(limit);
+          checkNewNotifications(data);
+        } else {
+          setNotifications((prev) => [...prev, ...data]);
+          setNotifSkip((prev) => prev + limit);
+        }
+
+        // If we got fewer items than the limit, we reached the end
+        if (data.length < limit) setHasMoreNotifs(false);
+        else setHasMoreNotifs(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  // Check if there is a new ID compared to LocalStorage
+  const checkNewNotifications = (currentNotifs) => {
+    if (!currentNotifs || currentNotifs.length === 0) return;
+
+    const lastSeenId = localStorage.getItem("lastSeenNotificationId");
+    // Assuming API returns newest first, so index 0 is the latest ID
+    const latestNotifId = currentNotifs[0].id;
+
+    if (!lastSeenId || latestNotifId > parseInt(lastSeenId)) {
+      setHasNewNotifs(true);
+    } else {
+      setHasNewNotifs(false);
+    }
+  };
+
+  // Toggle Dropdown & Mark as Read locally
+  const toggleNotifications = () => {
+    const newState = !isNotifOpen;
+    setIsNotifOpen(newState);
+
+    if (newState && notifications.length > 0) {
+      // User opened dropdown, save the latest ID
+      const latestId = notifications[0].id;
+      localStorage.setItem("lastSeenNotificationId", latestId.toString());
+      setHasNewNotifs(false); // Stop animation
+    }
+  };
+
+  // Load More Handler
+  const handleLoadMoreNotifs = (e) => {
+    e.stopPropagation();
+    fetchNotifications(false);
+  };
+
+  // Initial Fetch on Login
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications(true);
+    }
+  }, [isAuthenticated]);
+
+  // Click Outside to Close Notification Dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notifDropdownRef.current &&
+        !notifDropdownRef.current.contains(event.target)
+      ) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Format Date Helper
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    // If less than 24 hours, show time
+    if (diff < 86400000) {
+      return date.toLocaleTimeString("ar-EG", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    // Else show date
+    return date.toLocaleDateString("ar-EG");
+  };
+
+  // ----------------------------------------------------------------
+  // 2. Search & Scroll Logic
+  // ----------------------------------------------------------------
+
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
     if (!isSearchOpen) {
-      // Clear search when opening
       setSearchQuery("");
       setAutocompleteSuggestions([]);
       setShowSuggestions(false);
     }
   };
+
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleSidebarCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
     setIsCoursesDropdownOpen(false);
-    setIsProfileDropdownOpen(false);
   };
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const shouldShowExpanded = !isSidebarCollapsed || isHovering;
-
-  const handleMouseEnter = () => {
-    if (isSidebarCollapsed) {
-      setIsHovering(true);
-    }
-  };
-
-  const [isScroll, setIsScroll] = useState(false);
-
+  // Scroll Progress Logic
   useEffect(() => {
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } =
@@ -65,52 +180,31 @@ const Navbar = ({ children }) => {
 
       if (scrollHeight - clientHeight === 0) {
         setScrollProgress(100);
-        setIsScroll(false); // no scrolling possible
+        setIsScroll(false);
         return;
       }
-
       const progress = (scrollTop / (scrollHeight - clientHeight)) * 100;
       setScrollProgress(progress);
-
-      // if user has scrolled from top
       setIsScroll(scrollTop > 0);
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    // Run once on mount in case page is already scrolled
     handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // --- NEW: Dynamic style for the conic gradient background ---
   const progressCircleStyle = {
-    background: `conic-gradient(
-      #3b82f6 ${scrollProgress * 3.6}deg, 
-      #e5e7eb ${scrollProgress * 3.6}deg
-    )`,
-    // Note for dark mode: You can replace '#e5e7eb' (gray-200) with a darker color
-    // using a theme provider or another state check. For simplicity, we use a light gray track.
+    background: `conic-gradient(#3b82f6 ${scrollProgress * 3.6}deg, #e5e7eb ${
+      scrollProgress * 3.6
+    }deg)`,
   };
 
-  const handleMouseLeave = () => {
-    if (isSidebarCollapsed) {
-      setIsHovering(false);
-      setIsCoursesDropdownOpen(false);
-      setIsProfileDropdownOpen(false);
-    }
-  };
-
-  // Get autocomplete suggestions
+  // Search Autocomplete
   const getAutocompleteSuggestions = useCallback(async (query) => {
     if (!query.trim() || query.length < 2) {
       setAutocompleteSuggestions([]);
       return;
     }
-
     try {
       const suggestions = await getSearchAutocomplete(query, 8);
       setAutocompleteSuggestions(suggestions);
@@ -120,31 +214,21 @@ const Navbar = ({ children }) => {
     }
   }, []);
 
-  // Handle search input change with autocomplete
   const handleSearchInputChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
     setShowSuggestions(true);
-
-    // Clear previous timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    // Set new timeout for autocomplete
+    if (searchTimeout) clearTimeout(searchTimeout);
     const newTimeout = setTimeout(() => {
       getAutocompleteSuggestions(value);
     }, 300);
-
     setSearchTimeout(newTimeout);
   };
 
-  // Handle search submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setShowSuggestions(false);
     if (searchQuery.trim()) {
-      // Navigate to search page with query
       router.push(
         `/courses/search?q=${encodeURIComponent(searchQuery.trim())}`
       );
@@ -154,119 +238,90 @@ const Navbar = ({ children }) => {
     }
   };
 
-  // Handle suggestion click
   const handleSuggestionClick = (suggestion) => {
     setSearchQuery(suggestion);
     setShowSuggestions(false);
     setAutocompleteSuggestions([]);
-    // Navigate to search page with suggestion
     router.push(`/courses/search?q=${encodeURIComponent(suggestion)}`);
     setIsSearchOpen(false);
     setSearchQuery("");
   };
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-    };
-  }, [searchTimeout]);
+  // ----------------------------------------------------------------
+  // 3. Layout Helpers
+  // ----------------------------------------------------------------
+  const shouldShowExpanded = !isSidebarCollapsed || isHovering;
+
+  const handleMouseEnter = () => {
+    if (isSidebarCollapsed) setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (isSidebarCollapsed) {
+      setIsHovering(false);
+      setIsCoursesDropdownOpen(false);
+    }
+  };
 
   const getMainContentMarginClass = () => {
-    if (!isAuthenticated) {
-      return ""; // No margin if user is not logged in
-    }
-    // These classes have the `lg:` prefix, so they only apply on large screens.
-    if (isSidebarCollapsed) {
-      return "lg:mr-20"; // 5rem margin for the collapsed sidebar
-    }
-    return "lg:mr-80"; // 20rem margin for the expanded sidebar
+    if (!isAuthenticated) return "";
+    if (isSidebarCollapsed) return "lg:mr-20";
+    return "lg:mr-80";
   };
 
-  // Helper function to check if a profile link is active
-  const isProfileDropdownActive = () => {
-    return pathname.startsWith("/profile");
-  };
+  const isProfileDropdownActive = () => pathname.startsWith("/profile");
+  const isCoursesDropdownActive = () => pathname.startsWith("/courses");
+  const isCommunityActive = () => pathname.startsWith("/community");
 
-  // Helper function to check if a courses link is active
-  const isCoursesDropdownActive = () => {
-    return pathname.startsWith("/courses");
-  };
-
-  const isCommunityActive = () => {
-    return pathname.startsWith("/community");
-  };
-
-  // Helper function to format user status
-  const getUserStatusDisplay = (status) => {
-    const statusMap = {
-      student: "طالب",
-      teacher: "مدرس",
-      admin: "مدير",
-      moderator: "مشرف",
-    };
-    return statusMap[status] || status;
-  };
-
-  // Helper function to get verification badge
   const getVerificationBadge = () => {
-    if (user?.is_verified) {
-      return (
-        <Icon
-          icon="solar:verified-check-bold"
-          className="w-4 h-4 text-green-500"
-          title="حساب موثق"
-        />
-      );
-    } else {
-      return (
-        <Icon
-          icon="solar:verified-close-bold"
-          className="w-4 h-4 text-red-500"
-          title="حساب غير موثق"
-        />
-      );
-    }
+    return user?.is_verified ? (
+      <Icon
+        icon="solar:verified-check-bold"
+        className="w-4 h-4 text-green-500"
+        title="حساب موثق"
+      />
+    ) : (
+      <Icon
+        icon="solar:verified-close-bold"
+        className="w-4 h-4 text-red-500"
+        title="حساب غير موثق"
+      />
+    );
   };
 
-  // Helper function to get Telegram verification badge
   const getTelegramVerificationBadge = () => {
-    if (user?.telegram_verified) {
-      return (
-        <Icon
-          icon="solar:verified-check-bold"
-          className="w-4 h-4 text-blue-500"
-          title="حساب تليجرام موثق"
-        />
-      );
-    }
-    // Return null if not verified, so nothing shows up
-    return null;
+    return user?.telegram_verified ? (
+      <Icon
+        icon="solar:verified-check-bold"
+        className="w-4 h-4 text-blue-500"
+        title="حساب تليجرام موثق"
+      />
+    ) : null;
   };
 
+  // ----------------------------------------------------------------
+  // 4. Render
+  // ----------------------------------------------------------------
   return (
     <div dir="rtl">
-      {/* Navbar (Fixed Position) */}
+      {/* --- Navbar (Fixed Position) --- */}
       <nav
         className={`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 smooth fixed top-0 left-0 right-0 z-30
           ${
             isAuthenticated ? "border-b" : "w-[95%] m-auto mt-4 rounded-lg"
-          } overflow-hidden`} // <-- CHANGE HERE
+          } overflow-visible`}
       >
         <div className="max-w-[1440px] mx-auto">
-          <div className="flex items-center justify-between ">
-            {/* --- DESKTOP NAVBAR --- */}
+          <div className="flex items-center justify-between">
+            {/* === DESKTOP NAVBAR === */}
 
-            {/* Right side - Logo & Dark Mode */}
+            {/* Right: Logo & Dark Mode */}
             <div className="hidden lg:flex items-center gap-4">
               <div
                 style={isAuthenticated && isScroll ? progressCircleStyle : {}}
                 className="w-12 h-12 rounded-full p-0.5 flex items-center justify-center transition-all duration-300"
                 title={`Page scrolled: ${Math.round(scrollProgress)}%`}
               >
-                {/* This inner div provides a solid background to cover the center of the gradient */}
                 <div className="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center p-1">
                   <Link href="/">
                     <Image
@@ -282,7 +337,7 @@ const Navbar = ({ children }) => {
               <DarkModeSwitcher />
             </div>
 
-            {/* Left side - Desktop Navigation */}
+            {/* Left: Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-3">
               {isAuthenticated ? (
                 <>
@@ -302,6 +357,8 @@ const Navbar = ({ children }) => {
                       </div>
                     </div>
                   )}
+
+                  {/* Search Button */}
                   <button
                     onClick={toggleSearch}
                     className="w-10 h-10 lg:w-12 lg:h-12 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center"
@@ -311,6 +368,113 @@ const Navbar = ({ children }) => {
                       className="w-5 h-5"
                     />
                   </button>
+
+                  {/* Notification Button (Desktop) */}
+                  <div className="relative" ref={notifDropdownRef}>
+                    <button
+                      onClick={toggleNotifications}
+                      className="w-10 h-10 lg:w-12 lg:h-12 text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center relative"
+                    >
+                      <Icon
+                        icon="solar:bell-bold-duotone"
+                        className="w-6 h-6"
+                      />
+
+                      {/* Pump Circle Animation */}
+                      {hasNewNotifs && (
+                        <span className="absolute top-2 right-2 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white dark:border-gray-900"></span>
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Notification Dropdown Panel */}
+                    {isNotifOpen && (
+                      <div className="absolute top-full left-0 mt-2 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-fade-in origin-top-left">
+                        {/* Header */}
+                        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+                          <h3 className="font-bold text-gray-800 dark:text-white">
+                            الإشعارات
+                          </h3>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchNotifications(true);
+                            }}
+                            className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                          >
+                            <Icon icon="solar:refresh-bold" /> تحديث
+                          </button>
+                        </div>
+
+                        {/* List */}
+                        <div className="max-h-[60vh] overflow-y-auto">
+                          {notifications.length === 0 && !notifLoading ? (
+                            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                              <Icon
+                                icon="solar:bell-off-bold-duotone"
+                                className="w-12 h-12 mx-auto mb-2 opacity-50"
+                              />
+                              <p>لا توجد إشعارات حالياً</p>
+                            </div>
+                          ) : (
+                            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                              {notifications.map((notif) => (
+                                <div
+                                  key={notif.id}
+                                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex gap-3"
+                                >
+                                  <div
+                                    className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                                      notif.type === "error"
+                                        ? "bg-red-500"
+                                        : notif.type === "success"
+                                        ? "bg-green-500"
+                                        : "bg-blue-500"
+                                    }`}
+                                  ></div>
+                                  <div className="flex-1">
+                                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-0.5">
+                                      {notif.title}
+                                    </h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-2">
+                                      {notif.message}
+                                    </p>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                                      {formatDate(notif.created_at)}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Loading State */}
+                          {notifLoading && (
+                            <div className="p-4 text-center">
+                              <Icon
+                                icon="solar:loading-bold-duotone"
+                                className="w-6 h-6 animate-spin text-blue-500 mx-auto"
+                              />
+                            </div>
+                          )}
+
+                          {/* Load More Button */}
+                          {!notifLoading &&
+                            hasMoreNotifs &&
+                            notifications.length > 0 && (
+                              <button
+                                onClick={handleLoadMoreNotifs}
+                                className="w-full py-3 text-sm text-center text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 font-medium border-t border-gray-100 dark:border-gray-700 transition-colors"
+                              >
+                                عرض المزيد
+                              </button>
+                            )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <div className="flex items-center gap-3">
@@ -332,7 +496,7 @@ const Navbar = ({ children }) => {
               )}
             </div>
 
-            {/* --- MOBILE NAVBAR --- */}
+            {/* === MOBILE NAVBAR === */}
             <div
               className={`lg:hidden flex items-center justify-between w-full`}
             >
@@ -349,6 +513,88 @@ const Navbar = ({ children }) => {
                         className="w-5 h-5"
                       />
                     </button>
+
+                    {/* Mobile Notification Button */}
+                    <div className="relative" ref={notifDropdownRef}>
+                      <button
+                        onClick={toggleNotifications}
+                        className="w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl smooth flex items-center justify-center relative"
+                      >
+                        <Icon
+                          icon="solar:bell-bold-duotone"
+                          className="w-5 h-5"
+                        />
+                        {hasNewNotifs && (
+                          <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-white dark:border-gray-900"></span>
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Mobile Notification Dropdown */}
+                      {isNotifOpen && (
+                        <div className="absolute top-full right-[-60px] xs:right-0 mt-2 w-[85vw] max-w-[320px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-fade-in">
+                          <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">
+                              الإشعارات
+                            </h3>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                fetchNotifications(true);
+                              }}
+                              className="text-xs text-blue-500"
+                            >
+                              تحديث
+                            </button>
+                          </div>
+                          <div className="max-h-[50vh] overflow-y-auto">
+                            {notifications.length === 0 && !notifLoading ? (
+                              <div className="p-6 text-center text-gray-500">
+                                <p className="text-sm">لا توجد إشعارات</p>
+                              </div>
+                            ) : (
+                              <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                {notifications.map((notif) => (
+                                  <div
+                                    key={notif.id}
+                                    className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 text-right"
+                                  >
+                                    <div
+                                      className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                                        notif.type === "error"
+                                          ? "bg-red-500"
+                                          : "bg-blue-500"
+                                      }`}
+                                    ></div>
+                                    <div className="flex-1">
+                                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                        {notif.title}
+                                      </h4>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 my-1">
+                                        {notif.message}
+                                      </p>
+                                      <span className="text-[10px] text-gray-400">
+                                        {formatDate(notif.created_at)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {!notifLoading && hasMoreNotifs && (
+                              <button
+                                onClick={handleLoadMoreNotifs}
+                                className="w-full py-3 text-sm text-blue-600 border-t border-gray-100 dark:border-gray-700"
+                              >
+                                عرض المزيد
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
                 <button
@@ -366,7 +612,6 @@ const Navbar = ({ children }) => {
                   className="w-12 h-12 rounded-full p-0.5 flex items-center justify-center transition-all duration-150"
                   title={`Page scrolled: ${Math.round(scrollProgress)}%`}
                 >
-                  {/* This inner div provides a solid background to cover the center of the gradient */}
                   <div className="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center p-1">
                     <Link href="/">
                       <Image
@@ -388,15 +633,13 @@ const Navbar = ({ children }) => {
             </div>
           </div>
 
-          {/* Mobile Menu Dropdown */}
+          {/* === MOBILE MENU (Dropdown) === */}
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
               <div className="space-y-3">
                 {isAuthenticated ? (
                   <>
-                    {/* بطاقة بيانات المستخدم */}
                     <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-2xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
-                      {/* صورة البروفايل */}
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-500 flex items-center justify-center">
                         {user?.profile_picture ? (
                           <img
@@ -412,7 +655,6 @@ const Navbar = ({ children }) => {
                         )}
                       </div>
 
-                      {/* بيانات المستخدم */}
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-1">
                           <p className="font-semibold text-gray-800 dark:text-white text-sm truncate">
@@ -455,7 +697,6 @@ const Navbar = ({ children }) => {
                       </div>
                     </div>
 
-                    {/* بطاقة الرصيد */}
                     {userType !== "admin" && (
                       <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm mt-3">
                         <Icon
@@ -631,7 +872,7 @@ const Navbar = ({ children }) => {
         )}
       </nav>
 
-      {/* Sidebar (Fixed Position) */}
+      {/* --- Sidebar (Fixed Position) --- */}
       {isAuthenticated && (
         <div
           className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 shadow-lg z-40 overflow-hidden transition-all smooth
@@ -671,12 +912,11 @@ const Navbar = ({ children }) => {
               </button>
             </div>
 
-            {/* User Info */}
+            {/* Sidebar User Info */}
             {shouldShowExpanded &&
             userType !== "admin" &&
             userType === "user" ? (
               <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-2xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
-                {/* صورة البروفايل */}
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-500 flex items-center justify-center">
                   {user?.profile_picture ? (
                     <img
@@ -692,9 +932,7 @@ const Navbar = ({ children }) => {
                   )}
                 </div>
 
-                {/* بيانات المستخدم */}
                 <div className="flex-1 min-w-0">
-                  {/* الاسم + رقم الهاتف + الحالة */}
                   <div className="flex flex-wrap items-center gap-1">
                     <p className="font-semibold text-gray-800 dark:text-white text-sm truncate">
                       {user?.display_name || user?.full_name}
@@ -715,14 +953,12 @@ const Navbar = ({ children }) => {
                     {getVerificationBadge()}
                   </div>
 
-                  {/* البريد الإلكتروني */}
                   {user?.email && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                       {user.email}
                     </p>
                   )}
 
-                  {/* التليجرام */}
                   {user?.telegram_username && (
                     <div className="flex items-center gap-1 mt-1">
                       <Icon
@@ -757,10 +993,9 @@ const Navbar = ({ children }) => {
             )}
           </div>
 
-          {/* Sidebar Content */}
+          {/* Sidebar Links */}
           <div className="p-4 space-y-2 overflow-y-auto h-full pb-32">
             {userType === "admin" ? (
-              /* Admin Dashboard Link */
               <Link
                 href="/admin/dashboard"
                 className={`flex items-center w-full p-3 rounded-xl smooth ${
@@ -778,28 +1013,24 @@ const Navbar = ({ children }) => {
                 )}
               </Link>
             ) : (
-              <>
-                {/* My Profile */}
-                <Link
-                  href="/profile"
-                  className={`flex items-center w-full p-3 rounded-xl smooth ${
-                    !shouldShowExpanded ? "justify-center" : "gap-3"
-                  } ${
-                    isProfileDropdownActive()
-                      ? "bg-blue-500 text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                  title={!shouldShowExpanded ? "ملفي الشخصي" : ""}
-                >
-                  <Icon icon="solar:user-circle-bold" className="w-6 h-6" />
-                  {shouldShowExpanded && (
-                    <span className="font-medium">ملفي الشخصي</span>
-                  )}
-                </Link>
-              </>
+              <Link
+                href="/profile"
+                className={`flex items-center w-full p-3 rounded-xl smooth ${
+                  !shouldShowExpanded ? "justify-center" : "gap-3"
+                } ${
+                  isProfileDropdownActive()
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+                title={!shouldShowExpanded ? "ملفي الشخصي" : ""}
+              >
+                <Icon icon="solar:user-circle-bold" className="w-6 h-6" />
+                {shouldShowExpanded && (
+                  <span className="font-medium">ملفي الشخصي</span>
+                )}
+              </Link>
             )}
 
-            {/* Practice Quiz */}
             <Link
               href="/practice-quiz"
               className={`flex items-center w-full p-3 rounded-xl smooth ${
@@ -817,7 +1048,6 @@ const Navbar = ({ children }) => {
               )}
             </Link>
 
-            {/* Questions Forum */}
             <Link
               href="/questions-forum"
               className={`flex items-center w-full p-3 rounded-xl smooth ${
@@ -835,9 +1065,6 @@ const Navbar = ({ children }) => {
               )}
             </Link>
 
-            {/* AI Explain */}
-
-            {/* Community */}
             <Link
               href="/community"
               className={`flex items-center w-full p-3 rounded-xl smooth ${
@@ -872,8 +1099,6 @@ const Navbar = ({ children }) => {
               )}
             </Link>
 
-            {/* Courses with Dropdown */}
-
             <div
               className={`${
                 isCoursesDropdownOpen && isCoursesDropdownActive()
@@ -883,9 +1108,8 @@ const Navbar = ({ children }) => {
             >
               <button
                 onClick={() => {
-                  if (shouldShowExpanded) {
+                  if (shouldShowExpanded)
                     setIsCoursesDropdownOpen(!isCoursesDropdownOpen);
-                  }
                 }}
                 className={`flex items-center justify-between w-full p-3 rounded-xl smooth ${
                   !shouldShowExpanded ? "justify-center" : ""
@@ -943,7 +1167,7 @@ const Navbar = ({ children }) => {
                 </div>
               )}
             </div>
-            {/* Logout */}
+
             <Link
               href="/logout"
               className={`flex items-center w-full p-3 rounded-xl smooth ${
@@ -962,13 +1186,12 @@ const Navbar = ({ children }) => {
 
       {/* Main Content Area */}
       <main
-        className={` transition-all duration-300 ease-in-out ${getMainContentMarginClass()}`}
+        className={`transition-all duration-300 ease-in-out ${getMainContentMarginClass()}`}
       >
-        {/* All your page content (e.g., from page.js) will be rendered here */}
         {children}
       </main>
 
-      {/* Overlays */}
+      {/* Search Overlay */}
       {isSearchOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-24"
@@ -1011,8 +1234,6 @@ const Navbar = ({ children }) => {
                   <Icon icon="material-symbols:search" className="w-6 h-6" />
                 </button>
               </div>
-
-              {/* Autocomplete Suggestions */}
               {showSuggestions && autocompleteSuggestions.length > 0 && (
                 <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-64 overflow-y-auto">
                   {autocompleteSuggestions.map((suggestion, index) => (

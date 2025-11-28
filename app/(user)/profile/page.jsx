@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/hooks/useAuth";
+import { getData } from "@/libs/axios"; // Imported getData
 import { getUserQuizAnalytics } from "@/services/QuizAnalytics";
 import { getCurrentUserProfile } from "@/services/User";
 import { Icon } from "@iconify/react";
@@ -16,6 +17,7 @@ import WalletTab from "./components/WalletTab";
 const UserProfile = () => {
   const { user: authUser } = useAuthStore();
   const [user, setUser] = useState(null);
+  const [analytics, setAnalytics] = useState(null); // New State for Analytics
   const [userLoading, setUserLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [quizResults, setQuizResults] = useState([]);
@@ -34,11 +36,19 @@ const UserProfile = () => {
   const loadUserProfile = async () => {
     setUserLoading(true);
     try {
+      // 1. Fetch User Profile
       const userData = await getCurrentUserProfile();
       setUser(userData);
+
+      // 2. Fetch User Analytics (New Endpoint)
+      try {
+        const analyticsData = await getData("/analytics/user/me", true);
+        setAnalytics(analyticsData);
+      } catch (analyticsError) {
+        console.error("Error loading analytics:", analyticsError);
+      }
     } catch (error) {
       console.error("Error loading user profile:", error);
-      // Fallback to auth store data if API fails
       setUser(authUser);
     } finally {
       setUserLoading(false);
@@ -58,11 +68,7 @@ const UserProfile = () => {
   };
 
   const profileTabs = [
-    {
-      id: "overview",
-      label: "نظرة عامة",
-      icon: "solar:user-id-bold",
-    },
+    { id: "overview", label: "نظرة عامة", icon: "solar:user-id-bold" },
     {
       id: "personal-info",
       label: "المعلومات الشخصية",
@@ -78,22 +84,15 @@ const UserProfile = () => {
       label: "الأمان والخصوصية",
       icon: "solar:shield-keyhole-bold",
     },
-    {
-      id: "notifications",
-      label: "الإشعارات",
-      icon: "solar:bell-bold",
-    },
-    {
-      id: "wallet",
-      label: "المحفظة",
-      icon: "solar:wallet-bold",
-    },
+    { id: "notifications", label: "الإشعارات", icon: "solar:bell-bold" },
+    { id: "wallet", label: "المحفظة", icon: "solar:wallet-bold" },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
       case "overview":
-        return <ProfileOverviewTab user={user} />;
+        // Pass analytics data to the Overview Tab
+        return <ProfileOverviewTab user={user} analytics={analytics} />;
 
       case "personal-info":
         return <PersonalInfoTab user={user} />;
@@ -137,7 +136,6 @@ const UserProfile = () => {
           </div>
         ) : (
           <div className="grid lg:grid-cols-12 gap-6">
-            {/* Navigation Section */}
             <div className="lg:col-span-4 xl:col-span-3">
               <ProfileSidebar
                 user={user}
@@ -146,8 +144,6 @@ const UserProfile = () => {
                 setActiveTab={setActiveTab}
               />
             </div>
-
-            {/* Content Section */}
             <div className="lg:col-span-8 xl:col-span-9">
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
                 {renderContent()}

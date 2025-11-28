@@ -35,6 +35,11 @@ const AdminSidebar = () => {
       href: "/admin/dashboard/users",
     },
     {
+      title: " إدارة الإشعارات",
+      icon: "basil:notification-on-solid",
+      href: "/admin/dashboard/notification",
+    },
+    {
       title: "إدارة المنتدى",
       icon: "solar:users-group-rounded-bold-duotone",
       isDropdown: true,

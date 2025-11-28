@@ -1,3 +1,4 @@
+import SessionTracker from "@/components/client/SessionTracker";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
@@ -138,6 +139,7 @@ export default function RootLayout({ children }) {
         className={`${IBMSans.className} bg-white dark:bg-zinc-950 smooth antialiased`}
       >
         <ThemeProvider>
+          <SessionTracker />
           {children}
           <ToastContainerWrapper />
         </ThemeProvider>
