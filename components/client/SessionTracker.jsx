@@ -16,7 +16,7 @@ const SessionTracker = () => {
 
     // 2. FIX: Set interval to 1 minute (60000ms)
     // This ensures smoother data and avoids backend timeouts
-    const PING_INTERVAL_MS = 60 * 1000;
+    const PING_INTERVAL_MS = 65 * 1000;
 
     const startSession = async () => {
       try {
