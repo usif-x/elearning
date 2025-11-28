@@ -18,7 +18,7 @@
   --glow-dark-end: rgba(85, 153, 247, 0);
 }
 .dark-mode-btn {
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .dark-mode-btn::after {
@@ -32,7 +32,7 @@
   z-index: -1;
   background: radial-gradient(circle, var(--glow-light-start) 0%, var(--glow-light-end) 70%);
   opacity: 0.6;
-  transition: all 0.3s ease;
+  transition: all 0.15s ease;
 }
 
 .dark-mode-btn.dark::after {

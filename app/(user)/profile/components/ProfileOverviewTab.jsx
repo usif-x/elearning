@@ -232,39 +232,44 @@ const ActivityChart = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
       {/* Left: Today's Timer (Dynamic Scale) */}
-      <div className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl border-2 border-sky-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden group">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border-2 border-sky-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-sky-500"></div>
 
-        <div className="w-full flex justify-between items-center mb-4 sm:mb-6 relative z-10">
-          <span className="text-xs font-bold bg-sky-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-md">
+        <div className="w-full flex justify-between items-center mb-6">
+          <span className="text-xs font-bold bg-sky-500 text-white px-3 py-1.5 rounded-lg shadow-md">
             الهدف: {currentGoal / 60} {currentGoal >= 120 ? "ساعات" : "ساعة"}
           </span>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             وقتك اليوم
             <Icon
               icon="solar:clock-circle-bold-duotone"
-              className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6"
+              className="text-sky-500 w-6 h-6"
             />
           </h3>
         </div>
 
-        <div className="relative z-10">
-          <svg className="transform -rotate-90 w-40 h-40 sm:w-48 sm:h-48">
+        <div className="relative flex items-center justify-center my-4">
+          <svg
+            className="transform -rotate-90"
+            width="200"
+            height="200"
+            viewBox="0 0 200 200"
+          >
             <circle
-              cx={window.innerWidth < 640 ? "80" : "96"}
-              cy={window.innerWidth < 640 ? "80" : "96"}
-              r={window.innerWidth < 640 ? radius * 0.85 : radius}
+              cx="100"
+              cy="100"
+              r={radius}
               stroke="currentColor"
-              strokeWidth={window.innerWidth < 640 ? "10" : "12"}
+              strokeWidth="12"
               fill="transparent"
               className="text-gray-200 dark:text-gray-700"
             />
             <circle
-              cx={window.innerWidth < 640 ? "80" : "96"}
-              cy={window.innerWidth < 640 ? "80" : "96"}
-              r={window.innerWidth < 640 ? radius * 0.85 : radius}
+              cx="100"
+              cy="100"
+              r={radius}
               stroke="currentColor"
-              strokeWidth={window.innerWidth < 640 ? "10" : "12"}
+              strokeWidth="12"
               fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={circleOffset}
@@ -273,10 +278,10 @@ const ActivityChart = () => {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
+            <span className="text-5xl font-black text-gray-900 dark:text-white">
               <CountUp end={todayMinutes} duration={2000} decimals={0} />
             </span>
-            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium">
+            <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium">
               دقيقة
             </span>
             {todayMinutes >= 60 && (
@@ -286,7 +291,7 @@ const ActivityChart = () => {
             )}
           </div>
         </div>
-        <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 relative z-10 px-2">
+        <p className="mt-4 text-center text-sm font-bold text-gray-700 dark:text-gray-300 px-2">
           {getMotivationalMessage(todayMinutes)}
         </p>
       </div>
