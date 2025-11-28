@@ -250,6 +250,14 @@ const CourseData = () => {
                         >
                           {lecture.name}
                         </span>
+                        {lecture.description && (
+                          <p
+                            className="text-sm text-gray-500 dark:text-gray-400 mt-1"
+                            dir="rtl"
+                          >
+                            {lecture.description}
+                          </p>
+                        )}
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           {lecture.contents?.length || 0} عنصر
                         </span>
@@ -502,10 +510,17 @@ const CourseData = () => {
                                   <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white dark:bg-gray-800 p-2 rounded-lg">
                                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                        الترتيب
+                                        الوصف
                                       </p>
                                       <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                        #{content.position + 1}
+                                        {content.description
+                                          ? content.description.length > 80
+                                            ? `${content.description.slice(
+                                                0,
+                                                80
+                                              )}...`
+                                            : content.description
+                                          : "-"}
                                       </p>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 p-2 rounded-lg">
