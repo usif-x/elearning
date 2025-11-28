@@ -309,7 +309,7 @@ const Navbar = ({ children }) => {
         className={`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 smooth fixed top-0 left-0 right-0 z-30
           ${
             isAuthenticated ? "border-b" : "w-[95%] m-auto mt-4 rounded-lg"
-          } overflow-hidden`}
+          } overflow-visible`}
       >
         <div className="max-w-[1440px] mx-auto">
           <div className="flex items-center justify-between">
