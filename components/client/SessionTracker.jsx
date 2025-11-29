@@ -7,8 +7,8 @@ import { useEffect, useRef } from "react";
 const SessionTracker = () => {
   const { isAuthenticated, userType } = useAuthStore();
   const isStartedRef = useRef(false);
-  const intervalIdRef = (useRef < NodeJS.Timeout) | (null > null);
-  const lastPingRef = useRef < number > 0;
+  const intervalIdRef = useRef(null);
+  const lastPingRef = useRef(0);
 
   useEffect(() => {
     // Only track regular users, not admins
