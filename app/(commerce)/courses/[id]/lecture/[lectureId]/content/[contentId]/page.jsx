@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
-
 const CustomAudioPlayer = ({ audioUrl, title }) => {
   const audioRef = useRef(null);
   const progressBarRef = useRef(null);
@@ -86,7 +85,9 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
   };
 
   const handleSeek = (e) => {
-    const seekTime = (Number(e.target.value) / 100) * duration;
+    if (!duration) return;
+    const percentage = Number(e.target.value);
+    const seekTime = (percentage / 100) * duration;
     if (isFinite(seekTime)) {
       audioRef.current.currentTime = seekTime;
       setCurrentTime(seekTime);
@@ -103,6 +104,20 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
     setHoverTime(time);
     setHoverPosition(percentage);
+  };
+
+  const handleProgressClick = (e) => {
+    if (!progressBarRef.current || !duration) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    const time = (percentage / 100) * duration;
+
+    if (isFinite(time)) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
   };
 
   const handleProgressLeave = () => {
@@ -167,6 +182,7 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
           className="relative h-8 w-full mb-6 cursor-pointer"
           onMouseMove={handleProgressHover}
           onMouseLeave={handleProgressLeave}
+          onClick={handleProgressClick}
         >
           {/* Hover Time Tooltip */}
           {hoverTime !== null && (
@@ -180,15 +196,6 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
               </div>
             </div>
           )}
-
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={progress || 0}
-            onChange={handleSeek}
-            className="absolute w-full h-full opacity-0 z-20 cursor-pointer"
-          />
 
           {/* Track Background */}
           <div className="absolute top-1/2 -translate-y-1/2 left-0 h-2 w-full bg-slate-300 dark:bg-slate-600 rounded-full overflow-hidden shadow-inner">
@@ -261,21 +268,24 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
           >
             {showVolume && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-600 z-30">
-                <div className="h-28 w-8 flex items-center justify-center">
+                <div className="h-28 w-8 flex items-center justify-center relative">
                   <input
                     type="range"
                     min="0"
                     max="1"
                     step="0.01"
+                    orient="vertical"
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="volume-slider"
-                    style={{
-                      width: "100px",
-                      transform: "rotate(-90deg)",
-                      transformOrigin: "center",
-                    }}
+                    className="volume-slider-vertical"
                   />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-1.5 h-full bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                  </div>
+                  <div
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-t from-sky-400 to-sky-600 rounded-full pointer-events-none transition-all duration-75"
+                    style={{ height: `${(isMuted ? 0 : volume) * 100}%` }}
+                  ></div>
                 </div>
               </div>
             )}
@@ -313,7 +323,7 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         }
 
         input[type="range"]::-webkit-slider-track {
-          background: #cbd5e1;
+          background: transparent;
           height: 6px;
           border-radius: 9999px;
         }
@@ -321,42 +331,72 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          background: #0ea5e9;
+          background: white;
           height: 16px;
           width: 16px;
           border-radius: 50%;
-          border: 3px solid white;
+          border: 3px solid #0ea5e9;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          margin-top: -5px;
           cursor: pointer;
         }
 
         input[type="range"]::-moz-range-track {
-          background: #cbd5e1;
+          background: transparent;
           height: 6px;
           border-radius: 9999px;
         }
 
         input[type="range"]::-moz-range-thumb {
-          background: #0ea5e9;
+          background: white;
           height: 16px;
           width: 16px;
           border-radius: 50%;
-          border: 3px solid white;
+          border: 3px solid #0ea5e9;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
           cursor: pointer;
         }
 
-        .volume-slider::-webkit-slider-track {
-          background: linear-gradient(to right, #cbd5e1 0%, #cbd5e1 100%);
-          height: 6px;
-          border-radius: 9999px;
+        .volume-slider-vertical {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 100%;
+          height: 100%;
+          background: transparent;
+          cursor: pointer;
+          z-index: 10;
+          position: relative;
         }
 
-        .volume-slider::-webkit-slider-thumb {
-          background: #0ea5e9;
-          height: 14px;
-          width: 14px;
+        .volume-slider-vertical::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          background: white;
+          height: 16px;
+          width: 16px;
+          border-radius: 50%;
+          border: 3px solid #0ea5e9;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+        }
+
+        .volume-slider-vertical::-moz-range-thumb {
+          background: white;
+          height: 16px;
+          width: 16px;
+          border-radius: 50%;
+          border: 3px solid #0ea5e9;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+        }
+
+        .volume-slider-vertical::-webkit-slider-runnable-track {
+          background: transparent;
+          height: 100%;
+        }
+
+        .volume-slider-vertical::-moz-range-track {
+          background: transparent;
+          height: 100%;
         }
       `}</style>
     </div>
