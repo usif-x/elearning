@@ -15,23 +15,22 @@ import Swal from "sweetalert2";
 
 const CustomAudioPlayer = ({ audioUrl, title }) => {
   const audioRef = useRef(null);
+  const progressBarRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
-
-  // --- Logic & Event Handlers ---
+  const [hoverTime, setHoverTime] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState(0);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const updateTime = () => setCurrentTime(audio.currentTime);
-
     const updateDuration = () => {
-      // Check for Infinity or NaN to prevent errors
       if (
         audio.duration &&
         !isNaN(audio.duration) &&
@@ -40,7 +39,6 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         setDuration(audio.duration);
       }
     };
-
     const handleEnded = () => setIsPlaying(false);
 
     audio.addEventListener("timeupdate", updateTime);
@@ -48,7 +46,6 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
     audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("ended", handleEnded);
 
-    // Fix: Check if metadata is already cached
     if (audio.readyState >= 1) {
       updateDuration();
     }
@@ -96,6 +93,22 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
     }
   };
 
+  const handleProgressHover = (e) => {
+    if (!progressBarRef.current || !duration) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    const time = (percentage / 100) * duration;
+
+    setHoverTime(time);
+    setHoverPosition(percentage);
+  };
+
+  const handleProgressLeave = () => {
+    setHoverTime(null);
+  };
+
   const handleVolumeChange = (e) => {
     const newVolume = Number(e.target.value);
     audioRef.current.volume = newVolume;
@@ -115,33 +128,59 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
   const formatTime = (time) => {
     if (!time || isNaN(time) || !isFinite(time)) return "0:00";
-    const minutes = Math.floor(time / 60);
+
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
     const seconds = Math.floor(time % 60);
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+    }
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="w-full max-w-sm mx-auto p-2" dir="ltr">
+    <div className="w-full max-w-md mx-auto p-4">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 p-5 transition-all duration-300">
-        {/* Top: Title & Time */}
-        <div className="flex justify-between items-center mb-2">
+      <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 transition-all duration-300">
+        {/* Title & Time Display */}
+        <div className="flex justify-between items-start mb-4">
           <h3
-            className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate w-2/3"
+            className="text-base font-bold text-slate-800 dark:text-slate-100 truncate flex-1 mr-3"
             title={title}
           >
             {title || "Audio Track"}
           </h3>
-          <span className="text-xs font-mono font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 px-2 py-1 rounded-md">
+          <div className="text-xs font-mono font-semibold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/40 px-3 py-1.5 rounded-full whitespace-nowrap">
             {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
+          </div>
         </div>
 
-        {/* Middle: Progress Bar */}
-        <div className="relative h-3 w-full mb-6 group">
+        {/* Progress Bar with Hover Tooltip */}
+        <div
+          ref={progressBarRef}
+          className="relative h-8 w-full mb-6 cursor-pointer"
+          onMouseMove={handleProgressHover}
+          onMouseLeave={handleProgressLeave}
+        >
+          {/* Hover Time Tooltip */}
+          {hoverTime !== null && (
+            <div
+              className="absolute -top-10 bg-slate-800 dark:bg-slate-700 text-white text-xs font-mono px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none z-30 whitespace-nowrap transform -translate-x-1/2"
+              style={{ left: `${hoverPosition}%` }}
+            >
+              {formatTime(hoverTime)}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+                <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-slate-800 dark:border-t-slate-700"></div>
+              </div>
+            </div>
+          )}
+
           <input
             type="range"
             min="0"
@@ -150,86 +189,92 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
             onChange={handleSeek}
             className="absolute w-full h-full opacity-0 z-20 cursor-pointer"
           />
-          {/* Background Track */}
-          <div className="absolute top-[5px] left-0 h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-            {/* Active Progress */}
+
+          {/* Track Background */}
+          <div className="absolute top-1/2 -translate-y-1/2 left-0 h-2 w-full bg-slate-300 dark:bg-slate-600 rounded-full overflow-hidden shadow-inner">
+            {/* Progress Fill */}
             <div
-              className="h-full bg-sky-500 transition-all duration-100 ease-linear"
+              className="h-full bg-gradient-to-r from-sky-400 to-sky-600 transition-all duration-75 ease-linear shadow-sm"
               style={{ width: `${progress}%` }}
             />
           </div>
-          {/* Thumb (Visual Only) */}
+
+          {/* Progress Thumb */}
           <div
-            className="absolute top-0 h-3.5 w-3.5 bg-white border-2 border-sky-500 rounded-full shadow-sm z-10 pointer-events-none transition-all duration-100 ease-linear"
-            style={{
-              left: `calc(${progress}% - 7px)`,
-            }}
+            className="absolute top-1/2 -translate-y-1/2 h-4 w-4 bg-white border-3 border-sky-500 rounded-full shadow-lg pointer-events-none transition-all duration-75 ease-linear"
+            style={{ left: `calc(${progress}% - 8px)` }}
           />
         </div>
 
-        {/* Bottom: Controls */}
+        {/* Control Buttons */}
         <div className="flex items-center justify-between">
-          {/* 1. Restart Button */}
+          {/* Restart */}
           <button
             onClick={handleRestart}
-            className="p-2 rounded-full text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors"
+            className="p-2.5 rounded-full text-slate-500 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700 transition-all duration-200 active:scale-95"
             title="Restart"
           >
             <Icon icon="solar:restart-bold" className="w-5 h-5" />
           </button>
 
-          {/* 2. Transport Controls (Grouped) */}
-          <div className="flex items-center gap-3">
+          {/* Transport Controls */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => handleSkip(-10)}
-              className="p-2 rounded-full text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors"
-              title="-10 Seconds"
+              className="p-2.5 rounded-full text-slate-600 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700 transition-all duration-200 active:scale-95"
+              title="Rewind 10s"
             >
               <Icon
                 icon="solar:rewind-10-seconds-back-bold"
-                className="w-6 h-6"
+                className="w-7 h-7"
               />
             </button>
 
             <button
               onClick={togglePlay}
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-b from-sky-400 to-sky-600 hover:from-sky-500 hover:to-sky-700 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-transform transform active:scale-95"
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-400 via-sky-500 to-sky-600 hover:from-sky-500 hover:via-sky-600 hover:to-sky-700 text-white shadow-xl shadow-sky-300/50 dark:shadow-sky-900/30 transition-all duration-200 active:scale-95"
+              title={isPlaying ? "Pause" : "Play"}
             >
               <Icon
                 icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
-                className="w-6 h-6 ml-0.5" // Slight offset for visual center
+                className={`w-7 h-7 ${!isPlaying ? "ml-1" : ""}`}
               />
             </button>
 
             <button
               onClick={() => handleSkip(10)}
-              className="p-2 rounded-full text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors"
-              title="+10 Seconds"
+              className="p-2.5 rounded-full text-slate-600 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700 transition-all duration-200 active:scale-95"
+              title="Forward 10s"
             >
               <Icon
                 icon="solar:rewind-10-seconds-forward-bold"
-                className="w-6 h-6"
+                className="w-7 h-7"
               />
             </button>
           </div>
 
-          {/* 3. Volume Control */}
+          {/* Volume Control */}
           <div
             className="relative flex items-center"
             onMouseEnter={() => setShowVolume(true)}
             onMouseLeave={() => setShowVolume(false)}
           >
             {showVolume && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-30 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="h-24 w-6 flex justify-center">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-600 z-30">
+                <div className="h-28 w-8 flex items-center justify-center">
                   <input
                     type="range"
                     min="0"
                     max="1"
-                    step="0.05"
+                    step="0.01"
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="w-24 h-1 bg-slate-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer -rotate-90 origin-center translate-y-11"
+                    className="volume-slider"
+                    style={{
+                      width: "100px",
+                      transform: "rotate(-90deg)",
+                      transformOrigin: "center",
+                    }}
                   />
                 </div>
               </div>
@@ -237,11 +282,12 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
             <button
               onClick={toggleMute}
-              className={`p-2 rounded-full transition-colors ${
+              className={`p-2.5 rounded-full transition-all duration-200 active:scale-95 ${
                 isMuted || volume === 0
-                  ? "text-red-400 bg-red-50 dark:bg-red-900/20"
-                  : "text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-slate-800"
+                  ? "text-red-500 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50"
+                  : "text-slate-500 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700"
               }`}
+              title={isMuted ? "Unmute" : "Mute"}
             >
               <Icon
                 icon={
@@ -258,15 +304,59 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         </div>
       </div>
 
-      {/* Styles to fix range input reset */}
       <style jsx>{`
+        input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-track {
+          background: #cbd5e1;
+          height: 6px;
+          border-radius: 9999px;
+        }
+
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
+          appearance: none;
           background: #0ea5e9;
-          height: 12px;
-          width: 12px;
+          height: 16px;
+          width: 16px;
           border-radius: 50%;
-          margin-top: -4px;
+          border: 3px solid white;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          margin-top: -5px;
+          cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-track {
+          background: #cbd5e1;
+          height: 6px;
+          border-radius: 9999px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+          background: #0ea5e9;
+          height: 16px;
+          width: 16px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-track {
+          background: linear-gradient(to right, #cbd5e1 0%, #cbd5e1 100%);
+          height: 6px;
+          border-radius: 9999px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+          background: #0ea5e9;
+          height: 14px;
+          width: 14px;
         }
       `}</style>
     </div>
