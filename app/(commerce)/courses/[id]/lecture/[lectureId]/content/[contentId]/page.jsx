@@ -10,7 +10,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 
 const CustomAudioPlayer = ({ audioUrl, title }) => {
