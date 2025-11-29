@@ -82,13 +82,25 @@ const QuizResultsTab = ({ quizResults, quizLoading }) => {
         cell: ({ row }) => {
           const quiz = row.original;
           return quiz.is_completed ? (
-            <Link
-              href={`/profile/quiz-result/${quiz.attempt_id}`}
-              className="text-sky-600 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300 font-medium inline-flex items-center gap-1"
-            >
-              <Icon icon="solar:eye-bold" className="w-4 h-4" />
-              <span className="hidden sm:inline">عرض النتيجة</span>
-            </Link>
+            <div className="flex gap-2">
+              {/* رابط عرض النتيجة */}
+              <Link
+                href={`/profile/quiz-result/${quiz.attempt_id}`}
+                className="text-sky-600 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300 font-medium inline-flex items-center gap-1"
+              >
+                <Icon icon="solar:eye-bold" className="w-4 h-4" />
+                <span className="hidden sm:inline">عرض النتيجة</span>
+              </Link>
+
+              {/* رابط الذهاب للـ quiz نفسه */}
+              <Link
+                href={`/course/${quiz.course_id}/lecture/${quiz.lecture_id}/content/${quiz.content_id}`}
+                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 font-medium inline-flex items-center gap-1"
+              >
+                <Icon icon="solar:arrow-right-bold" className="w-4 h-4" />
+                <span className="hidden sm:inline">اذهب إلى الكويز</span>
+              </Link>
+            </div>
           ) : (
             <span className="text-gray-400 dark:text-gray-600 text-xs">
               غير مكتمل
