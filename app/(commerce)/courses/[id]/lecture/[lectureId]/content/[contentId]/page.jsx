@@ -19,313 +19,179 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showVolume, setShowVolume] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
+
+    // Improved duration handling
+    const updateDuration = () => {
+      if (
+        audio.duration &&
+        !isNaN(audio.duration) &&
+        isFinite(audio.duration)
+      ) {
+        setDuration(audio.duration);
+      }
+    };
+
     const handleEnded = () => setIsPlaying(false);
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateDuration);
+    audio.addEventListener("durationchange", updateDuration); // Extra safety
     audio.addEventListener("ended", handleEnded);
+
+    // Check if metadata is already loaded (fixes cache issues)
+    if (audio.readyState >= 1) {
+      updateDuration();
+    }
 
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("loadedmetadata", updateDuration);
+      audio.removeEventListener("durationchange", updateDuration);
       audio.removeEventListener("ended", handleEnded);
     };
   }, []);
 
   const togglePlay = () => {
+    const audio = audioRef.current;
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
     } else {
-      audioRef.current.play();
+      audio.play();
     }
     setIsPlaying(!isPlaying);
   };
 
-  const handleRestart = () => {
-    audioRef.current.currentTime = 0;
-    if (!isPlaying) {
-      audioRef.current.play();
-      setIsPlaying(true);
+  const handleSeek = (e) => {
+    const seekTime = (Number(e.target.value) / 100) * duration;
+    if (isFinite(seekTime)) {
+      audioRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
     }
   };
 
-  const handleSkip = (seconds) => {
-    audioRef.current.currentTime += seconds;
-  };
-
-  const handleSeek = (e) => {
-    const seekTime = (e.target.value / 100) * duration;
-    audioRef.current.currentTime = seekTime;
-    setCurrentTime(seekTime);
-  };
-
   const handleVolumeChange = (e) => {
-    const newVolume = e.target.value / 100;
+    const newVolume = Number(e.target.value);
     audioRef.current.volume = newVolume;
     setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+  };
+
+  const toggleMute = () => {
+    if (isMuted) {
+      audioRef.current.volume = volume || 1;
+      setIsMuted(false);
+    } else {
+      audioRef.current.volume = 0;
+      setIsMuted(true);
+    }
   };
 
   const formatTime = (time) => {
-    if (isNaN(time)) return "0:00";
+    if (!time || isNaN(time) || !isFinite(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const progress = duration ? (currentTime / duration) * 100 : 0;
+  // Safe calculation for progress bar
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="flex justify-center px-4" dir="rtl">
-      <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 rounded-2xl p-1 w-full max-w-2xl shadow-2xl">
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-6 md:p-8">
-          {/* Audio Element */}
-          <audio ref={audioRef} src={audioUrl} preload="metadata" />
+    <div className="w-full max-w-md mx-auto" dir="ltr">
+      <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-          {/* Title and Icon */}
-          <div className="flex flex-col items-center mb-6 sm:mb-8">
-            <div className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 p-4 sm:p-6 rounded-full mb-3 sm:mb-4">
-              <Icon
-                icon="solar:music-library-2-bold-duotone"
-                className="w-12 h-12 sm:w-16 md:w-20 sm:h-16 md:h-20 text-purple-500"
-              />
-            </div>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white text-center px-2">
-              {title}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-800 p-4 flex items-center gap-4 transition-all duration-300">
+        {/* Play/Pause Button */}
+        <button
+          onClick={togglePlay}
+          className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-all transform active:scale-95"
+        >
+          <Icon
+            icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
+            className="w-6 h-6"
+          />
+        </button>
+
+        {/* Info & Progress */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+          <div className="flex justify-between items-end mb-1">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white truncate pr-2">
+              {title || "Unknown Track"}
             </h3>
+            <span className="text-xs font-medium text-sky-600 dark:text-sky-400 font-mono">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mb-4 sm:mb-6">
-            <div className="relative">
+          <div className="relative h-2 w-full group">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={progress || 0}
+              onChange={handleSeek}
+              className="absolute w-full h-full opacity-0 z-10 cursor-pointer"
+            />
+            <div className="absolute top-0 left-0 h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sky-500 rounded-full transition-all duration-100 ease-linear"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            {/* Thumb indicator (only visible on hover/drag idea) */}
+            <div
+              className="absolute top-1/2 -mt-[5px] h-2.5 w-2.5 bg-sky-600 rounded-full shadow pointer-events-none transition-all duration-100 ease-linear opacity-0 group-hover:opacity-100"
+              style={{ left: `calc(${progress}% - 5px)` }}
+            />
+          </div>
+        </div>
+
+        {/* Volume Control (Compact) */}
+        <div
+          className="relative flex items-center"
+          onMouseEnter={() => setShowVolume(true)}
+          onMouseLeave={() => setShowVolume(false)}
+        >
+          {showVolume && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white dark:bg-slate-800 p-2 rounded-lg shadow-lg border border-slate-100 dark:border-slate-700 animate-in fade-in slide-in-from-bottom-2 duration-200">
               <input
                 type="range"
                 min="0"
-                max="100"
-                value={progress}
-                onChange={handleSeek}
-                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer audio-progress-bar"
-                style={{
-                  background: `linear-gradient(to right, #a855f7 0%, #ec4899 ${progress}%, #e5e7eb ${progress}%, #e5e7eb 100%)`,
-                }}
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="w-20 h-1 accent-sky-500 bg-slate-200 rounded-lg cursor-pointer vertical-range"
+                style={{ writingMode: "bt-lr" }}
               />
             </div>
-            <div className="flex justify-between text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </div>
+          )}
 
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-            {/* Restart Button */}
-            <button
-              onClick={handleRestart}
-              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 sm:p-3 rounded-full transition-all duration-200 group"
-              title="إعادة البدء"
-            >
-              <Icon
-                icon="solar:restart-bold"
-                className="w-4 h-4 sm:w-5 md:w-6 sm:h-5 md:h-6 text-gray-700 dark:text-gray-300 group-hover:text-purple-500"
-              />
-            </button>
-
-            {/* Previous 10 Seconds */}
-            <button
-              onClick={() => handleSkip(-10)}
-              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 sm:p-3 rounded-full transition-all duration-200 group"
-              title="الرجوع 10 ثواني"
-            >
-              <Icon
-                icon="solar:rewind-10-seconds-back-bold"
-                className="w-5 h-5 sm:w-6 md:w-7 sm:h-6 md:h-7 text-gray-700 dark:text-gray-300 group-hover:text-purple-500"
-              />
-            </button>
-
-            {/* Play/Pause Button */}
-            <button
-              onClick={togglePlay}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 p-3 sm:p-4 md:p-5 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              <Icon
-                icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
-                className="w-6 h-6 sm:w-7 md:w-8 sm:h-7 md:h-8 text-white"
-              />
-            </button>
-
-            {/* Next 10 Seconds */}
-            <button
-              onClick={() => handleSkip(10)}
-              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 sm:p-3 rounded-full transition-all duration-200 group"
-              title="التقديم 10 ثواني"
-            >
-              <Icon
-                icon="solar:rewind-10-seconds-forward-bold"
-                className="w-5 h-5 sm:w-6 md:w-7 sm:h-6 md:h-7 text-gray-700 dark:text-gray-300 group-hover:text-purple-500"
-              />
-            </button>
-
-            {/* Volume Control */}
-            <div className="relative">
-              <button
-                onClick={() => setShowVolumeSlider(!showVolumeSlider)}
-                className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 sm:p-3 rounded-full transition-all duration-200 group"
-                title="التحكم في الصوت"
-              >
-                <Icon
-                  icon={
-                    volume === 0
-                      ? "solar:volume-cross-bold"
-                      : volume < 0.5
-                      ? "solar:volume-small-bold"
-                      : "solar:volume-loud-bold"
-                  }
-                  className="w-4 h-4 sm:w-5 md:w-6 sm:h-5 md:h-6 text-gray-700 dark:text-gray-300 group-hover:text-purple-500"
-                />
-              </button>
-
-              {/* Volume Slider */}
-              {showVolumeSlider && (
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 sm:p-3 z-10">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={volume * 100}
-                    onChange={handleVolumeChange}
-                    className="w-20 sm:w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer volume-slider"
-                    style={{
-                      background: `linear-gradient(to right, #a855f7 0%, #ec4899 ${
-                        volume * 100
-                      }%, #e5e7eb ${volume * 100}%, #e5e7eb 100%)`,
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Wave Animation */}
-          <div className="flex items-center justify-center gap-0.5 sm:gap-1 h-8 sm:h-10 md:h-12 overflow-hidden">
-            {[...Array(30)].map((_, i) => (
-              <div
-                key={i}
-                className={`w-0.5 sm:w-1 bg-gradient-to-t from-purple-500 to-pink-500 rounded-full transition-all duration-300 ${
-                  isPlaying ? "animate-wave" : "h-1 sm:h-2"
-                }`}
-                style={{
-                  animationDelay: `${i * 0.05}s`,
-                  height: isPlaying ? `${Math.random() * 100}%` : "8px",
-                }}
-              />
-            ))}
-          </div>
+          <button
+            onClick={toggleMute}
+            className="p-2 text-slate-400 hover:text-sky-500 dark:text-slate-500 dark:hover:text-sky-400 transition-colors"
+          >
+            <Icon
+              icon={
+                isMuted || volume === 0
+                  ? "solar:volume-cross-bold"
+                  : volume < 0.5
+                  ? "solar:volume-small-bold"
+                  : "solar:volume-loud-bold"
+              }
+              className="w-5 h-5"
+            />
+          </button>
         </div>
       </div>
-
-      {/* CSS Styles */}
-      <style jsx>{`
-        .audio-progress-bar::-webkit-slider-thumb {
-          appearance: none;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-          cursor: pointer;
-          box-shadow: 0 2px 8px rgba(168, 85, 247, 0.5);
-          transition: all 0.2s;
-        }
-
-        @media (min-width: 640px) {
-          .audio-progress-bar::-webkit-slider-thumb {
-            width: 16px;
-            height: 16px;
-          }
-        }
-
-        .audio-progress-bar::-webkit-slider-thumb:hover {
-          transform: scale(1.2);
-          box-shadow: 0 4px 12px rgba(168, 85, 247, 0.7);
-        }
-
-        .audio-progress-bar::-moz-range-thumb {
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 2px 8px rgba(168, 85, 247, 0.5);
-          transition: all 0.2s;
-        }
-
-        @media (min-width: 640px) {
-          .audio-progress-bar::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-          }
-        }
-
-        .audio-progress-bar::-moz-range-thumb:hover {
-          transform: scale(1.2);
-          box-shadow: 0 4px 12px rgba(168, 85, 247, 0.7);
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-          cursor: pointer;
-          box-shadow: 0 2px 6px rgba(168, 85, 247, 0.5);
-        }
-
-        @media (min-width: 640px) {
-          .volume-slider::-webkit-slider-thumb {
-            width: 14px;
-            height: 14px;
-          }
-        }
-
-        .volume-slider::-moz-range-thumb {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 2px 6px rgba(168, 85, 247, 0.5);
-        }
-
-        @media (min-width: 640px) {
-          .volume-slider::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
-          }
-        }
-
-        @keyframes wave {
-          0%,
-          100% {
-            height: 8px;
-          }
-          50% {
-            height: 100%;
-          }
-        }
-
-        .animate-wave {
-          animation: wave 1s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };
