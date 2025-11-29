@@ -94,7 +94,7 @@ const QuizResultsTab = ({ quizResults, quizLoading }) => {
 
               {/* رابط الذهاب للـ quiz نفسه */}
               <Link
-                href={`/course/${quiz.course_id}/lecture/${quiz.lecture_id}/content/${quiz.content_id}`}
+                href={`/courses/${quiz.course_id}/lecture/${quiz.lecture_id}/content/${quiz.content_id}`}
                 className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 font-medium inline-flex items-center gap-1"
               >
                 <Icon icon="solar:arrow-right-bold" className="w-4 h-4" />
