@@ -2,9 +2,10 @@
 
 import { getQuizAttemptDetails } from "@/services/QuizAnalytics";
 import { Icon } from "@iconify/react";
+import { Fireworks } from "fireworks-js";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const QuizResultPage = () => {
   const { id: attemptId } = useParams();
@@ -13,6 +14,9 @@ const QuizResultPage = () => {
   const [loading, setLoading] = useState(true);
   const [explanationLang, setExplanationLang] = useState({});
   const [activeFilter, setActiveFilter] = useState("all");
+  const fireworksContainerRef = useRef(null);
+  const [showFireworks, setShowFireworks] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   const scoreMessages = {
     "0-10": [
@@ -203,6 +207,98 @@ const QuizResultPage = () => {
     }
   }, [attemptId]);
 
+  // Fireworks effect for high scores (90% and above)
+  // Fireworks effect for high scores (90% and above)
+  useEffect(() => {
+    if (!quizResult || quizResult.score < 90) {
+      return;
+    }
+
+    setShowFireworks(true);
+
+    // Wait for ref to be available
+    const timer = setTimeout(() => {
+      if (!fireworksContainerRef.current) return;
+
+      // Create fireworks instance with improved settings
+      const fireworks = new Fireworks(fireworksContainerRef.current, {
+        autoresize: true,
+        opacity: 0.5,
+        acceleration: 1.05,
+        friction: 0.97,
+        gravity: 1.5,
+        particles: 150,
+        traceLength: 3,
+        traceSpeed: 10,
+        explosion: 8,
+        intensity: 30,
+        flickering: 50,
+        lineStyle: 'round',
+        hue: {
+          min: 0,
+          max: 360
+        },
+        delay: {
+          min: 30,
+          max: 60
+        },
+        rocketsPoint: {
+          min: 50,
+          max: 50
+        },
+        lineWidth: {
+          explosion: {
+            min: 1,
+            max: 3
+          },
+          trace: {
+            min: 1,
+            max: 2
+          }
+        },
+        brightness: {
+          min: 50,
+          max: 80
+        },
+        decay: {
+          min: 0.015,
+          max: 0.03
+        },
+        mouse: {
+          click: false,
+          move: false,
+          max: 1
+        },
+        sound: {
+          enabled: false
+        }
+      });
+
+      // Start fireworks
+      fireworks.start();
+
+      // Start fade out before stopping
+      const fadeOutTimeout = setTimeout(() => {
+        setIsFadingOut(true);
+      }, 9000); // Start fading out at 9 seconds
+
+      // Stop fireworks after 10 seconds
+      const stopTimeout = setTimeout(() => {
+        fireworks.stop();
+        setShowFireworks(false);
+        setIsFadingOut(false);
+      }, 10000);
+
+      return () => {
+        clearTimeout(fadeOutTimeout);
+        clearTimeout(stopTimeout);
+        fireworks.stop();
+      };
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [quizResult]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -240,6 +336,17 @@ const QuizResultPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
+      {/* Fireworks Container */}
+      {showFireworks && (
+        <div
+          ref={fireworksContainerRef}
+          className={`fixed inset-0 pointer-events-none z-50 transition-opacity duration-1000 ${
+            isFadingOut ? "opacity-0" : "opacity-100"
+          }`}
+          style={{ width: "100%", height: "100%" }}
+        />
+      )}
+      
       <div className="container mx-auto px-4 max-w-5xl">
         {/* Breadcrumb */}
         <div

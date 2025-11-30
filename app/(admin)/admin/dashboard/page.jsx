@@ -55,7 +55,7 @@ export default function AdminDashboard() {
         {
           title: "المستخدمين النشطين",
           value: analytics.total_active_users,
-          icon: "solar:clock-bold-duotone",
+          icon: "nrk:user-loggedin-active",
           color: "green",
         },
         {
@@ -73,13 +73,13 @@ export default function AdminDashboard() {
         {
           title: "إجمالي المحاضرات",
           value: analytics.total_lectures,
-          icon: "solar:video-bold-duotone",
+          icon: "mdi:lecture",
           color: "sky",
         },
         {
           title: "إجمالي التعليقات",
           value: analytics.total_comments,
-          icon: "solar:chat-bold-duotone",
+          icon: "mingcute:comment-fill",
           color: "pink",
         },
         {
@@ -91,13 +91,13 @@ export default function AdminDashboard() {
         {
           title: "محاولات الاختبار",
           value: analytics.total_quiz_attempts,
-          icon: "solar:quiz-bold",
+          icon: "icon-park-twotone:reload",
           color: "emerald",
         },
         {
           title: "أسئلة المستخدمين",
           value: analytics.total_user_questions,
-          icon: "solar:question-bold",
+          icon: "mingcute:user-question-fill",
           color: "indigo",
         },
       ]
