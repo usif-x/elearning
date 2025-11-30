@@ -16,14 +16,14 @@ const QuestionsForumQuizQuestion = ({
   submitting,
   isLastQuestion,
 }) => {
-  // Logic to detect Arabic text
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
   const questionIsArabic = isArabic(currentQuestion.question);
 
   return (
     <div className="p-4 sm:p-6 md:p-8 w-full max-w-4xl mx-auto">
-      {/* Top Bar: Count & Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700 gap-3">
+      {/* --- HEADER SECTION --- */}
+      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700 gap-3">
+        {/* Title */}
         <h2
           className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100"
           dir="rtl"
@@ -32,20 +32,23 @@ const QuestionsForumQuizQuestion = ({
           <span className="text-slate-400 font-medium">/ {totalQuestions}</span>
         </h2>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Buttons Group */}
+        <div className="flex items-center gap-2 flex-wrap w-full xl:w-auto">
+          {/* Answered Badge */}
           {answer !== null && (
-            <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
+            <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
               مجاب ✓
             </span>
           )}
 
+          {/* Flag Button (Unique Colors) */}
           <button
             onClick={onToggleFlag}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs sm:text-sm font-semibold transition-colors
             ${
               flaggedQuestions.has(currentQuestionIndex)
-                ? "bg-amber-50 border-amber-200 text-amber-600 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400"
-                : "bg-slate-100 border-transparent text-slate-500 hover:bg-amber-50 hover:text-amber-600 dark:bg-slate-800 dark:text-slate-400"
+                ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400"
+                : "bg-white border-slate-200 text-slate-500 hover:border-amber-300 hover:text-amber-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
             }`}
           >
             <Icon
@@ -61,15 +64,31 @@ const QuestionsForumQuizQuestion = ({
             </span>
           </button>
 
+          {/* Later Button (Unique: Orange/White style) */}
           <button
             onClick={onContinueLater}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-colors text-xs sm:text-sm font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:border-orange-300 dark:bg-orange-900/10 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/30 transition-colors text-xs sm:text-sm font-semibold"
           >
             <Icon icon="solar:clock-circle-bold" className="w-4 h-4" />
             <span>لاحقاً</span>
           </button>
+
+          {/* Submit Button (Unique: Solid Indigo) */}
+          <button
+            onClick={onSubmit}
+            disabled={submitting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-semibold ml-auto xl:ml-0"
+          >
+            {submitting ? (
+              <Icon icon="eos-icons:loading" className="w-4 h-4" />
+            ) : (
+              <Icon icon="solar:check-circle-bold" className="w-4 h-4" />
+            )}
+            <span>تسليم</span>
+          </button>
         </div>
       </div>
+      {/* --- END HEADER --- */}
 
       {/* Question */}
       <div className="mb-6 sm:mb-8">
@@ -133,7 +152,7 @@ const QuestionsForumQuizQuestion = ({
         })}
       </div>
 
-      {/* Bottom Nav */}
+      {/* Footer Nav */}
       <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 gap-3">
         <div className="flex gap-2">
           <button
@@ -155,25 +174,7 @@ const QuestionsForumQuizQuestion = ({
           )}
         </div>
 
-        {isLastQuestion ? (
-          <button
-            onClick={onSubmit}
-            disabled={submitting}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-70 transition-transform active:scale-95 text-sm sm:text-base"
-          >
-            {submitting ? (
-              <>
-                <Icon icon="eos-icons:loading" className="w-5 h-5" />
-                <span>جاري...</span>
-              </>
-            ) : (
-              <>
-                <Icon icon="solar:check-circle-bold" className="w-5 h-5" />
-                <span>تسليم</span>
-              </>
-            )}
-          </button>
-        ) : (
+        {!isLastQuestion && (
           <button
             onClick={onNext}
             className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-white bg-sky-500 hover:bg-sky-600 transition-transform active:scale-95 text-sm sm:text-base"
