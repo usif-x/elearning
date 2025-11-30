@@ -169,15 +169,22 @@ const QuizQuestion = ({
       {/* Footer Navigation */}
       <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button
-            onClick={onPrevious}
-            disabled={currentQuestionIndex === 0}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed
-              bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-          >
-            <Icon icon="solar:arrow-right-linear" className="w-5 h-5" />
-            <span>السابق</span>
-          </button>
+        <button
+  onClick={onPrevious}
+  disabled={currentQuestionIndex === 0}
+  className="
+    flex-1 sm:flex-none flex items-center justify-center gap-2
+    px-6 py-3 rounded-xl font-bold transition-all
+    disabled:opacity-50 disabled:cursor-not-allowed
+
+    bg-slate-100 text-slate-700 hover:bg-slate-200
+    dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600
+  "
+>
+  <Icon icon="solar:arrow-right-linear" className="w-5 h-5" />
+  <span>السابق</span>
+</button>
+
 
           {answer !== null && (
             <button
