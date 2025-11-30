@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/hooks/useAuth";
 import { getData } from "@/libs/axios";
 import { Icon } from "@iconify/react";
@@ -8,182 +9,206 @@ import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { isAuthenticated, userType, admin } = useAuthStore();
+  const { isAuthenticated, userType } = useAuthStore();
   const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getData("/analytics/", true);
+      setAnalytics(data);
+    } catch (err) {
+      console.error("Failed to load analytics:", err);
+      setError(
+        err?.response?.data?.detail || err.message || "خطأ في جلب الإحصائيات"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/admin/login");
     } else if (userType !== "admin") {
       router.push("/profile");
-    }
-  }, [isAuthenticated, userType, router]);
-
-  useEffect(() => {
-    // fetch analytics when authenticated admin accesses the page
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getData("/analytics/", true); // auth=true
-        setAnalytics(data);
-      } catch (err) {
-        console.error("Failed to load analytics:", err);
-        setError(
-          err?.response?.data?.detail || err.message || "خطأ في جلب الإحصائيات"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isAuthenticated && userType === "admin") {
+    } else {
       fetchAnalytics();
     }
-  }, [isAuthenticated, userType]);
+  }, [isAuthenticated, userType, router]);
 
   if (!isAuthenticated || userType !== "admin") {
     return null;
   }
 
+  const stats = analytics
+    ? [
+        {
+          title: "إجمالي المستخدمين",
+          value: analytics.total_users,
+          icon: "solar:users-group-rounded-bold-duotone",
+          color: "blue",
+        },
+        {
+          title: "المستخدمين النشطين",
+          value: analytics.total_active_users,
+          icon: "solar:clock-bold-duotone",
+          color: "green",
+        },
+        {
+          title: "إجمالي الكورسات",
+          value: analytics.total_courses,
+          icon: "solar:book-bold-duotone",
+          color: "purple",
+        },
+        {
+          title: "إجمالي التسجيلات",
+          value: analytics.total_enrollments,
+          icon: "solar:bag-bold-duotone",
+          color: "amber",
+        },
+        {
+          title: "إجمالي المحاضرات",
+          value: analytics.total_lectures,
+          icon: "solar:video-bold-duotone",
+          color: "sky",
+        },
+        {
+          title: "إجمالي التعليقات",
+          value: analytics.total_comments,
+          icon: "solar:chat-bold-duotone",
+          color: "pink",
+        },
+        {
+          title: "إجمالي الاختبارات",
+          value: analytics.total_practice_quizzes,
+          icon: "solar:clipboard-bold-duotone",
+          color: "lime",
+        },
+        {
+          title: "محاولات الاختبار",
+          value: analytics.total_quiz_attempts,
+          icon: "solar:quiz-bold",
+          color: "emerald",
+        },
+        {
+          title: "أسئلة المستخدمين",
+          value: analytics.total_user_questions,
+          icon: "solar:question-bold",
+          color: "indigo",
+        },
+      ]
+    : [];
+
   return (
-    <div>
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          لوحة التحكم
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">إحصائيات المنصة</p>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-zinc-800">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">
+            لوحة التحكم
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">
+            نظرة عامة على أداء المنصة والإحصائيات الحالية
+          </p>
+        </div>
+        <Button
+          onClick={fetchAnalytics}
+          text="تحديث البيانات"
+          icon="solar:refresh-bold"
+          color="blue"
+          isLoading={loading}
+          className="shadow-lg shadow-blue-500/20"
+        />
       </div>
 
-      {/* Loading / Error */}
-      {loading && (
-        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl text-center">
-          جاري جلب الإحصائيات...
-        </div>
-      )}
-
+      {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl text-center text-red-600">
-          خطأ: {error}
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400">
+          <Icon icon="solar:danger-circle-bold" className="w-6 h-6" />
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
-      {/* Analytics Cards */}
-      {analytics && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            title="إجمالي المستخدمين"
-            value={analytics.total_users}
-            icon="solar:users-group-rounded-bold-duotone"
-            color="bg-blue-100 text-blue-500"
-          />
-
-          <StatCard
-            title="المستخدمين النشطين"
-            value={analytics.total_active_users}
-            icon="solar:clock-bold-duotone"
-            color="bg-green-100 text-green-500"
-          />
-
-          <StatCard
-            title="إجمالي الكورسات"
-            value={analytics.total_courses}
-            icon="solar:book-bold-duotone"
-            color="bg-purple-100 text-purple-500"
-          />
-
-          <StatCard
-            title="إجمالي التسجيلات"
-            value={analytics.total_enrollments}
-            icon="solar:bag-bold-duotone"
-            color="bg-amber-100 text-amber-500"
-          />
-
-          <StatCard
-            title="إجمالي المحاضرات"
-            value={analytics.total_lectures}
-            icon="solar:video-bold-duotone"
-            color="bg-sky-100 text-sky-500"
-          />
-
-          <StatCard
-            title="إجمالي التعليقات"
-            value={analytics.total_comments}
-            icon="solar:chat-bold-duotone"
-            color="bg-pink-100 text-pink-500"
-          />
-
-          <StatCard
-            title="إجمالي الاختبارات"
-            value={analytics.total_practice_quizzes}
-            icon="solar:clipboard-bold-duotone"
-            color="bg-lime-100 text-lime-700"
-          />
-
-          <StatCard
-            title="محاولات الاختبار"
-            value={analytics.total_quiz_attempts}
-            icon="solar:quiz-bold"
-            color="bg-emerald-100 text-emerald-600"
-          />
-
-          <StatCard
-            title="أسئلة المستخدمين"
-            value={analytics.total_user_questions}
-            icon="solar:question-bold"
-            color="bg-gray-100 text-gray-700"
-          />
+      {/* Stats Grid */}
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <StatCard key={index} {...stat} index={index} />
+          ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Refresh Button */}
-      <div className="mb-8">
-        <button
-          onClick={async () => {
-            setLoading(true);
-            setError(null);
-            try {
-              const data = await getData("/analytics/", true);
-              setAnalytics(data);
-            } catch (err) {
-              setError(
-                err?.response?.data?.detail ||
-                  err.message ||
-                  "خطأ في جلب الإحصائيات"
-              );
-            } finally {
-              setLoading(false);
-            }
-          }}
-          className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700"
-        >
-          تحديث الإحصائيات
-        </button>
+function StatCard({ title, value, icon, color, index }) {
+  const colorStyles = {
+    blue: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
+    green:
+      "bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400",
+    purple:
+      "bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400",
+    amber:
+      "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
+    sky: "bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400",
+    pink: "bg-pink-50 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400",
+    lime: "bg-lime-50 text-lime-600 dark:bg-lime-900/20 dark:text-lime-400",
+    emerald:
+      "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
+    indigo:
+      "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400",
+  };
+
+  return (
+    <div
+      className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-zinc-800 overflow-hidden"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-800/50 dark:to-zinc-900/50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110 pointer-events-none" />
+
+      <div className="relative flex flex-col h-full justify-between z-10">
+        <div className="flex justify-between items-start mb-6">
+          <div
+            className={`p-4 rounded-2xl ${
+              colorStyles[color] || colorStyles.blue
+            } group-hover:scale-110 transition-transform duration-300 shadow-sm`}
+          >
+            <Icon icon={icon} className="w-8 h-8" />
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+            {value}
+          </h3>
+          <p className="text-base font-medium text-gray-500 dark:text-gray-400">
+            {title}
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-// Small presentational component for stats
-function StatCard({ title, value, icon, color }) {
+function DashboardSkeleton() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {[...Array(8)].map((_, i) => (
         <div
-          className={`p-3 rounded-xl ${color.split(" ")[0]} dark:${
-            color.split(" ")[0]
-          } `}
+          key={i}
+          className="bg-white dark:bg-zinc-900 rounded-3xl p-6 h-48 animate-pulse border border-gray-100 dark:border-zinc-800"
         >
-          <Icon icon={icon} className={`w-8 h-8 ${color.split(" ")[1]}`} />
+          <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-2xl mb-6"></div>
+          <div className="h-10 w-24 bg-gray-100 dark:bg-zinc-800 rounded-lg mb-3"></div>
+          <div className="h-5 w-32 bg-gray-100 dark:bg-zinc-800 rounded-lg"></div>
         </div>
-      </div>
-      <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-        {value}
-      </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
+      ))}
     </div>
   );
 }

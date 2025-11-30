@@ -77,7 +77,7 @@ const AdminSidebar = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed top-4 right-4 z-50 lg:hidden bg-red-600 text-white p-3 rounded-xl shadow-lg"
+        className="fixed top-4 right-4 z-50 lg:hidden bg-white dark:bg-zinc-800 text-gray-900 dark:text-white p-3 rounded-2xl shadow-lg border border-gray-100 dark:border-zinc-700 hover:scale-105 transition-transform"
       >
         <Icon
           icon={
@@ -92,52 +92,52 @@ const AdminSidebar = () => {
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 ${
-          isCollapsed ? "w-20" : "w-72"
+        className={`fixed top-0 right-0 h-full bg-white dark:bg-zinc-900 border-l border-gray-100 dark:border-zinc-800 z-40 transition-all duration-300 ease-in-out ${
+          isCollapsed ? "w-28" : "w-80"
         } ${
           isMobileOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full py-6 px-4">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="mb-8 px-2">
             <div className="flex items-center justify-between">
               {!isCollapsed && (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                <div className="flex items-center gap-3 animate-fade-in">
+                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20">
                     <Icon
                       icon="solar:shield-user-bold"
-                      className="w-6 h-6 text-white"
+                      className="w-7 h-7 text-white"
                     />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
                       لوحة الإدارة
                     </h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      مدير النظام
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                      نظام التحكم الكامل
                     </p>
                   </div>
                 </div>
               )}
               {isCollapsed && (
-                <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-red-500/20">
                   <Icon
                     icon="solar:shield-user-bold"
-                    className="w-6 h-6 text-white"
+                    className="w-7 h-7 text-white"
                   />
                 </div>
               )}
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:block p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="hidden lg:flex items-center justify-center w-8 h-8 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
               >
                 <Icon
                   icon={
@@ -145,14 +145,14 @@ const AdminSidebar = () => {
                       ? "solar:alt-arrow-left-bold"
                       : "solar:alt-arrow-right-bold"
                   }
-                  className="w-5 h-5 text-gray-600 dark:text-gray-400"
+                  className="w-5 h-5"
                 />
               </button>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+          <nav className="flex-1 overflow-y-auto space-y-2 no-scrollbar">
             {menuItems.map((item, index) => {
               if (item.isDropdown) {
                 const isOpen =
@@ -161,33 +161,33 @@ const AdminSidebar = () => {
                 const dropdownActive = isDropdownActive(item.subItems);
 
                 return (
-                  <div key={index}>
+                  <div key={index} className="group">
                     <button
                       onClick={() => toggleDropdown(index)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group-hover:bg-gray-50 dark:group-hover:bg-zinc-800/50 ${
                         dropdownActive
-                          ? "bg-red-600 text-white shadow-lg"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? "bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400"
+                          : "text-gray-600 dark:text-gray-400"
                       } ${isCollapsed ? "justify-center" : ""}`}
                       title={isCollapsed ? item.title : ""}
                     >
                       <Icon
                         icon={item.icon}
-                        className="w-6 h-6 flex-shrink-0"
+                        className={`w-6 h-6 flex-shrink-0 transition-colors ${
+                          dropdownActive
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                        }`}
                       />
                       {!isCollapsed && (
                         <>
-                          <span className="font-medium flex-1 text-right">
+                          <span className="font-bold text-sm flex-1 text-right">
                             {item.title}
                           </span>
                           <Icon
-                            icon={
-                              isOpen
-                                ? "solar:alt-arrow-down-bold"
-                                : "solar:alt-arrow-left-bold"
-                            }
-                            className={`w-5 h-5 transition-transform duration-200 ${
-                              isOpen ? "rotate-0" : "rotate-0"
+                            icon="solar:alt-arrow-left-bold"
+                            className={`w-4 h-4 transition-transform duration-200 ${
+                              isOpen ? "-rotate-90" : "rotate-0"
                             }`}
                           />
                         </>
@@ -196,7 +196,7 @@ const AdminSidebar = () => {
 
                     {/* Dropdown Items */}
                     {!isCollapsed && isOpen && (
-                      <div className="mt-1 mr-4 space-y-1">
+                      <div className="mt-2 mr-4 space-y-1 border-r-2 border-gray-100 dark:border-zinc-800 pr-4">
                         {item.subItems.map((subItem, subIndex) => {
                           const subActive = isActive(subItem.href);
                           return (
@@ -204,40 +204,22 @@ const AdminSidebar = () => {
                               key={subIndex}
                               href={subItem.href}
                               onClick={() => setIsMobileOpen(false)}
-                              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 ${
                                 subActive
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold"
-                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  ? "bg-red-600 text-white shadow-md shadow-red-500/20"
+                                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-white"
                               }`}
                             >
                               <Icon
                                 icon={subItem.icon}
                                 className="w-5 h-5 flex-shrink-0"
                               />
-                              <span className="text-sm">{subItem.title}</span>
-                              {subActive && (
-                                <div className="mr-auto w-1.5 h-1.5 bg-red-600 dark:bg-red-400 rounded-full" />
-                              )}
+                              <span className="text-sm font-medium">
+                                {subItem.title}
+                              </span>
                             </Link>
                           );
                         })}
-                      </div>
-                    )}
-
-                    {/* Collapsed Dropdown Tooltip */}
-                    {isCollapsed && (
-                      <div className="hidden group-hover:block absolute right-full top-0 mr-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg py-2 px-3 whitespace-nowrap z-50">
-                        <div className="font-semibold mb-1">{item.title}</div>
-                        {item.subItems.map((subItem, subIndex) => (
-                          <Link
-                            key={subIndex}
-                            href={subItem.href}
-                            onClick={() => setIsMobileOpen(false)}
-                            className="block py-1 hover:text-red-400 transition-colors"
-                          >
-                            {subItem.title}
-                          </Link>
-                        ))}
                       </div>
                     )}
                   </div>
@@ -250,29 +232,33 @@ const AdminSidebar = () => {
                   key={index}
                   href={item.href}
                   onClick={() => setIsMobileOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group ${
                     active
-                      ? "bg-red-600 text-white shadow-lg"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      ? "bg-red-600 text-white shadow-lg shadow-red-500/20"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-white"
                   } ${isCollapsed ? "justify-center" : ""}`}
                   title={isCollapsed ? item.title : ""}
                 >
-                  <Icon icon={item.icon} className="w-6 h-6 flex-shrink-0" />
+                  <Icon
+                    icon={item.icon}
+                    className={`w-6 h-6 flex-shrink-0 transition-colors ${
+                      active
+                        ? "text-white"
+                        : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                    }`}
+                  />
                   {!isCollapsed && (
-                    <span className="font-medium">{item.title}</span>
-                  )}
-                  {!isCollapsed && active && (
-                    <div className="mr-auto w-2 h-2 bg-white rounded-full" />
+                    <span className="font-bold text-sm">{item.title}</span>
                   )}
                 </Link>
               );
             })}
 
             {/* Theme Toggle Button */}
-            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-4 mt-4 border-t border-gray-100 dark:border-zinc-800">
               <button
                 onClick={toggleDarkMode}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-white group ${
                   isCollapsed ? "justify-center" : ""
                 }`}
                 title={
@@ -302,7 +288,7 @@ const AdminSidebar = () => {
                   />
                 </div>
                 {!isCollapsed && (
-                  <span className="font-medium">
+                  <span className="font-bold text-sm">
                     {isDarkMode ? "الوضع النهاري" : "الوضع الليلي"}
                   </span>
                 )}
@@ -311,28 +297,28 @@ const AdminSidebar = () => {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800">
             {!isCollapsed ? (
-              <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-4 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
+              <div className="bg-gray-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
                     <Icon
                       icon="solar:user-bold"
-                      className="w-5 h-5 text-white"
+                      className="w-5 h-5 text-gray-500 dark:text-gray-400"
                     />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
                       أحمد محمد
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                       admin@example.com
                     </p>
                   </div>
                 </div>
                 <Link
                   href="/admin/logout"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white dark:bg-zinc-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 rounded-xl transition-all duration-200 text-sm font-bold shadow-sm border border-gray-100 dark:border-zinc-600"
                 >
                   <Icon icon="solar:logout-2-bold" className="w-4 h-4" />
                   <span>تسجيل الخروج</span>
@@ -341,7 +327,7 @@ const AdminSidebar = () => {
             ) : (
               <Link
                 href="/admin/logout"
-                className="flex items-center justify-center p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                className="flex items-center justify-center p-3.5 bg-gray-50 dark:bg-zinc-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-2xl transition-all duration-200"
                 title="تسجيل الخروج"
               >
                 <Icon icon="solar:logout-2-bold" className="w-6 h-6" />
@@ -353,8 +339,8 @@ const AdminSidebar = () => {
 
       {/* Spacer for content */}
       <div
-        className={`hidden lg:block transition-all duration-300 ${
-          isCollapsed ? "w-20" : "w-72"
+        className={`hidden lg:block transition-all duration-300 ease-in-out ${
+          isCollapsed ? "w-28" : "w-80"
         }`}
       />
     </>
