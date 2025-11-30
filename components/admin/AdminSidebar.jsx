@@ -25,6 +25,11 @@ const AdminSidebar = () => {
       href: "/admin/dashboard/courses",
     },
     {
+      title: "مولد الاختبارات",
+      icon: "solar:document-add-bold-duotone",
+      href: "/admin/dashboard/pdf-generator",
+    },
+    {
       title: "إدارة المشرفين",
       icon: "solar:shield-user-bold-duotone",
       href: "/admin/dashboard/admins",
