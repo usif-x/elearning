@@ -73,7 +73,15 @@ const QuizQuestion = ({
           {/* Later Button */}
           <button
             onClick={onContinueLater}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-orange-300 bg-orange-300 text-orange-700 hover:bg-orange-200 hover:border-orange-200 dark:bg-orange-900/10 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-900/30 transition-all text-sm font-bold"
+            className="
+    flex items-center gap-2
+    px-4 py-2 rounded-lg
+    bg-orange-500 text-white
+    hover:bg-orange-600
+    active:bg-orange-700
+    dark:bg-orange-600 dark:hover:bg-orange-500
+    transition-all text-sm font-semibold shadow-sm
+  "
             title="حفظ ومتابعة لاحقاً"
           >
             <Icon icon="solar:clock-circle-bold" className="w-5 h-5" />
