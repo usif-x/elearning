@@ -45,6 +45,9 @@ const Hero = () => {
                 دحيحة ميديكال منصة معمولة مخصوص علشان تساعد طلاب التخصصات الطبيه
                 يفهموا المذاكرة من غير تعقيد.
               </p>
+              <p className="text-base sm:text-lg lg:text-xl text-sky-50 dark:text-sky-100 leading-relaxed">
+                من ميح لدحيح
+              </p>
             </div>
 
             {/* CTA Button with improved responsiveness */}
@@ -54,7 +57,7 @@ const Hero = () => {
                 className={`inline-block w-full sm:w-auto bg-white hover:bg-sky-50 text-sky-600 font-bold text-base sm:text-lg lg:text-xl py-3 sm:py-4 px-8 sm:px-10 lg:px-12 rounded-xl sm:rounded-2xl transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl shadow-lg transform ${lemonada.className}`}
               >
                 <span className="flex items-center justify-center gap-2">
-                  اشترك دلوقتي!
+                  سجل دلوقتي!
                   <span className="text-xl sm:text-2xl">🚀</span>
                 </span>
               </Link>
