@@ -67,17 +67,17 @@ const QuestionsForumQuizQuestion = ({
           {/* Later Button (Unique: Orange/White style) */}
           <button
             onClick={onContinueLater}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:border-orange-300 dark:bg-orange-900/10 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/30 transition-colors text-xs sm:text-sm font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-200 bg-orange-200 text-orange-500 hover:bg-orange-100 hover:border-orange-300 dark:bg-orange-900/10 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/30 transition-colors text-xs sm:text-sm font-semibold"
           >
             <Icon icon="solar:clock-circle-bold" className="w-4 h-4" />
             <span>لاحقاً</span>
           </button>
 
-          {/* Submit Button (Unique: Solid Indigo) */}
+          {/* Top Submit Button (Unique: Solid Indigo) */}
           <button
             onClick={onSubmit}
             disabled={submitting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-semibold ml-auto xl:ml-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-semibold ml-auto xl:ml-0"
           >
             {submitting ? (
               <Icon icon="eos-icons:loading" className="w-4 h-4" />
@@ -174,7 +174,26 @@ const QuestionsForumQuizQuestion = ({
           )}
         </div>
 
-        {!isLastQuestion && (
+        {/* Bottom Button: Switch between Next (Sky) and Submit (Emerald) */}
+        {isLastQuestion ? (
+          <button
+            onClick={onSubmit}
+            disabled={submitting}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-70 transition-transform active:scale-95 text-sm sm:text-base"
+          >
+            {submitting ? (
+              <>
+                <Icon icon="eos-icons:loading" className="w-5 h-5" />
+                <span>جاري...</span>
+              </>
+            ) : (
+              <>
+                <Icon icon="solar:check-circle-bold" className="w-5 h-5" />
+                <span>تسليم</span>
+              </>
+            )}
+          </button>
+        ) : (
           <button
             onClick={onNext}
             className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-white bg-sky-500 hover:bg-sky-600 transition-transform active:scale-95 text-sm sm:text-base"

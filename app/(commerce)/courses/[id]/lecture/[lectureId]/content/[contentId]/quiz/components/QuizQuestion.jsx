@@ -73,18 +73,18 @@ const QuizQuestion = ({
           {/* Later Button (Unique: Orange/White style) */}
           <button
             onClick={onContinueLater}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:border-orange-300 dark:bg-orange-900/10 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/30 transition-all text-sm font-bold"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-orange-200 bg-orange-200 text-orange-500 hover:bg-orange-100 hover:border-orange-300 dark:bg-orange-900/10 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/30 transition-all text-sm font-bold"
             title="حفظ ومتابعة لاحقاً"
           >
             <Icon icon="solar:clock-circle-bold" className="w-5 h-5" />
             <span className="hidden sm:inline">لاحقاً</span>
           </button>
 
-          {/* Submit Button (Unique: Solid Indigo) */}
+          {/* Top Submit Button (Unique: Solid Indigo) */}
           <button
             onClick={onSubmit}
             disabled={submitting}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold ml-auto xl:ml-0"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold ml-auto xl:ml-0"
           >
             {submitting ? (
               <Icon icon="eos-icons:loading" className="w-5 h-5" />
@@ -158,7 +158,7 @@ const QuizQuestion = ({
         })}
       </div>
 
-      {/* Footer Navigation (Prev/Next only, since Submit is now top) */}
+      {/* Footer Navigation */}
       <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -182,17 +182,38 @@ const QuizQuestion = ({
           )}
         </div>
 
-        {/* Navigation Next Button (Blue) */}
-        {!isLastQuestion && (
-          <button
-            onClick={onNext}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-bold text-white transition-all transform active:scale-95
-               bg-sky-500 hover:bg-sky-600 shadow-lg shadow-sky-200 dark:shadow-none"
-          >
-            <span>التالي</span>
-            <Icon icon="solar:arrow-left-linear" className="w-5 h-5" />
-          </button>
-        )}
+        {/* Bottom Button: Switch between Next (Sky) and Submit (Emerald) */}
+        <div className="w-full sm:w-auto">
+          {isLastQuestion ? (
+            <button
+              onClick={onSubmit}
+              disabled={submitting}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-bold text-white transition-all transform active:scale-95 disabled:opacity-70 disabled:active:scale-100
+                bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-200 dark:shadow-none"
+            >
+              {submitting ? (
+                <>
+                  <Icon icon="eos-icons:loading" className="w-5 h-5" />
+                  <span>جاري التسليم...</span>
+                </>
+              ) : (
+                <>
+                  <Icon icon="solar:check-circle-bold" className="w-5 h-5" />
+                  <span>تسليم الاختبار</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={onNext}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-bold text-white transition-all transform active:scale-95
+                bg-sky-500 hover:bg-sky-600 shadow-lg shadow-sky-200 dark:shadow-none"
+            >
+              <span>التالي</span>
+              <Icon icon="solar:arrow-left-linear" className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
