@@ -2,8 +2,8 @@
 
 import Button from "@/components/ui/Button";
 import {
-    generateExamFromPdf,
-    generateExamFromText,
+  generateExamFromPdf,
+  generateExamFromText,
 } from "@/services/admin/PdfGenerator";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
@@ -17,8 +17,8 @@ export default function PdfGeneratorPage() {
   const [formData, setFormData] = useState({
     exam_title: "",
     num_questions: 10,
-    question_type: "Multiple Choice",
-    difficulty: "Medium",
+    question_type: "mcq",
+    difficulty: "medium",
     include_answers: true,
     content: "",
     pdf_file: null,
@@ -186,10 +186,10 @@ export default function PdfGeneratorPage() {
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 focus:ring-2 focus:ring-red-500 outline-none transition-all dark:text-white"
                   >
-                    <option value="Multiple Choice">اختيار من متعدد</option>
-                    <option value="True/False">صح أم خطأ</option>
-                    <option value="Short Answer">إجابة قصيرة</option>
-                    <option value="Mixed">مختلط</option>
+                    <option value="mcq">اختيار من متعدد</option>
+                    <option value="true_false">صح أم خطأ</option>
+                    <option value="essay">مقال</option>
+                    <option value="mixed">مختلط</option>
                   </select>
                 </div>
                 <div>
@@ -202,9 +202,9 @@ export default function PdfGeneratorPage() {
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 focus:ring-2 focus:ring-red-500 outline-none transition-all dark:text-white"
                   >
-                    <option value="Easy">سهل</option>
-                    <option value="Medium">متوسط</option>
-                    <option value="Hard">صعب</option>
+                    <option value="easy">سهل</option>
+                    <option value="medium">متوسط</option>
+                    <option value="hard">صعب</option>
                   </select>
                 </div>
               </div>
