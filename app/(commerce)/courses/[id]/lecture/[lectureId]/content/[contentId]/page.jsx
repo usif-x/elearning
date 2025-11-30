@@ -12,15 +12,19 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
+
 const CustomAudioPlayer = ({ audioUrl, title }) => {
   const audioRef = useRef(null);
   const progressBarRef = useRef(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
+
+  // Hover state for timeline
   const [hoverTime, setHoverTime] = useState(null);
   const [hoverPosition, setHoverPosition] = useState(0);
 
@@ -45,9 +49,7 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
     audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("ended", handleEnded);
 
-    if (audio.readyState >= 1) {
-      updateDuration();
-    }
+    if (audio.readyState >= 1) updateDuration();
 
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
@@ -79,49 +81,31 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
   const handleSkip = (seconds) => {
     const audio = audioRef.current;
-    if (audio) {
-      audio.currentTime += seconds;
-    }
+    if (audio) audio.currentTime += seconds;
   };
 
-  const handleSeek = (e) => {
-    if (!duration) return;
-    const percentage = Number(e.target.value);
-    const seekTime = (percentage / 100) * duration;
-    if (isFinite(seekTime)) {
-      audioRef.current.currentTime = seekTime;
-      setCurrentTime(seekTime);
-    }
+  // Unified function to calculate position from mouse event
+  const getProgressFromEvent = (e) => {
+    if (!progressBarRef.current || !duration) return { time: 0, percent: 0 };
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    const time = (percentage / 100) * duration;
+    return { time, percent: percentage };
   };
 
   const handleProgressHover = (e) => {
-    if (!progressBarRef.current || !duration) return;
-
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    const time = (percentage / 100) * duration;
-
+    const { time, percent } = getProgressFromEvent(e);
     setHoverTime(time);
-    setHoverPosition(percentage);
+    setHoverPosition(percent);
   };
 
   const handleProgressClick = (e) => {
-    if (!progressBarRef.current || !duration) return;
-
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    const time = (percentage / 100) * duration;
-
+    const { time } = getProgressFromEvent(e);
     if (isFinite(time)) {
       audioRef.current.currentTime = time;
       setCurrentTime(time);
     }
-  };
-
-  const handleProgressLeave = () => {
-    setHoverTime(null);
   };
 
   const handleVolumeChange = (e) => {
@@ -143,7 +127,6 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
   const formatTime = (time) => {
     if (!time || isNaN(time) || !isFinite(time)) return "0:00";
-
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
     const seconds = Math.floor(time % 60);
@@ -156,91 +139,95 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className="w-full max-w-md mx-auto p-4">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-      <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 transition-all duration-300">
-        {/* Title & Time Display */}
-        <div className="flex justify-between items-start mb-4">
-          <h3
-            className="text-base font-bold text-slate-800 dark:text-slate-100 truncate flex-1 mr-3"
-            title={title}
-          >
-            {title || "Audio Track"}
-          </h3>
-          <div className="text-xs font-mono font-semibold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/40 px-3 py-1.5 rounded-full whitespace-nowrap">
+      {/* Main Card: Solid Colors */}
+      <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl relative overflow-visible">
+        {/* Header: Title & Time */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex-1 min-w-0 mr-4">
+            <h3
+              className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate"
+              title={title}
+            >
+              {title || "Untitled Track"}
+            </h3>
+          </div>
+          <div className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/30 px-3 py-1 rounded-md">
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
         </div>
 
-        {/* Progress Bar with Hover Tooltip */}
+        {/* Progress Bar Container */}
         <div
           ref={progressBarRef}
-          className="relative h-8 w-full mb-6 cursor-pointer"
+          className="relative h-6 w-full mb-6 cursor-pointer group flex items-center"
           onMouseMove={handleProgressHover}
-          onMouseLeave={handleProgressLeave}
+          onMouseLeave={() => setHoverTime(null)}
           onClick={handleProgressClick}
         >
-          {/* Hover Time Tooltip */}
+          {/* Hover Tooltip */}
           {hoverTime !== null && (
             <div
-              className="absolute -top-10 bg-slate-800 dark:bg-slate-700 text-white text-xs font-mono px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none z-30 whitespace-nowrap transform -translate-x-1/2"
+              className="absolute -top-10 -translate-x-1/2 bg-slate-800 dark:bg-slate-700 text-white text-[11px] font-bold px-2 py-1 rounded shadow-lg pointer-events-none z-20"
               style={{ left: `${hoverPosition}%` }}
             >
               {formatTime(hoverTime)}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
-                <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-slate-800 dark:border-t-slate-700"></div>
-              </div>
+              {/* Tooltip Arrow */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800 dark:border-t-slate-700" />
             </div>
           )}
 
-          {/* Track Background */}
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 h-2 w-full bg-slate-300 dark:bg-slate-600 rounded-full overflow-hidden shadow-inner">
-            {/* Progress Fill */}
-            <div
-              className="h-full bg-gradient-to-r from-sky-400 to-sky-600 transition-all duration-75 ease-linear shadow-sm"
-              style={{ width: `${progress}%` }}
-            />
+          {/* Background Track (Grey) */}
+          <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+            {/* Note: This is just the empty track background */}
           </div>
 
-          {/* Progress Thumb */}
+          {/* Fill Line (Sky) - Positioned Absolutely over the track */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 h-4 w-4 bg-white border-3 border-sky-500 rounded-full shadow-lg pointer-events-none transition-all duration-75 ease-linear"
-            style={{ left: `calc(${progress}% - 8px)` }}
+            className="absolute left-0 h-1.5 bg-sky-500 rounded-l-full pointer-events-none transition-[width] duration-75 ease-linear"
+            style={{ width: `${progressPercent}%` }}
+          />
+
+          {/* Thumb Circle - Positioned absolutely based on %. 
+              Key Fix: translate-x-1/2 ensures center of circle aligns with end of line. */}
+          <div
+            className="absolute h-4 w-4 bg-white border-[3px] border-sky-500 rounded-full shadow-md -translate-x-1/2 pointer-events-none transition-[left] duration-75 ease-linear group-hover:scale-125"
+            style={{ left: `${progressPercent}%` }}
           />
         </div>
 
-        {/* Control Buttons */}
+        {/* Controls */}
         <div className="flex items-center justify-between">
           {/* Restart */}
           <button
             onClick={handleRestart}
-            className="p-2.5 rounded-full text-slate-500 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700 transition-all duration-200 active:scale-95"
+            className="p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
             title="Restart"
           >
-            <Icon icon="solar:restart-bold" className="w-5 h-5" />
+            <Icon icon="solar:restart-bold" className="w-6 h-6" />
           </button>
 
-          {/* Transport Controls */}
-          <div className="flex items-center gap-2">
+          {/* Main Transport */}
+          <div className="flex items-center gap-4">
             <button
               onClick={() => handleSkip(-10)}
-              className="p-2.5 rounded-full text-slate-600 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700 transition-all duration-200 active:scale-95"
-              title="Rewind 10s"
+              className="p-2 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 transition-colors"
             >
               <Icon
                 icon="solar:rewind-10-seconds-back-bold"
-                className="w-7 h-7"
+                className="w-8 h-8"
               />
             </button>
 
+            {/* Play Button - Solid Color, No Gradient */}
             <button
               onClick={togglePlay}
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-400 via-sky-500 to-sky-600 hover:from-sky-500 hover:via-sky-600 hover:to-sky-700 text-white shadow-xl shadow-sky-300/50 dark:shadow-sky-900/30 transition-all duration-200 active:scale-95"
-              title={isPlaying ? "Pause" : "Play"}
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-transform active:scale-95"
             >
               <Icon
                 icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
@@ -250,54 +237,46 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
             <button
               onClick={() => handleSkip(10)}
-              className="p-2.5 rounded-full text-slate-600 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700 transition-all duration-200 active:scale-95"
-              title="Forward 10s"
+              className="p-2 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 transition-colors"
             >
               <Icon
                 icon="solar:rewind-10-seconds-forward-bold"
-                className="w-7 h-7"
+                className="w-8 h-8"
               />
             </button>
           </div>
 
           {/* Volume Control */}
           <div
-            className="relative flex items-center"
+            className="relative"
             onMouseEnter={() => setShowVolume(true)}
             onMouseLeave={() => setShowVolume(false)}
           >
+            {/* Volume Popup */}
             {showVolume && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-600 z-30">
-                <div className="h-28 w-8 flex items-center justify-center relative">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-30">
+                <div className="h-24 w-6 flex items-center justify-center">
+                  {/* Clean Range Input Implementation */}
                   <input
                     type="range"
                     min="0"
                     max="1"
                     step="0.01"
-                    orient="vertical"
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="volume-slider-vertical"
+                    className="volume-slider"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-1.5 h-full bg-slate-300 dark:bg-slate-600 rounded-full"></div>
-                  </div>
-                  <div
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-t from-sky-400 to-sky-600 rounded-full pointer-events-none transition-all duration-75"
-                    style={{ height: `${(isMuted ? 0 : volume) * 100}%` }}
-                  ></div>
                 </div>
               </div>
             )}
 
             <button
               onClick={toggleMute}
-              className={`p-2.5 rounded-full transition-all duration-200 active:scale-95 ${
+              className={`p-2 transition-colors ${
                 isMuted || volume === 0
-                  ? "text-red-500 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50"
-                  : "text-slate-500 hover:text-sky-600 hover:bg-sky-100 dark:hover:bg-slate-700"
+                  ? "text-red-500 hover:text-red-600"
+                  : "text-slate-400 hover:text-sky-500 dark:text-slate-500 dark:hover:text-sky-400"
               }`}
-              title={isMuted ? "Unmute" : "Mute"}
             >
               <Icon
                 icon={
@@ -307,96 +286,51 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
                     ? "solar:volume-small-bold"
                     : "solar:volume-loud-bold"
                 }
-                className="w-5 h-5"
+                className="w-6 h-6"
               />
             </button>
           </div>
         </div>
       </div>
 
+      {/* CSS for custom range inputs */}
       <style jsx>{`
-        input[type="range"] {
+        /* Rotated range input for volume to ensure cross-browser vertical support */
+        .volume-slider {
           -webkit-appearance: none;
-          appearance: none;
-          background: transparent;
-          cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-track {
-          background: transparent;
+          width: 96px; /* Height of the container */
           height: 6px;
-          border-radius: 9999px;
+          background: #e2e8f0; /* slate-200 */
+          border-radius: 999px;
+          transform: rotate(-90deg);
+          transform-origin: center;
+          cursor: pointer;
+        }
+        /* Dark mode adjustment for track */
+        :global(.dark) .volume-slider {
+          background: #334155; /* slate-700 */
         }
 
-        input[type="range"]::-webkit-slider-thumb {
+        .volume-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
-          appearance: none;
-          background: white;
-          height: 16px;
-          width: 16px;
+          height: 14px;
+          width: 14px;
           border-radius: 50%;
-          border: 3px solid #0ea5e9;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          background: #0ea5e9; /* sky-500 */
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
           cursor: pointer;
         }
 
-        input[type="range"]::-moz-range-track {
-          background: transparent;
-          height: 6px;
-          border-radius: 9999px;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-          background: white;
-          height: 16px;
-          width: 16px;
+        .volume-slider::-moz-range-thumb {
+          height: 14px;
+          width: 14px;
           border-radius: 50%;
-          border: 3px solid #0ea5e9;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          background: #0ea5e9;
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
           cursor: pointer;
-        }
-
-        .volume-slider-vertical {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 100%;
-          height: 100%;
-          background: transparent;
-          cursor: pointer;
-          z-index: 10;
-          position: relative;
-        }
-
-        .volume-slider-vertical::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          background: white;
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          border: 3px solid #0ea5e9;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-          cursor: pointer;
-        }
-
-        .volume-slider-vertical::-moz-range-thumb {
-          background: white;
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          border: 3px solid #0ea5e9;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-          cursor: pointer;
-        }
-
-        .volume-slider-vertical::-webkit-slider-runnable-track {
-          background: transparent;
-          height: 100%;
-        }
-
-        .volume-slider-vertical::-moz-range-track {
-          background: transparent;
-          height: 100%;
+          border: none;
         }
       `}</style>
     </div>
