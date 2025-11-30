@@ -137,6 +137,7 @@ export default function RootLayout({ children }) {
       </head>
       <body
         className={`${IBMSans.className} bg-white dark:bg-zinc-950 smooth antialiased`}
+        suppressHydrationWarning
       >
         <ThemeProvider>
           <SessionTracker />

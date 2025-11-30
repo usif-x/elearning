@@ -13,7 +13,6 @@ import {
   updateQuizQuestion,
 } from "@/services/admin/Lecutre";
 import { Icon } from "@iconify/react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -386,99 +385,84 @@ const AdminContentDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900/50">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.back()}
-                className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
-                aria-label="رجوع"
-              >
-                <Icon
-                  icon="solar:arrow-right-outline"
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                />
-              </button>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
-                    <Icon
-                      icon={
-                        content?.content_type === "quiz"
-                          ? "solar:checklist-minimalistic-bold"
-                          : "solar:file-bold"
-                      }
-                      className="w-6 h-6 text-blue-600 dark:text-blue-400"
-                    />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {content?.title || "بدون عنوان"}
-                    </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium">
-                        {content?.content_type === "quiz" ? "اختبار" : "محتوى"}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-3 bg-white dark:bg-gray-800 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 group"
+            >
+              <Icon
+                icon="solar:arrow-right-bold"
+                className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform"
+              />
+            </button>
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center border border-blue-100 dark:border-blue-800">
+                  <Icon
+                    icon={
+                      content?.content_type === "quiz"
+                        ? "solar:checklist-minimalistic-bold"
+                        : "solar:layers-minimalistic-bold"
+                    }
+                    className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {content?.title || "بدون عنوان"}
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-sm font-medium border border-blue-100 dark:border-blue-800">
+                      {content?.content_type === "quiz" ? "اختبار" : "محتوى"}
+                    </span>
+                    {content?.content_type === "quiz" && (
+                      <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium border border-emerald-100 dark:border-emerald-800">
+                        {quizQuestions.length} سؤال
                       </span>
-                      {content?.content_type === "quiz" && (
-                        <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-sm font-medium">
-                          {quizQuestions.length} سؤال
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  إدارة وتحرير تفاصيل المحتوى التدريبي
-                </p>
-                <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <Link href="/admin/dashboard/courses">الدورات</Link>
-                  <Icon
-                    icon="solar:alt-arrow-left-bold"
-                    className="w-4 h-4 mx-2"
-                  />
-                  <Link href={`/admin/dashboard/courses/${courseId}/lectures`}>
-                    المحاضرات
-                  </Link>
-                  <Icon
-                    icon="solar:alt-arrow-left-bold"
-                    className="w-4 h-4 mx-2"
-                  />
-                  <Link
-                    href={`/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content`}
-                  >
-                    المحتوى
-                  </Link>
-                  <Icon
-                    icon="solar:alt-arrow-left-bold"
-                    className="w-4 h-4 mx-2"
-                  />
-                  <span>تفاصيل المحتوى</span>
-                </nav>
               </div>
+              <p className="text-gray-500 dark:text-gray-400 mt-2 text-lg">
+                إدارة وتحرير تفاصيل المحتوى التدريبي
+              </p>
             </div>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                color="red"
-                shade={500}
-                darkShade={600}
-                icon="solar:trash-bold"
-                text="حذف المحتوى"
-                onClick={confirmDelete}
-              />
-            </div>
+          <div className="flex gap-3">
+            <Button
+              color="red"
+              shade={500}
+              darkShade={600}
+              icon="solar:trash-bin-trash-bold"
+              text="حذف المحتوى"
+              onClick={confirmDelete}
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-lg space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">
+                  <Icon
+                    icon="solar:pen-bold"
+                    className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                  />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  تعديل المحتوى
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     نوع المحتوى
                   </label>
                   <select
@@ -486,7 +470,7 @@ const AdminContentDetailPage = () => {
                     onChange={(e) =>
                       handleChange("content_type", e.target.value)
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
                   >
                     <option value="video">فيديو</option>
                     <option value="photo">صورة</option>
@@ -497,18 +481,19 @@ const AdminContentDetailPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     العنوان
                   </label>
                   <input
                     type="text"
                     value={form.title}
                     onChange={(e) => handleChange("title", e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+                    placeholder="عنوان المحتوى"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     الوصف
                   </label>
                   <textarea
@@ -516,25 +501,28 @@ const AdminContentDetailPage = () => {
                     onChange={(e) =>
                       handleChange("description", e.target.value)
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 min-h-[100px]"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white placeholder:text-gray-400 resize-none"
+                    rows={4}
+                    placeholder="وصف المحتوى"
                   />
                 </div>
                 {form.content_type !== "quiz" && (
                   <>
                     <div className="md:col-span-2">
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         المصدر (رابط)
                       </label>
                       <input
                         type="text"
                         value={form.source}
                         onChange={(e) => handleChange("source", e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+                        placeholder="https://..."
                       />
                     </div>
                     {form.content_type === "video" && (
                       <div>
-                        <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                           منصة الفيديو
                         </label>
                         <input
@@ -543,7 +531,8 @@ const AdminContentDetailPage = () => {
                           onChange={(e) =>
                             handleChange("video_platform", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+                          placeholder="youtube, vimeo..."
                         />
                       </div>
                     )}
@@ -552,7 +541,7 @@ const AdminContentDetailPage = () => {
                 {form.content_type === "quiz" && (
                   <>
                     <div>
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         مدة الاختبار (دقيقة)
                       </label>
                       <input
@@ -561,11 +550,12 @@ const AdminContentDetailPage = () => {
                         onChange={(e) =>
                           handleChange("quiz_duration", Number(e.target.value))
                         }
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
+                        min="0"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         أقصى محاولات
                       </label>
                       <input
@@ -574,11 +564,12 @@ const AdminContentDetailPage = () => {
                         onChange={(e) =>
                           handleChange("max_attempts", Number(e.target.value))
                         }
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
+                        min="0"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         درجة النجاح (0-100)
                       </label>
                       <input
@@ -587,11 +578,13 @@ const AdminContentDetailPage = () => {
                         onChange={(e) =>
                           handleChange("passing_score", Number(e.target.value))
                         }
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
+                        min="0"
+                        max="100"
                       />
                     </div>
-                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/60">
+                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700">
                         <Switcher
                           checked={Boolean(form.show_correct_answers)}
                           onChange={(checked) =>
@@ -600,29 +593,29 @@ const AdminContentDetailPage = () => {
                               checked ? 1 : 0
                             )
                           }
-                          label="إظهار الإجابات الصحيحة"
+                          label="إظهار الإجابات"
                           labelPosition="left"
                           color="emerald"
                         />
                       </div>
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/60">
+                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700">
                         <Switcher
                           checked={Boolean(form.randomize_questions)}
                           onChange={(checked) =>
                             handleChange("randomize_questions", checked ? 1 : 0)
                           }
-                          label="ترتيب الأسئلة عشوائي"
+                          label="ترتيب عشوائي للأسئلة"
                           labelPosition="left"
                           color="blue"
                         />
                       </div>
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/60">
+                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700">
                         <Switcher
                           checked={Boolean(form.randomize_options)}
                           onChange={(checked) =>
                             handleChange("randomize_options", checked ? 1 : 0)
                           }
-                          label="ترتيب الخيارات عشوائي"
+                          label="ترتيب عشوائي للخيارات"
                           labelPosition="left"
                           color="purple"
                         />
@@ -631,7 +624,7 @@ const AdminContentDetailPage = () => {
                   </>
                 )}
                 <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     الترتيب
                   </label>
                   <input
@@ -640,12 +633,12 @@ const AdminContentDetailPage = () => {
                     onChange={(e) =>
                       handleChange("position", Number(e.target.value))
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
                     min={1}
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-3 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
                 <Button
                   color="green"
                   shade={600}
@@ -674,22 +667,21 @@ const AdminContentDetailPage = () => {
           {/* Quiz Questions Management */}
           {content?.content_type === "quiz" && (
             <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-                <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl flex items-center justify-center border border-purple-100 dark:border-purple-800">
                       <Icon
                         icon="solar:question-circle-bold"
-                        className="w-8 h-8 text-purple-600"
+                        className="w-6 h-6 text-purple-600 dark:text-purple-400"
                       />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                         أسئلة الاختبار
                       </h2>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        إدارة وتحرير أسئلة الاختبار ({quizQuestions.length}{" "}
-                        سؤال)
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        إدارة وتحرير أسئلة الاختبار ({quizQuestions.length} سؤال)
                       </p>
                     </div>
                   </div>
@@ -698,7 +690,7 @@ const AdminContentDetailPage = () => {
                     {content?.source && content.source !== "" && (
                       <button
                         onClick={() => setShowGenerateModal(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all duration-200"
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-purple-500/20 transition-all"
                       >
                         <Icon
                           icon="solar:magic-stick-3-bold"
@@ -710,7 +702,7 @@ const AdminContentDetailPage = () => {
                     <button
                       onClick={fetchQuizQuestions}
                       disabled={loadingQuestions}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 transition-all duration-200"
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold transition-all"
                     >
                       <Icon
                         icon={
@@ -718,7 +710,7 @@ const AdminContentDetailPage = () => {
                             ? "svg-spinners:ring-resize"
                             : "solar:refresh-bold"
                         }
-                        className="w-4 h-4"
+                        className="w-5 h-5"
                       />
                       تحديث
                     </button>

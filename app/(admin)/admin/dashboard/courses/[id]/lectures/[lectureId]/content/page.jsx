@@ -473,194 +473,207 @@ const AdminLectureContentPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900/50 pb-20">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.back()}
-                className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
-              >
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-3 bg-white dark:bg-gray-800 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 group"
+            >
+              <Icon
+                icon="solar:arrow-right-bold"
+                className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform"
+              />
+            </button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  إدارة المحتوى
+                </h1>
+                <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium border border-emerald-100 dark:border-emerald-800">
+                  {contents.length} محتوى
+                </span>
+              </div>
+              <p className="text-gray-500 dark:text-gray-400 mt-2 text-lg">
+                إضافة وتنظيم محتوى المحاضرة التدريبية
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="relative group">
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                 <Icon
-                  icon="solar:arrow-right-outline"
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  icon="solar:magnifer-linear"
+                  className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
                 />
-              </button>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    إدارة محتوى المحاضرة
-                  </h1>
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-sm font-medium">
-                    {contents.length} محتوى
-                  </span>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  إضافة وتحرير وتنظيم محتوى المحاضرة التدريبية
-                </p>
               </div>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="البحث في المحتوى..."
+                className="w-full sm:w-64 pl-4 pr-11 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-900 dark:text-white transition-all shadow-sm"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                >
+                  <Icon icon="solar:close-circle-bold" className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Search */}
-              <div className="relative hidden md:block">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
-                  <Icon
-                    icon="solar:search-bold"
-                    className="w-5 h-5 text-gray-500 dark:text-gray-400"
-                  />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="البحث..."
-                    className="bg-transparent outline-none flex-1 text-gray-900 dark:text-white placeholder-gray-500"
-                  />
-                </div>
-              </div>
+            {/* Filter */}
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+            >
+              <option value="all">جميع الأنواع</option>
+              <option value="video">فيديو</option>
+              <option value="audio">صوت</option>
+              <option value="photo">صورة</option>
+              <option value="file">ملف</option>
+              <option value="link">رابط</option>
+              <option value="quiz">اختبار</option>
+            </select>
 
-              {/* Filter */}
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">جميع الأنواع</option>
-                <option value="video">فيديو</option>
-                <option value="audio">صوت</option> {/* Added Audio Option */}
-                <option value="photo">صورة</option>
-                <option value="file">ملف</option>
-                <option value="link">رابط</option>
-                <option value="quiz">اختبار</option>
-              </select>
-
-              {/* Add Button */}
-              <button
-                onClick={openCreate}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium shadow-lg transform hover:-translate-y-0.5 transition-all"
-              >
-                <Icon icon="solar:add-circle-bold" className="w-5 h-5" /> إضافة
-                محتوى
-              </button>
-            </div>
+            {/* Add Button */}
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/20 transform hover:-translate-y-0.5 transition-all"
+            >
+              <Icon icon="solar:add-circle-bold" className="w-5 h-5" />
+              إضافة محتوى
+            </button>
           </div>
         </div>
 
         {/* Content List */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
           {contents.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="p-16 text-center">
+              <div className="w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Icon
-                  icon="solar:book-bold"
-                  className="w-10 h-10 text-blue-600 dark:text-blue-400"
+                  icon="solar:layers-minimalistic-bold"
+                  className="w-12 h-12 text-blue-600 dark:text-blue-400"
                 />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 لا يوجد محتوى
               </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto text-lg">
+                ابدأ بإضافة المحتوى الأول لهذه المحاضرة
+              </p>
               <button
                 onClick={openCreate}
-                className="inline-flex items-center gap-2 px-6 py-3 mt-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium shadow-lg"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/20 transform hover:-translate-y-1 transition-all"
               >
-                <Icon icon="solar:add-circle-bold" className="w-5 h-5" /> إضافة
-                المحتوى الأول
+                <Icon icon="solar:add-circle-bold" className="w-6 h-6" />
+                إضافة المحتوى الأول
               </button>
             </div>
           ) : displayedContents.length === 0 ? (
-            <div className="p-12 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="p-16 text-center">
+              <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon
+                  icon="solar:magnifer-linear"
+                  className="w-10 h-10 text-gray-400"
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 لا توجد نتائج
               </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                جرب تغيير معايير البحث أو الفلتر
+              </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {displayedContents.map((c, idx) => (
                 <div
                   key={c.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  className="p-6 hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors duration-200 group"
                 >
-                  <div className="flex items-start justify-between gap-6">
+                  <div className="flex items-start gap-6">
+                    {/* Sorting Controls */}
+                    <div className="flex flex-col gap-1 pt-1">
+                      <button
+                        onClick={() => moveUp(idx)}
+                        disabled={idx === 0}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      >
+                        <Icon icon="solar:alt-arrow-up-bold" className="w-5 h-5" />
+                      </button>
+                      <span className="text-center text-sm font-bold text-gray-400 font-mono">
+                        {c.position}
+                      </span>
+                      <button
+                        onClick={() => moveDown(idx)}
+                        disabled={idx === displayedContents.length - 1}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      >
+                        <Icon icon="solar:alt-arrow-down-bold" className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Content Icon */}
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800">
+                      <Icon
+                        icon={contentIcon(c.content_type)}
+                        className="w-7 h-7 text-blue-600 dark:text-blue-400"
+                      />
+                    </div>
+
+                    {/* Content Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-3">
-                        {/* Sorting */}
-                        <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => moveUp(idx)}
-                            disabled={idx === 0}
-                            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
-                          >
-                            <Icon
-                              icon="solar:arrow-up-bold"
-                              className="w-4 h-4"
-                            />
-                          </button>
-                          <button
-                            onClick={() => moveDown(idx)}
-                            disabled={idx === displayedContents.length - 1}
-                            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
-                          >
-                            <Icon
-                              icon="solar:arrow-down-bold"
-                              className="w-4 h-4"
-                            />
-                          </button>
-                        </div>
-
-                        <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium">
-                          #{c.position}
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                          {c.title || c.content_type}
+                        </h4>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium shrink-0 border border-gray-200 dark:border-gray-600">
+                          {c.content_type}
                         </span>
-
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <Icon
-                            icon={contentIcon(c.content_type)}
-                            className="w-5 h-5 text-blue-600 dark:text-blue-400"
-                          />
-                        </div>
-
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {c.title || c.content_type}
-                          </h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium">
-                              {c.content_type}
-                            </span>
-                            {/* Display duration for any type if it exists (Quizzes, Videos, Audio) */}
-                            {c.quiz_duration > 0 && (
-                              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
-                                {c.quiz_duration} دقيقة
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                        {c.quiz_duration > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium shrink-0 border border-emerald-200 dark:border-emerald-800">
+                            <Icon icon="solar:clock-circle-bold" className="w-3 h-3" />
+                            {c.quiz_duration} دقيقة
+                          </span>
+                        )}
                       </div>
                       {c.description && (
-                        <p className="text-gray-600 dark:text-gray-400 mb-3">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                           {c.description}
                         </p>
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <button
                         onClick={() => openEdit(c)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-md transition-all"
+                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"
+                        title="تعديل"
                       >
-                        <Icon icon="solar:pen-bold" className="w-4 h-4" /> تعديل
+                        <Icon icon="solar:pen-bold" className="w-5 h-5" />
                       </button>
                       <Link
                         href={`/admin/dashboard/courses/${courseId}/lectures/${lectureId}/content/${c.id}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md transition-all"
+                        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-xl transition-all"
+                        title="عرض التفاصيل"
                       >
-                        <Icon icon="solar:eye-bold" className="w-4 h-4" /> عرض
+                        <Icon icon="solar:eye-bold" className="w-5 h-5" />
                       </Link>
                       <button
                         onClick={() => confirmDelete(c)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium shadow-md transition-all"
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                        title="حذف"
                       >
-                        <Icon icon="solar:trash-bold" className="w-4 h-4" /> حذف
+                        <Icon icon="solar:trash-bin-trash-bold" className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
