@@ -21,7 +21,7 @@ const QuizQuestion = ({
   const questionIsArabic = isArabic(currentQuestion.question);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 w-full max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 md:p-8 w-full max-w-6xl mx-auto">
       {/* --- HEADER SECTION --- */}
       <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700 gap-4">
         {/* Title / Counter */}
