@@ -28,6 +28,10 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
   const [hoverTime, setHoverTime] = useState(null);
   const [hoverPosition, setHoverPosition] = useState(0);
 
+  // Playback speed state (1x .. 4x)
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [showSpeed, setShowSpeed] = useState(false);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -58,6 +62,12 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
       audio.removeEventListener("ended", handleEnded);
     };
   }, []);
+
+  // keep audio element playbackRate in sync
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.playbackRate = playbackRate;
+  }, [playbackRate]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -289,6 +299,44 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
                 className="w-6 h-6"
               />
             </button>
+          </div>
+
+          {/* Playback Speed Control */}
+          <div
+            className="relative ml-2"
+            onMouseEnter={() => setShowSpeed(true)}
+            onMouseLeave={() => setShowSpeed(false)}
+          >
+            <button
+              onClick={() => setShowSpeed((s) => !s)}
+              className="px-3 py-2 text-xs font-semibold rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+              title={`Playback speed: ${playbackRate}x`}
+            >
+              {playbackRate}x
+            </button>
+
+            {showSpeed && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 p-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-30">
+                <div className="flex flex-col gap-1">
+                  {[1, 1.25, 1.5, 1.75, 2, 3, 4].map((rate) => (
+                    <button
+                      key={rate}
+                      onClick={() => {
+                        setPlaybackRate(rate);
+                        setShowSpeed(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                        playbackRate === rate
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 font-semibold"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      }`}
+                    >
+                      {rate}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
