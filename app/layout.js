@@ -1,4 +1,5 @@
 import SessionTracker from "@/components/client/SessionTracker";
+import TokenValidator from "@/components/client/TokenValidator";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
