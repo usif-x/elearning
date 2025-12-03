@@ -84,8 +84,7 @@ const UserProfile = () => {
       label: "الأمان والخصوصية",
       icon: "solar:shield-keyhole-bold",
     },
-    { id: "notifications", label: "الإشعارات", icon: "solar:bell-bold" },
-    { id: "wallet", label: "المحفظة", icon: "solar:wallet-bold" },
+    { id: "notifications", label: "الإشعارات", icon: "solar:bell-bold" }
   ];
 
   const renderContent = () => {

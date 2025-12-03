@@ -339,22 +339,6 @@ const Navbar = ({ children }) => {
             <div className="hidden lg:flex items-center gap-3">
               {isAuthenticated ? (
                 <>
-                  {userType !== "admin" && (
-                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl smooth hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <Icon
-                        icon="solar:wallet-bold"
-                        className="w-5 h-5 text-green-500"
-                      />
-                      <div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
-                          الرصيد{" "}
-                        </span>
-                        <span className="text-sm font-bold text-gray-800 dark:text-white leading-none">
-                          {user?.wallet_balance || 0} ج.م
-                        </span>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Search Button */}
                   <button
@@ -695,22 +679,6 @@ const Navbar = ({ children }) => {
                       </div>
                     </div>
 
-                    {userType !== "admin" && (
-                      <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm mt-3">
-                        <Icon
-                          icon="solar:wallet-bold"
-                          className="w-5 h-5 text-green-500"
-                        />
-                        <div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
-                            الرصيد
-                          </span>
-                          <span className="block text-sm font-bold text-gray-800 dark:text-white leading-none">
-                            {user?.wallet_balance || 0} ج.م
-                          </span>
-                        </div>
-                      </div>
-                    )}
 
                     <div className="space-y-2">
                       {userType === "admin" ? (
