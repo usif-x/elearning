@@ -264,16 +264,25 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
           >
             {/* Volume Popup */}
             {showVolume && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-30">
+              <div
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-30"
+                onMouseEnter={() => setShowVolume(true)}
+                onMouseLeave={() => setShowVolume(false)}
+              >
                 <div className="h-24 w-6 flex items-center justify-center">
-                  {/* Clean Range Input Implementation */}
+                  {/* Clean Range Input Implementation - Reversed so high is up */}
                   <input
                     type="range"
                     min="0"
                     max="1"
                     step="0.01"
-                    value={isMuted ? 0 : volume}
-                    onChange={handleVolumeChange}
+                    value={isMuted ? 0 : 1 - volume}
+                    onChange={(e) => {
+                      const reversedValue = 1 - Number(e.target.value);
+                      audioRef.current.volume = reversedValue;
+                      setVolume(reversedValue);
+                      setIsMuted(reversedValue === 0);
+                    }}
                     className="volume-slider"
                   />
                 </div>
@@ -316,24 +325,30 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
             </button>
 
             {showSpeed && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 p-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-30">
-                <div className="flex flex-col gap-1">
-                  {[1, 1.25, 1.5, 1.75, 2, 3, 4].map((rate) => (
-                    <button
-                      key={rate}
-                      onClick={() => {
-                        setPlaybackRate(rate);
-                        setShowSpeed(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                        playbackRate === rate
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 font-semibold"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                      }`}
-                    >
-                      {rate}x
-                    </button>
-                  ))}
+              <div
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-30"
+                onMouseEnter={() => setShowSpeed(true)}
+                onMouseLeave={() => setShowSpeed(false)}
+              >
+                <div className="max-h-48 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                  <div className="flex flex-col gap-1">
+                    {[1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4].map((rate) => (
+                      <button
+                        key={rate}
+                        onClick={() => {
+                          setPlaybackRate(rate);
+                          setShowSpeed(false);
+                        }}
+                        className={`w-full text-center px-3 py-1.5 rounded-md text-sm transition-colors ${
+                          playbackRate === rate
+                            ? "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400 font-semibold"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        }`}
+                      >
+                        {rate}x
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
