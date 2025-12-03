@@ -1,6 +1,6 @@
 "use client";
 
-import { getUserById } from "@/services/admin/User";
+import { getUserDetails } from "@/services/admin/User";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ export default function AdminUserDetails() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getUserById(id);
+        const data = await getUserDetails(id);
         setUser(data);
       } catch (err) {
         console.error("Failed to load user details:", err);
@@ -104,7 +104,7 @@ export default function AdminUserDetails() {
                 setLoading(true);
                 setError(null);
                 try {
-                  const data = await getUserById(id);
+                  const data = await getUserDetails(id);
                   setUser(data);
                 } catch (e) {
                   setError(e?.message || "خطأ");

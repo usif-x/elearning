@@ -42,3 +42,57 @@ export const updateUserActivation = async (userId, isActive) => {
     true
   );
 };
+
+// Get user full details with all statistics
+export const getUserDetails = async (userId) => {
+  return getData(`/admin/users/${userId}/details`, true);
+};
+
+// Get user quiz attempts with pagination
+export const getUserQuizAttempts = async (userId, params = {}) => {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append("page", params.page);
+  if (params.size) queryParams.append("size", params.size);
+  if (params.course_id) queryParams.append("course_id", params.course_id);
+
+  const endpoint = `/admin/users/${userId}/quiz-attempts${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  return getData(endpoint, true);
+};
+
+// Get user generated questions with pagination
+export const getUserGeneratedQuestions = async (userId, params = {}) => {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append("page", params.page);
+  if (params.size) queryParams.append("size", params.size);
+
+  const endpoint = `/admin/users/${userId}/generated-questions${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  return getData(endpoint, true);
+};
+
+// Get user usage statistics with pagination
+export const getUserUsage = async (userId, params = {}) => {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append("page", params.page);
+  if (params.size) queryParams.append("size", params.size);
+
+  const endpoint = `/admin/users/${userId}/usage${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  return getData(endpoint, true);
+};
+
+// Get user practice quizzes with pagination
+export const getUserPracticeQuizzes = async (userId, params = {}) => {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append("page", params.page);
+  if (params.size) queryParams.append("size", params.size);
+
+  const endpoint = `/admin/users/${userId}/practice-quizzes${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  return getData(endpoint, true);
+};
