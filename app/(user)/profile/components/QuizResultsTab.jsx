@@ -144,21 +144,120 @@ const QuizResultsTab = ({ quizResults, quizLoading }) => {
         </div>
       ) : quizResults.length > 0 ? (
         <>
-          {/* Responsive Table View with Horizontal Scroll */}
-          <div className="relative">
-            {/* Scroll Indicator for Mobile */}
-            <div className="lg:hidden absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-sky-200 dark:via-sky-800 to-transparent opacity-50 pointer-events-none" />
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {table.getRowModel().rows.map((row) => {
+              const quiz = row.original;
+              return (
+                <div
+                  key={row.id}
+                  className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-4 hover:shadow-lg hover:border-sky-300 dark:hover:border-sky-600 transition-all duration-300"
+                >
+                  {/* Quiz Title */}
+                  <div className="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1 line-clamp-2">
+                        {quiz.quiz_title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {quiz.completed_at
+                          ? new Date(quiz.completed_at).toLocaleDateString(
+                              "ar-EG",
+                              {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )
+                          : "-"}
+                      </p>
+                    </div>
+                    <div
+                      className={`text-2xl font-black px-3 py-1 rounded-lg ${
+                        quiz.score >= 50
+                          ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                      }`}
+                    >
+                      {quiz.score}%
+                    </div>
+                  </div>
 
-            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-              <table className="w-full text-sm text-right min-w-[640px]">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                      <Icon
+                        icon="solar:checklist-minimalistic-bold-duotone"
+                        className="w-5 h-5 text-sky-500"
+                      />
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          الإجابات
+                        </p>
+                        <p className="font-bold text-sm text-gray-900 dark:text-white">
+                          {quiz.correct_answers}/{quiz.total_questions}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                      <Icon
+                        icon="solar:clock-circle-bold-duotone"
+                        className="w-5 h-5 text-purple-500"
+                      />
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          الوقت
+                        </p>
+                        <p className="font-bold text-sm text-gray-900 dark:text-white">
+                          {quiz.time_taken} د
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  {quiz.is_completed ? (
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/profile/quiz-result/${quiz.attempt_id}`}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium text-sm transition-colors"
+                      >
+                        <Icon icon="solar:eye-bold" className="w-4 h-4" />
+                        عرض النتيجة
+                      </Link>
+                      <Link
+                        href={`/courses/${quiz.course_id}/lecture/${quiz.lecture_id}/content/${quiz.content_id}`}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-colors"
+                      >
+                        <Icon
+                          icon="solar:arrow-right-bold"
+                          className="w-4 h-4"
+                        />
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="text-center py-2 text-gray-400 dark:text-gray-600 text-sm">
+                      غير مكتمل
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block relative">
+            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="w-full text-sm text-right">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
                           scope="col"
-                          className="px-3 sm:px-4 xl:px-6 py-3 font-semibold text-[10px] sm:text-xs whitespace-nowrap"
+                          className="px-6 py-3 font-semibold"
                         >
                           {header.isPlaceholder
                             ? null
@@ -178,10 +277,7 @@ const QuizResultsTab = ({ quizResults, quizLoading }) => {
                       className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="px-3 sm:px-4 xl:px-6 py-3 sm:py-4 text-xs sm:text-sm"
-                        >
+                        <td key={cell.id} className="px-6 py-4">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
@@ -192,19 +288,6 @@ const QuizResultsTab = ({ quizResults, quizLoading }) => {
                   ))}
                 </tbody>
               </table>
-            </div>
-
-            {/* Mobile Scroll Hint */}
-            <div className="lg:hidden flex items-center justify-center gap-2 mt-3 text-xs text-gray-500 dark:text-gray-400">
-              <Icon
-                icon="solar:arrow-left-linear"
-                className="w-4 h-4 animate-pulse"
-              />
-              <span>اسحب للعرض الكامل</span>
-              <Icon
-                icon="solar:arrow-right-linear"
-                className="w-4 h-4 animate-pulse"
-              />
             </div>
           </div>
 
