@@ -123,6 +123,7 @@ const CircularProgress = ({
 const ActivityChart = () => {
   const [chartData, setChartData] = useState([]);
   const [todayMinutes, setTodayMinutes] = useState(0);
+  const [totalPeriodMinutes, setTotalPeriodMinutes] = useState(0);
   const [viewMode, setViewMode] = useState("week");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -160,6 +161,9 @@ const ActivityChart = () => {
         const res = await getData(endpoint, true);
 
         if (res?.data && Array.isArray(res.data)) {
+          // Store total period minutes
+          setTotalPeriodMinutes(res.total_minutes_period || 0);
+          
           const formattedData = res.data.map((day) => {
             const dateObj = new Date(day.date);
             return {
@@ -182,6 +186,7 @@ const ActivityChart = () => {
           setChartData(formattedData);
         } else {
           setChartData([]);
+          setTotalPeriodMinutes(0);
         }
       } catch (error) {
         console.error("Failed to load chart data", error);
@@ -322,6 +327,37 @@ const ActivityChart = () => {
             ))}
           </div>
         </div>
+
+        {/* Total Period Time Display */}
+        {!loading && !error && totalPeriodMinutes > 0 && (
+          <div className="mb-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 border-2 border-sky-200 dark:border-sky-700 rounded-xl p-4 flex items-center justify-between gap-3 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="bg-sky-500 p-2.5 rounded-lg shadow-md">
+                <Icon
+                  icon="solar:clock-circle-bold-duotone"
+                  className="w-6 h-6 text-white"
+                />
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                  إجمالي الوقت ({viewMode === "week" ? "7 أيام" : "30 يوم"})
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatTime(totalPeriodMinutes)}
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm">
+              <Icon
+                icon="solar:fire-bold-duotone"
+                className="w-5 h-5 text-orange-500"
+              />
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                <CountUp end={totalPeriodMinutes} decimals={0} /> دقيقة
+              </span>
+            </div>
+          </div>
+        )}
 
         <div
           className="flex-1 min-h-[250px] sm:min-h-[280px] w-full overflow-x-auto"
