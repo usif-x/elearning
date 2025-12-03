@@ -152,22 +152,22 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="w-full max-w-md mx-auto p-4">
+    <div className="w-full max-w-md mx-auto p-2 sm:p-4">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
       {/* Main Card: Solid Colors */}
-      <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl relative overflow-visible">
+      <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-xl relative overflow-visible">
         {/* Header: Title & Time */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex-1 min-w-0 mr-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2">
+          <div className="flex-1 min-w-0 w-full sm:mr-4">
             <h3
-              className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate"
+              className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 truncate"
               title={title}
             >
               {title || "Untitled Track"}
             </h3>
           </div>
-          <div className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/30 px-3 py-1 rounded-md">
+          <div className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/30 px-2.5 sm:px-3 py-1 rounded-md whitespace-nowrap">
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
         </div>
@@ -175,10 +175,22 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         {/* Progress Bar Container */}
         <div
           ref={progressBarRef}
-          className="relative h-6 w-full mb-6 cursor-pointer group flex items-center"
+          className="relative h-8 sm:h-6 w-full mb-4 sm:mb-6 cursor-pointer group flex items-center touch-none"
           onMouseMove={handleProgressHover}
           onMouseLeave={() => setHoverTime(null)}
           onClick={handleProgressClick}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            handleProgressClick({
+              clientX: touch.clientX,
+            });
+          }}
+          onTouchMove={(e) => {
+            const touch = e.touches[0];
+            handleProgressClick({
+              clientX: touch.clientX,
+            });
+          }}
         >
           {/* Hover Tooltip */}
           {hoverTime !== null && (
@@ -193,165 +205,180 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
           )}
 
           {/* Background Track (Grey) */}
-          <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div className="w-full h-2 sm:h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             {/* Note: This is just the empty track background */}
           </div>
 
           {/* Fill Line (Sky) - Positioned Absolutely over the track */}
           <div
-            className="absolute left-0 h-1.5 bg-sky-500 rounded-l-full pointer-events-none transition-[width] duration-75 ease-linear"
+            className="absolute left-0 h-2 sm:h-1.5 bg-sky-500 rounded-l-full pointer-events-none transition-[width] duration-75 ease-linear"
             style={{ width: `${progressPercent}%` }}
           />
 
           {/* Thumb Circle - Positioned absolutely based on %. 
               Key Fix: translate-x-1/2 ensures center of circle aligns with end of line. */}
           <div
-            className="absolute h-4 w-4 bg-white border-[3px] border-sky-500 rounded-full shadow-md -translate-x-1/2 pointer-events-none transition-[left] duration-75 ease-linear group-hover:scale-125"
+            className="absolute h-5 w-5 sm:h-4 sm:w-4 bg-white border-[3px] border-sky-500 rounded-full shadow-md -translate-x-1/2 pointer-events-none transition-[left] duration-75 ease-linear group-hover:scale-125 group-active:scale-125"
             style={{ left: `${progressPercent}%` }}
           />
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-1 sm:gap-0">
           {/* Restart */}
           <button
             onClick={handleRestart}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors active:scale-95"
             title="Restart"
           >
-            <Icon icon="solar:restart-bold" className="w-6 h-6" />
+            <Icon icon="solar:restart-bold" className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           {/* Main Transport */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => handleSkip(-10)}
-              className="p-2 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 transition-colors"
+              className="p-1.5 sm:p-2 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 transition-colors active:scale-95"
             >
               <Icon
                 icon="solar:rewind-10-seconds-back-bold"
-                className="w-8 h-8"
+                className="w-6 h-6 sm:w-8 sm:h-8"
               />
             </button>
 
             {/* Play Button - Solid Color, No Gradient */}
             <button
               onClick={togglePlay}
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-transform active:scale-95"
+              className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-transform active:scale-95"
             >
               <Icon
                 icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
-                className={`w-7 h-7 ${!isPlaying ? "ml-1" : ""}`}
+                className={`w-6 h-6 sm:w-7 sm:h-7 ${!isPlaying ? "ml-1" : ""}`}
               />
             </button>
 
             <button
               onClick={() => handleSkip(10)}
-              className="p-2 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 transition-colors"
+              className="p-1.5 sm:p-2 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 transition-colors active:scale-95"
             >
               <Icon
                 icon="solar:rewind-10-seconds-forward-bold"
-                className="w-8 h-8"
+                className="w-6 h-6 sm:w-8 sm:h-8"
               />
             </button>
           </div>
 
-          {/* Volume Control */}
-          <div
-            className="relative"
-            onMouseEnter={() => setShowVolume(true)}
-            onMouseLeave={() => setShowVolume(false)}
-          >
-            {/* Volume Popup */}
-            {showVolume && (
-              <div
-                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-30"
-                onMouseEnter={() => setShowVolume(true)}
-                onMouseLeave={() => setShowVolume(false)}
-              >
-                <div className="h-24 w-6 flex items-center justify-center">
-                  {/* Clean Range Input Implementation - Reversed so high is up */}
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={isMuted ? 0 : 1 - volume}
-                    onChange={(e) => {
-                      const reversedValue = 1 - Number(e.target.value);
-                      audioRef.current.volume = reversedValue;
-                      setVolume(reversedValue);
-                      setIsMuted(reversedValue === 0);
-                    }}
-                    className="volume-slider"
-                  />
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={toggleMute}
-              className={`p-2 transition-colors ${
-                isMuted || volume === 0
-                  ? "text-red-500 hover:text-red-600"
-                  : "text-slate-400 hover:text-sky-500 dark:text-slate-500 dark:hover:text-sky-400"
-              }`}
+          <div className="flex items-center gap-1">
+            {/* Volume Control */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowVolume(true)}
+              onMouseLeave={() => setShowVolume(false)}
             >
-              <Icon
-                icon={
-                  isMuted || volume === 0
-                    ? "solar:volume-cross-bold"
-                    : volume < 0.5
-                    ? "solar:volume-small-bold"
-                    : "solar:volume-loud-bold"
-                }
-                className="w-6 h-6"
-              />
-            </button>
-          </div>
-
-          {/* Playback Speed Control */}
-          <div
-            className="relative ml-2"
-            onMouseEnter={() => setShowSpeed(true)}
-            onMouseLeave={() => setShowSpeed(false)}
-          >
-            <button
-              onClick={() => setShowSpeed((s) => !s)}
-              className="px-3 py-2 text-xs font-semibold rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-              title={`Playback speed: ${playbackRate}x`}
-            >
-              {playbackRate}x
-            </button>
-
-            {showSpeed && (
-              <div
-                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-30"
-                onMouseEnter={() => setShowSpeed(true)}
-                onMouseLeave={() => setShowSpeed(false)}
-              >
-                <div className="max-h-48 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                  <div className="flex flex-col gap-1">
-                    {[1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4].map((rate) => (
-                      <button
-                        key={rate}
-                        onClick={() => {
-                          setPlaybackRate(rate);
-                          setShowSpeed(false);
-                        }}
-                        className={`w-full text-center px-3 py-1.5 rounded-md text-sm transition-colors ${
-                          playbackRate === rate
-                            ? "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400 font-semibold"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                        }`}
-                      >
-                        {rate}x
-                      </button>
-                    ))}
+              {/* Volume Popup */}
+              {showVolume && (
+                <div
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-30"
+                  onMouseEnter={() => setShowVolume(true)}
+                  onMouseLeave={() => setShowVolume(false)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="h-24 w-6 flex items-center justify-center">
+                    {/* Clean Range Input Implementation - Reversed so high is up */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={isMuted ? 0 : 1 - volume}
+                      onChange={(e) => {
+                        const reversedValue = 1 - Number(e.target.value);
+                        audioRef.current.volume = reversedValue;
+                        setVolume(reversedValue);
+                        setIsMuted(reversedValue === 0);
+                      }}
+                      className="volume-slider"
+                    />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.innerWidth < 640) {
+                    // On mobile, toggle popup instead of mute
+                    setShowVolume(!showVolume);
+                  } else {
+                    toggleMute();
+                  }
+                }}
+                className={`p-1.5 sm:p-2 transition-colors active:scale-95 ${
+                  isMuted || volume === 0
+                    ? "text-red-500 hover:text-red-600"
+                    : "text-slate-400 hover:text-sky-500 dark:text-slate-500 dark:hover:text-sky-400"
+                }`}
+              >
+                <Icon
+                  icon={
+                    isMuted || volume === 0
+                      ? "solar:volume-cross-bold"
+                      : volume < 0.5
+                      ? "solar:volume-small-bold"
+                      : "solar:volume-loud-bold"
+                  }
+                  className="w-5 h-5 sm:w-6 sm:h-6"
+                />
+              </button>
+            </div>
+
+            {/* Playback Speed Control */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowSpeed(true)}
+              onMouseLeave={() => setShowSpeed(false)}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowSpeed(!showSpeed);
+                }}
+                className="px-2 py-1 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-semibold rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-95"
+                title={`Playback speed: ${playbackRate}x`}
+              >
+                {playbackRate}x
+              </button>
+
+              {showSpeed && (
+                <div
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-28 sm:w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-30"
+                  onMouseEnter={() => setShowSpeed(true)}
+                  onMouseLeave={() => setShowSpeed(false)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="max-h-48 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                    <div className="flex flex-col gap-1">
+                      {[1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4].map((rate) => (
+                        <button
+                          key={rate}
+                          onClick={() => {
+                            setPlaybackRate(rate);
+                            setShowSpeed(false);
+                          }}
+                          className={`w-full text-center px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-xs sm:text-sm transition-colors active:scale-95 ${
+                            playbackRate === rate
+                              ? "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400 font-semibold"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                          }`}
+                        >
+                          {rate}x
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
