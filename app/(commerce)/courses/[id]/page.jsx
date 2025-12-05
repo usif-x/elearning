@@ -148,21 +148,20 @@ const CourseData = () => {
 
               {/* Price and Subscribe */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-sky-500">
-                      {parseFloat(course.price) === 0
-                        ? "مجاني"
-                        : `${course.price} جنيه`}
-                    </p>
-                    {course.price_before_discount &&
-                      parseFloat(course.price_before_discount) > 0 && (
-                        <p className="text-sm text-gray-500 line-through">
-                          {course.price_before_discount} جنيه
-                        </p>
-                      )}
-                  </div>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+  <div className="text-right">
+    <p className="text-3xl font-bold text-sky-500">
+      {Number(course.price) === 0 ? "مجاني" : `${course.price} جنيه`}
+    </p>
+
+    {Number(course.price_before_discount) > 0 && (
+      <p className="text-sm text-gray-500 line-through">
+        {course.price_before_discount} جنيه
+      </p>
+    )}
+  </div>
+</div>
+
                 {parseFloat(course.price) === 0 ? (
                   <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg p-4 text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
@@ -390,6 +389,8 @@ const CourseData = () => {
                                           ? "ملف PDF"
                                           : content.content_type === "book"
                                           ? "كتاب"
+                                          : content.content_type === "audio"
+                                          ? "صوت"
                                           : content.content_type === "quiz"
                                           ? "اختبار"
                                           : content.content_type === "exam"
