@@ -1471,10 +1471,9 @@ const ContentPage = () => {
                               lectureContent.id === parseInt(contentId);
 
                             return (
-                              <Link
+                              <div
                                 key={lectureContent.id}
-                                href={`/courses/${courseId}/lecture/${lecture.id}/content/${lectureContent.id}`}
-                                className={`block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all duration-200 ${
+                                className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 ${
                                   isCurrentContent ? "ring-2 ring-sky-500" : ""
                                 }`}
                               >
@@ -1517,13 +1516,31 @@ const ContentPage = () => {
                                       </span>
                                     </div>
                                   </div>
-                                  {isCurrentContent && (
-                                    <div className="bg-sky-500 text-white text-xs font-bold py-1 px-3 rounded-full">
-                                      جاري العرض
-                                    </div>
-                                  )}
+                                  <div className="flex items-center gap-2">
+                                    {isCurrentContent && (
+                                      <div className="bg-sky-500 text-white text-xs font-bold py-1 px-3 rounded-full">
+                                        جاري العرض
+                                      </div>
+                                    )}
+                                    <Link
+                                      href={`/courses/${courseId}/lecture/${lecture.id}/content/${lectureContent.id}`}
+                                      className={`${contentStyle.bg} ${contentStyle.color} font-semibold py-2 px-4 rounded-lg hover:opacity-80 transition-all duration-200 flex items-center gap-2`}
+                                    >
+                                      <Icon
+                                        icon="solar:play-bold"
+                                        className="w-4 h-4"
+                                      />
+                                      <span className="hidden sm:inline">
+                                        {lectureContent.content_type === "video"
+                                          ? "تشغيل"
+                                          : lectureContent.content_type === "quiz"
+                                          ? "بدء"
+                                          : "عرض"}
+                                      </span>
+                                    </Link>
+                                  </div>
                                 </div>
-                              </Link>
+                              </div>
                             );
                           }
                         )}

@@ -29,8 +29,7 @@ export default function NotFound() {
 
         {/* Description */}
         <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-10">
-          يبدو أنك قد ضللت الطريق في الفضاء الرقمي. الصفحة التي تبحث عنها قد تكون
-          نُقلت أو لم تعد متوفرة.
+          الصفحة التي تبحث عنها قد تكون نُقلت أو لم تعد متوفرة.
         </p>
 
         {/* Action Button */}
