@@ -412,54 +412,49 @@ const ActivityChart = () => {
         )}
 
         <div
-          className="flex-1 min-h-[280px] sm:min-h-[320px] w-full overflow-x-auto relative z-10"
+          className="flex-1 min-h-[250px] sm:min-h-[280px] w-full overflow-x-auto"
           style={{ direction: "ltr" }}
         >
           {loading ? (
-            <div className="h-full w-full flex flex-col items-center justify-center gap-4 animate-in fade-in zoom-in duration-500">
-              <div className="relative">
-                <Icon
-                  icon="solar:loading-bold-duotone"
-                  className="animate-spin text-sky-500 w-12 h-12"
-                />
-                <div className="absolute inset-0 bg-sky-400/30 rounded-full blur-xl animate-pulse"></div>
-              </div>
-              <p className="text-sm sm:text-base font-semibold text-gray-600 dark:text-gray-400 animate-pulse">
-                ⏳ جاري تحميل البيانات...
+            <div className="h-full w-full flex flex-col items-center justify-center gap-3">
+              <Icon
+                icon="solar:loading-bold-duotone"
+                className="animate-spin text-indigo-500 w-10 h-10"
+              />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                جاري تحميل البيانات...
               </p>
             </div>
           ) : error ? (
-            <div className="h-full w-full flex flex-col items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4">
+            <div className="h-full w-full flex flex-col items-center justify-center gap-3">
               <Icon
                 icon="solar:danger-circle-bold-duotone"
-                className="text-red-500 w-12 h-12 animate-bounce"
+                className="text-red-500 w-10 h-10"
               />
-              <p className="text-sm sm:text-base font-semibold text-red-600 dark:text-red-400">
-                {error}
-              </p>
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-2 px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl text-sm font-bold hover:from-sky-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                className="mt-2 px-4 py-2 bg-sky-500 text-white rounded-lg text-sm font-medium hover:bg-sky-600 transition-colors"
               >
-                🔄 إعادة المحاولة
+                إعادة المحاولة
               </button>
             </div>
           ) : chartData.length === 0 ? (
-            <div className="h-full w-full flex flex-col items-center justify-center gap-4 animate-in fade-in zoom-in duration-500">
+            <div className="h-full w-full flex flex-col items-center justify-center gap-3">
               <Icon
                 icon="solar:ghost-bold-duotone"
-                className="text-gray-400 w-14 h-14 sm:w-16 sm:h-16 animate-bounce"
+                className="text-gray-400 w-10 h-10"
               />
-              <p className="text-sm sm:text-base font-semibold text-gray-500 dark:text-gray-400">
-                👻 لا توجد بيانات متاحة
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                لا توجد بيانات متاحة
               </p>
             </div>
           ) : (
-            <div className="w-full h-full min-w-[300px] animate-in fade-in zoom-in duration-700">
+            <div className="w-full h-full min-w-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
-                  margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+                  margin={{ top: 10, right: 5, left: -15, bottom: 5 }}
                 >
                   <defs>
                     <linearGradient
@@ -469,61 +464,28 @@ const ActivityChart = () => {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4} />
-                      <stop
-                        offset="50%"
-                        stopColor="#3b82f6"
-                        stopOpacity={0.2}
-                      />
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient
-                      id="lineGradient"
-                      x1="0"
-                      y1="0"
-                      x2="1"
-                      y2="0"
-                    >
-                      <stop offset="0%" stopColor="#0ea5e9" />
-                      <stop offset="50%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#06b6d4" />
-                    </linearGradient>
-                    <filter
-                      id="shadow"
-                      x="-50%"
-                      y="-50%"
-                      width="200%"
-                      height="200%"
-                    >
-                      <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                      <feOffset dx="0" dy="2" result="offsetblur" />
-                      <feComponentTransfer>
-                        <feFuncA type="linear" slope="0.3" />
-                      </feComponentTransfer>
-                      <feMerge>
-                        <feMergeNode />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
                   </defs>
                   <CartesianGrid
-                    strokeDasharray="4 4"
+                    strokeDasharray="3 3"
                     vertical={false}
                     stroke="#E5E7EB"
-                    opacity={0.4}
+                    opacity={0.3}
                   />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#6B7280", fontSize: 11, fontWeight: 600 }}
-                    dy={10}
+                    tick={{ fill: "#9CA3AF", fontSize: 11, fontWeight: 500 }}
+                    dy={8}
                     interval={viewMode === "month" ? 3 : 0}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#6B7280", fontSize: 11, fontWeight: 600 }}
+                    tick={{ fill: "#9CA3AF", fontSize: 10, fontWeight: 500 }}
                     domain={[0, yAxisMax]}
                     ticks={Array.from(
                       { length: Math.ceil(yAxisMax / 60) + 1 },
@@ -532,15 +494,14 @@ const ActivityChart = () => {
                     tickFormatter={(val) =>
                       val >= 60 ? `${(val / 60).toFixed(0)}h` : `${val}m`
                     }
-                    width={40}
+                    width={35}
                   />
                   <Tooltip
                     content={<CustomTooltip />}
                     cursor={{
-                      stroke: "#3b82f6",
+                      stroke: "#0ea5e9",
                       strokeWidth: 2,
                       strokeDasharray: "5 5",
-                      opacity: 0.5,
                     }}
                   />
                   <Area
@@ -549,29 +510,27 @@ const ActivityChart = () => {
                     stroke="none"
                     fillOpacity={1}
                     fill="url(#colorMinutes)"
-                    animationDuration={1800}
+                    animationDuration={1500}
                     animationEasing="ease-out"
                   />
                   <Line
                     type="monotone"
                     dataKey="minutes"
-                    stroke="url(#lineGradient)"
-                    strokeWidth={3.5}
+                    stroke="#0ea5e9"
+                    strokeWidth={3}
                     dot={{
-                      fill: "#3b82f6",
-                      strokeWidth: 3,
-                      r: 5,
+                      fill: "#0ea5e9",
+                      strokeWidth: 2,
+                      r: 4,
                       stroke: "#fff",
-                      filter: "url(#shadow)",
                     }}
                     activeDot={{
-                      r: 7,
+                      r: 6,
                       fill: "#0ea5e9",
                       stroke: "#fff",
-                      strokeWidth: 3,
-                      filter: "url(#shadow)",
+                      strokeWidth: 2,
                     }}
-                    animationDuration={1800}
+                    animationDuration={1500}
                     animationEasing="ease-out"
                   />
                 </LineChart>
