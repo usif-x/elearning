@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
+  YAxis,
 } from "recharts";
 
 // --- Helper: Count Up Animation ---
@@ -78,43 +78,52 @@ const CircularProgress = ({
   }, [percentage, circumference]);
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all hover:scale-105 hover:shadow-lg duration-300 group">
-      <div className="relative w-32 h-32 flex items-center justify-center mb-3">
-        <svg className="transform -rotate-90 w-32 h-32">
+    <div className="flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-white via-white to-gray-50/50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 rounded-2xl border-2 border-gray-200/60 dark:border-gray-700 transition-all hover:scale-105 hover:shadow-2xl hover:border-sky-300 dark:hover:border-sky-600 duration-500 group relative overflow-hidden animate-in fade-in zoom-in">
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-100/20 via-transparent to-blue-100/20 dark:from-sky-900/10 dark:to-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center mb-3 sm:mb-4">
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-200/30 to-blue-200/30 dark:from-sky-800/20 dark:to-blue-800/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <svg className="transform -rotate-90 w-28 h-28 sm:w-32 sm:h-32 drop-shadow-lg">
           <circle
-            cx="64"
-            cy="64"
+            cx="56"
+            cy="56"
             r={radius}
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth="9"
             fill="transparent"
-            className="text-gray-200 dark:text-gray-700"
+            className="text-gray-200/70 dark:text-gray-700/70"
           />
           <circle
-            cx="64"
-            cy="64"
+            cx="56"
+            cy="56"
             r={radius}
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth="9"
             fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className={`${color} transition-all duration-[1500ms] ease-out`}
+            className={`${color} transition-all duration-[1800ms] ease-out drop-shadow-lg`}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-          <Icon icon={icon} className={`w-8 h-8 ${color}`} />
+        <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+          <Icon
+            icon={icon}
+            className={`w-10 h-10 sm:w-12 sm:h-12 ${color} drop-shadow-md`}
+          />
         </div>
       </div>
-      <div className="text-center">
-        <span className={`text-2xl font-bold ${color}`}>
+      <div className="text-center relative z-10">
+        <span
+          className={`text-2xl sm:text-3xl font-black ${color} drop-shadow-sm`}
+        >
           <CountUp end={percentage} suffix={suffix} decimals={decimals} />
         </span>
-        <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mt-1">
+        <p className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-200 mt-2">
           {label}
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{subLabel}</p>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">
+          {subLabel}
+        </p>
       </div>
     </div>
   );
@@ -164,7 +173,7 @@ const ActivityChart = () => {
         if (res?.data && Array.isArray(res.data)) {
           // Store total period minutes
           setTotalPeriodMinutes(res.total_minutes_period || 0);
-          
+
           const formattedData = res.data.map((day) => {
             const dateObj = new Date(day.date);
             return {
@@ -203,13 +212,21 @@ const ActivityChart = () => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border-2 border-sky-200 dark:border-sky-700 shadow-xl rounded-xl text-right animate-in fade-in zoom-in duration-200">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            {payload[0].payload.fullDate}
-          </p>
-          <p className="font-bold text-lg text-sky-600 dark:text-sky-400">
-            {formatTime(payload[0].value)}
-          </p>
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-4 border-2 border-sky-300 dark:border-sky-700 shadow-2xl rounded-xl text-right animate-in fade-in zoom-in duration-200 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-100/50 to-blue-100/50 dark:from-sky-900/30 dark:to-blue-900/30"></div>
+          <div className="relative z-10">
+            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-1">
+              <Icon icon="solar:calendar-bold-duotone" className="w-3 h-3" />
+              {payload[0].payload.fullDate}
+            </p>
+            <p className="font-black text-xl bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
+              <Icon
+                icon="solar:clock-circle-bold-duotone"
+                className="w-5 h-5 text-sky-500"
+              />
+              {formatTime(payload[0].value)}
+            </p>
+          </div>
         </div>
       );
     }
@@ -236,94 +253,127 @@ const ActivityChart = () => {
   const yAxisMax = Math.ceil(maxMinutes / 60) * 60;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
       {/* Left: Today's Timer (Dynamic Scale) */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border-2 border-sky-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-sky-500"></div>
+      <div className="bg-gradient-to-br from-white via-sky-50/30 to-blue-50/50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 p-4 sm:p-6 rounded-2xl border-2 border-sky-200/60 dark:border-gray-700 shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col items-center justify-center relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-sky-400 via-blue-500 to-sky-600 animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-100/20 to-transparent dark:from-sky-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-        <div className="w-full flex justify-between items-center mb-6">
-          <span className="text-xs font-bold bg-sky-500 text-white px-3 py-1.5 rounded-lg shadow-md">
-            الهدف: {currentGoal / 60} {currentGoal >= 120 ? "ساعات" : "ساعة"}
+        <div className="w-full flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-3 relative z-10">
+          <span className="text-xs sm:text-sm font-bold bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-in fade-in slide-in-from-top-2">
+            🎯 الهدف: {currentGoal / 60} {currentGoal >= 120 ? "ساعات" : "ساعة"}
           </span>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            وقتك اليوم
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 animate-in fade-in slide-in-from-top-3">
             <Icon
               icon="solar:clock-circle-bold-duotone"
-              className="text-sky-500 w-6 h-6"
+              className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6 animate-pulse"
             />
+            وقتك اليوم
           </h3>
         </div>
 
-        <div className="relative flex items-center justify-center my-4">
+        <div className="relative flex items-center justify-center my-4 sm:my-6 animate-in zoom-in duration-700 delay-200">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-sky-500/20 rounded-full blur-3xl animate-pulse"></div>
           <svg
-            className="transform -rotate-90"
-            width="200"
-            height="200"
+            className="transform -rotate-90 drop-shadow-2xl"
+            width="160"
+            height="160"
             viewBox="0 0 200 200"
+            style={{ maxWidth: "100%", height: "auto" }}
           >
+            <defs>
+              <linearGradient
+                id="progressGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="50%" stopColor="#0ea5e9" />
+                <stop offset="100%" stopColor="#06b6d4" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
             <circle
               cx="100"
               cy="100"
               r={radius}
               stroke="currentColor"
-              strokeWidth="12"
+              strokeWidth="14"
               fill="transparent"
-              className="text-gray-200 dark:text-gray-700"
+              className="text-gray-200/50 dark:text-gray-700/50"
             />
             <circle
               cx="100"
               cy="100"
               r={radius}
-              stroke="currentColor"
-              strokeWidth="12"
+              stroke="url(#progressGradient)"
+              strokeWidth="14"
               fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={circleOffset}
               strokeLinecap="round"
-              className="text-blue-600 transition-all duration-[2000ms] ease-out"
+              className="transition-all duration-[2000ms] ease-out"
+              filter="url(#glow)"
+              style={{ transformOrigin: "center" }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-5xl font-black text-gray-900 dark:text-white">
+            <span className="text-4xl sm:text-5xl font-black bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 dark:from-white dark:via-sky-200 dark:to-white bg-clip-text text-transparent drop-shadow-lg">
               <CountUp end={todayMinutes} duration={2000} decimals={0} />
             </span>
-            <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium">
+            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 font-bold tracking-wider">
               دقيقة
             </span>
             {todayMinutes >= 60 && (
-              <span className="text-xs text-blue-600 dark:text-blue-400 font-bold mt-1 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
-                {(todayMinutes / 60).toFixed(1)} ساعة
+              <span className="text-xs font-bold mt-2 bg-gradient-to-r from-blue-600 to-sky-500 text-white px-3 py-1 rounded-full shadow-lg animate-in fade-in zoom-in duration-500 delay-500">
+                ⏱️ {(todayMinutes / 60).toFixed(1)} ساعة
               </span>
             )}
           </div>
         </div>
-        <p className="mt-4 text-center text-sm font-bold text-gray-700 dark:text-gray-300 px-2">
-          {getMotivationalMessage(todayMinutes)}
-        </p>
+        <div className="mt-4 w-full relative z-10 animate-in slide-in-from-bottom-4 duration-700 delay-500">
+          <p className="text-center text-sm sm:text-base font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-sky-600 dark:from-sky-400 dark:via-blue-400 dark:to-sky-400 bg-clip-text text-transparent px-2 py-2">
+            {getMotivationalMessage(todayMinutes)}
+          </p>
+        </div>
       </div>
 
       {/* Right: Activity Chart */}
-      <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <div className="lg:col-span-2 bg-gradient-to-br from-white via-white to-sky-50/30 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 p-4 sm:p-6 rounded-2xl border-2 border-sky-200/60 dark:border-gray-700 shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-100/30 via-transparent to-blue-100/30 dark:from-sky-900/10 dark:to-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 relative z-10">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 animate-in fade-in slide-in-from-left-3">
             <Icon
               icon="solar:graph-up-bold-duotone"
-              className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6"
+              className="text-sky-500 w-5 h-5 sm:w-6 sm:h-6 animate-pulse"
             />
             تحليل النشاط
           </h3>
-          <div className="flex bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl w-full sm:w-auto shadow-inner">
+          <div className="flex bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-700/50 dark:to-gray-700/30 p-1.5 rounded-xl w-full sm:w-auto shadow-inner border border-gray-200 dark:border-gray-600 animate-in fade-in slide-in-from-right-3">
             {["week", "month"].map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
-                className={`flex-1 sm:flex-none px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 ${
+                className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 relative overflow-hidden ${
                   viewMode === mode
-                    ? "bg-sky-500 text-white shadow-lg scale-105"
-                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg scale-105"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-600/30"
                 }`}
               >
-                {mode === "week" ? "7 أيام" : "30 يوم"}
+                {viewMode === mode && (
+                  <span className="absolute inset-0 bg-white/20 animate-pulse"></span>
+                )}
+                <span className="relative z-10">
+                  {mode === "week" ? "📊 7 أيام" : "📈 30 يوم"}
+                </span>
               </button>
             ))}
           </div>
@@ -331,29 +381,30 @@ const ActivityChart = () => {
 
         {/* Total Period Time Display */}
         {!loading && !error && totalPeriodMinutes > 0 && (
-          <div className="mb-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 border-2 border-sky-200 dark:border-sky-700 rounded-xl p-4 flex items-center justify-between gap-3 hover:shadow-md transition-all duration-300">
-            <div className="flex items-center gap-3">
-              <div className="bg-sky-500 p-2.5 rounded-lg shadow-md">
+          <div className="mb-4 bg-gradient-to-r from-sky-50 via-blue-50 to-sky-50 dark:from-sky-900/30 dark:via-blue-900/30 dark:to-sky-900/30 border-2 border-sky-300/60 dark:border-sky-700 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-xl hover:border-sky-400 dark:hover:border-sky-600 transition-all duration-500 relative overflow-hidden group animate-in fade-in slide-in-from-bottom-3">
+            <div className="absolute inset-0 bg-gradient-to-r from-sky-200/20 to-blue-200/20 dark:from-sky-800/20 dark:to-blue-800/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <div className="flex items-center gap-3 sm:gap-4 relative z-10">
+              <div className="bg-gradient-to-br from-sky-500 to-blue-600 p-3 rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Icon
                   icon="solar:clock-circle-bold-duotone"
-                  className="w-6 h-6 text-white"
+                  className="w-6 h-6 sm:w-7 sm:h-7 text-white"
                 />
               </div>
               <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                  إجمالي الوقت ({viewMode === "week" ? "7 أيام" : "30 يوم"})
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">
+                  ⏰ إجمالي الوقت ({viewMode === "week" ? "7 أيام" : "30 يوم"})
                 </p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
                   {formatTime(totalPeriodMinutes)}
                 </p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-4 py-2.5 rounded-xl shadow-md border border-sky-200 dark:border-gray-700 group-hover:scale-105 transition-all duration-300 relative z-10 w-full sm:w-auto">
               <Icon
                 icon="solar:fire-bold-duotone"
-                className="w-5 h-5 text-orange-500"
+                className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 animate-pulse"
               />
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              <span className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-200">
                 <CountUp end={totalPeriodMinutes} decimals={0} /> دقيقة
               </span>
             </div>
@@ -361,74 +412,118 @@ const ActivityChart = () => {
         )}
 
         <div
-          className="flex-1 min-h-[250px] sm:min-h-[280px] w-full overflow-x-auto"
+          className="flex-1 min-h-[280px] sm:min-h-[320px] w-full overflow-x-auto relative z-10"
           style={{ direction: "ltr" }}
         >
           {loading ? (
-            <div className="h-full w-full flex flex-col items-center justify-center gap-3">
-              <Icon
-                icon="solar:loading-bold-duotone"
-                className="animate-spin text-indigo-500 w-10 h-10"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                جاري تحميل البيانات...
+            <div className="h-full w-full flex flex-col items-center justify-center gap-4 animate-in fade-in zoom-in duration-500">
+              <div className="relative">
+                <Icon
+                  icon="solar:loading-bold-duotone"
+                  className="animate-spin text-sky-500 w-12 h-12"
+                />
+                <div className="absolute inset-0 bg-sky-400/30 rounded-full blur-xl animate-pulse"></div>
+              </div>
+              <p className="text-sm sm:text-base font-semibold text-gray-600 dark:text-gray-400 animate-pulse">
+                ⏳ جاري تحميل البيانات...
               </p>
             </div>
           ) : error ? (
-            <div className="h-full w-full flex flex-col items-center justify-center gap-3">
+            <div className="h-full w-full flex flex-col items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4">
               <Icon
                 icon="solar:danger-circle-bold-duotone"
-                className="text-red-500 w-10 h-10"
+                className="text-red-500 w-12 h-12 animate-bounce"
               />
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <p className="text-sm sm:text-base font-semibold text-red-600 dark:text-red-400">
+                {error}
+              </p>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-2 px-4 py-2 bg-sky-500 text-white rounded-lg text-sm font-medium hover:bg-sky-600 transition-colors"
+                className="mt-2 px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl text-sm font-bold hover:from-sky-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
               >
-                إعادة المحاولة
+                🔄 إعادة المحاولة
               </button>
             </div>
           ) : chartData.length === 0 ? (
-            <div className="h-full w-full flex flex-col items-center justify-center gap-3">
+            <div className="h-full w-full flex flex-col items-center justify-center gap-4 animate-in fade-in zoom-in duration-500">
               <Icon
                 icon="solar:ghost-bold-duotone"
-                className="text-gray-400 w-10 h-10"
+                className="text-gray-400 w-14 h-14 sm:w-16 sm:h-16 animate-bounce"
               />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                لا توجد بيانات متاحة
+              <p className="text-sm sm:text-base font-semibold text-gray-500 dark:text-gray-400">
+                👻 لا توجد بيانات متاحة
               </p>
             </div>
           ) : (
-            <div className="w-full h-full min-w-[300px]">
+            <div className="w-full h-full min-w-[300px] animate-in fade-in zoom-in duration-700">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
-                  margin={{ top: 10, right: 5, left: -15, bottom: 5 }}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
                 >
                   <defs>
-                    <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
+                    <linearGradient
+                      id="colorMinutes"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4} />
+                      <stop
+                        offset="50%"
+                        stopColor="#3b82f6"
+                        stopOpacity={0.2}
+                      />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                     </linearGradient>
+                    <linearGradient
+                      id="lineGradient"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
+                      <stop offset="0%" stopColor="#0ea5e9" />
+                      <stop offset="50%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#06b6d4" />
+                    </linearGradient>
+                    <filter
+                      id="shadow"
+                      x="-50%"
+                      y="-50%"
+                      width="200%"
+                      height="200%"
+                    >
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                      <feOffset dx="0" dy="2" result="offsetblur" />
+                      <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.3" />
+                      </feComponentTransfer>
+                      <feMerge>
+                        <feMergeNode />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
                   </defs>
                   <CartesianGrid
-                    strokeDasharray="3 3"
+                    strokeDasharray="4 4"
                     vertical={false}
                     stroke="#E5E7EB"
-                    opacity={0.3}
+                    opacity={0.4}
                   />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#9CA3AF", fontSize: 11, fontWeight: 500 }}
-                    dy={8}
+                    tick={{ fill: "#6B7280", fontSize: 11, fontWeight: 600 }}
+                    dy={10}
                     interval={viewMode === "month" ? 3 : 0}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#9CA3AF", fontSize: 10, fontWeight: 500 }}
+                    tick={{ fill: "#6B7280", fontSize: 11, fontWeight: 600 }}
                     domain={[0, yAxisMax]}
                     ticks={Array.from(
                       { length: Math.ceil(yAxisMax / 60) + 1 },
@@ -437,11 +532,16 @@ const ActivityChart = () => {
                     tickFormatter={(val) =>
                       val >= 60 ? `${(val / 60).toFixed(0)}h` : `${val}m`
                     }
-                    width={35}
+                    width={40}
                   />
                   <Tooltip
                     content={<CustomTooltip />}
-                    cursor={{ stroke: "#0ea5e9", strokeWidth: 2, strokeDasharray: "5 5" }}
+                    cursor={{
+                      stroke: "#3b82f6",
+                      strokeWidth: 2,
+                      strokeDasharray: "5 5",
+                      opacity: 0.5,
+                    }}
                   />
                   <Area
                     type="monotone"
@@ -449,17 +549,29 @@ const ActivityChart = () => {
                     stroke="none"
                     fillOpacity={1}
                     fill="url(#colorMinutes)"
-                    animationDuration={1500}
+                    animationDuration={1800}
                     animationEasing="ease-out"
                   />
                   <Line
                     type="monotone"
                     dataKey="minutes"
-                    stroke="#0ea5e9"
-                    strokeWidth={3}
-                    dot={{ fill: "#0ea5e9", strokeWidth: 2, r: 4, stroke: "#fff" }}
-                    activeDot={{ r: 6, fill: "#0ea5e9", stroke: "#fff", strokeWidth: 2 }}
-                    animationDuration={1500}
+                    stroke="url(#lineGradient)"
+                    strokeWidth={3.5}
+                    dot={{
+                      fill: "#3b82f6",
+                      strokeWidth: 3,
+                      r: 5,
+                      stroke: "#fff",
+                      filter: "url(#shadow)",
+                    }}
+                    activeDot={{
+                      r: 7,
+                      fill: "#0ea5e9",
+                      stroke: "#fff",
+                      strokeWidth: 3,
+                      filter: "url(#shadow)",
+                    }}
+                    animationDuration={1800}
                     animationEasing="ease-out"
                   />
                 </LineChart>
