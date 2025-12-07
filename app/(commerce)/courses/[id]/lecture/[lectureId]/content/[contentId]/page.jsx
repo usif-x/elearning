@@ -31,6 +31,9 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
   // Playback speed state (1x .. 4x)
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeed, setShowSpeed] = useState(false);
+  
+  // Error state
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -47,11 +50,17 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
       }
     };
     const handleEnded = () => setIsPlaying(false);
+    const handleError = (e) => {
+      console.error('Audio loading error:', e);
+      setHasError(true);
+      setIsPlaying(false);
+    };
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
 
     if (audio.readyState >= 1) updateDuration();
 
@@ -60,6 +69,7 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("durationchange", updateDuration);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
     };
   }, []);
 
@@ -151,9 +161,42 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // Show error state if audio failed to load
+  if (hasError) {
+    return (
+      <div className="w-full max-w-md mx-auto p-2 sm:p-4">
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl sm:rounded-3xl border border-red-200 dark:border-red-800 p-6 sm:p-8">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <Icon 
+              icon="solar:danger-circle-bold" 
+              className="w-16 h-16 text-red-500"
+            />
+            <h3 className="text-lg font-bold text-red-900 dark:text-red-100">
+              فشل تحميل الملف الصوتي
+            </h3>
+            <p className="text-sm text-red-700 dark:text-red-300">
+              حدث خطأ أثناء تحميل الملف الصوتي. يرجى المحاولة مرة أخرى لاحقاً.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md mx-auto p-2 sm:p-4">
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      <audio 
+        ref={audioRef} 
+        src={audioUrl} 
+        preload="auto"
+        crossOrigin="anonymous"
+      />
 
       {/* Main Card: Solid Colors */}
       <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-xl relative overflow-visible">
@@ -641,15 +684,16 @@ const ContentPage = () => {
           (content.source.startsWith("http://") ||
             content.source.startsWith("https://"))
         ) {
+          // Use API proxy to avoid CORS issues with external URLs
           return (
             <CustomAudioPlayer
-              audioUrl={content.source}
+              audioUrl={`/api/audio?url=${encodeURIComponent(content.source)}`}
               title={content.title}
             />
           );
         }
 
-        // Default audio player for uploaded files
+        // Default audio player for uploaded files (local storage - no proxy needed)
         return (
           <CustomAudioPlayer
             audioUrl={`${apiUrl}/storage/${content.source}`}
