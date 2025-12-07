@@ -136,6 +136,12 @@ export default function RootLayout({ children }) {
           href="/icons/safari-pinned-tab.svg"
           color="#3B82F6"
         />
+        {/* Umami Analytics */}
+        <script
+          defer
+          src="https://umami.usif.space/script.js"
+          data-website-id="b66544ae-16df-4ce3-b059-42ea1899f394"
+        />
       </head>
       <body
         className={`${IBMSans.className} bg-white dark:bg-zinc-950 smooth antialiased`}
