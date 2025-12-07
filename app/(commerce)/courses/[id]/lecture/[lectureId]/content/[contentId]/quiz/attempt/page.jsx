@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  getCourseById,
-  getCourseLectures,
-  getQuizAttempts,
-  resumeQuiz,
-  startQuiz,
-  submitQuizAttempt,
+    getCourseById,
+    getCourseLectures,
+    getQuizAttempts,
+    resumeQuiz,
+    startQuiz,
+    submitQuizAttempt,
 } from "@/services/Courses";
 import { Icon } from "@iconify/react";
 import { useParams, useRouter } from "next/navigation";
@@ -240,6 +240,50 @@ const QuizAttemptPage = () => {
       .filter((index) => flaggedQuestions.has(index));
   };
 
+  const handlePrevious = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      if (currentPos > 0) {
+        setCurrentQuestionIndex(filteredIndices[currentPos - 1]);
+      }
+    } else {
+      setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
+    }
+  };
+
+  const handleNext = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      if (currentPos < filteredIndices.length - 1) {
+        setCurrentQuestionIndex(filteredIndices[currentPos + 1]);
+      }
+    } else {
+      setCurrentQuestionIndex((prev) =>
+        Math.min(questions.length - 1, prev + 1)
+      );
+    }
+  };
+
+  const isLastInView = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      return currentPos === filteredIndices.length - 1;
+    }
+    return currentQuestionIndex === questions.length - 1;
+  };
+
+  const isFirstInView = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      return currentPos === 0;
+    }
+    return currentQuestionIndex === 0;
+  };
+
   const handleSubmit = async (autoSubmit = false) => {
     if (!autoSubmit) {
       const result = await Swal.fire({
@@ -425,18 +469,15 @@ const QuizAttemptPage = () => {
               }
               onClearAnswer={() => handleClearAnswer(currentQuestionIndex)}
               onToggleFlag={() => handleToggleFlag(currentQuestionIndex)}
-              onPrevious={() =>
-                setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
-              }
-              onNext={() =>
-                setCurrentQuestionIndex((prev) =>
-                  Math.min(questions.length - 1, prev + 1)
-                )
-              }
+              onPrevious={handlePrevious}
+              onNext={handleNext}
               onSubmit={() => handleSubmit(false)}
               onContinueLater={() => handleContinueLater()}
               submitting={submitting}
               isLastQuestion={currentQuestionIndex === questions.length - 1}
+              isFirstInView={isFirstInView()}
+              isLastInView={isLastInView()}
+              showOnlyFlagged={showOnlyFlagged}
             />
           </div>
         </div>

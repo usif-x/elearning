@@ -116,12 +116,57 @@ const PracticeQuizAttemptPage = () => {
     });
   };
 
+  const getFilteredQuestions = () => {
+    if (!showOnlyFlagged) {
+      return questions.map((q, index) => index);
+    }
+    return questions
+      .map((q, index) => index)
+      .filter((index) => flaggedQuestions.has(index));
+  };
+
   const handlePrevious = () => {
-    setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      if (currentPos > 0) {
+        setCurrentQuestionIndex(filteredIndices[currentPos - 1]);
+      }
+    } else {
+      setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
+    }
   };
 
   const handleNext = () => {
-    setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1));
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      if (currentPos < filteredIndices.length - 1) {
+        setCurrentQuestionIndex(filteredIndices[currentPos + 1]);
+      }
+    } else {
+      setCurrentQuestionIndex((prev) =>
+        Math.min(questions.length - 1, prev + 1)
+      );
+    }
+  };
+
+  const isLastInView = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      return currentPos === filteredIndices.length - 1;
+    }
+    return currentQuestionIndex === questions.length - 1;
+  };
+
+  const isFirstInView = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      return currentPos === 0;
+    }
+    return currentQuestionIndex === 0;
   };
 
   const getAnsweredCount = () => {
@@ -285,6 +330,9 @@ const PracticeQuizAttemptPage = () => {
               onContinueLater={() => handleContinueLater()}
               submitting={submitting}
               isLastQuestion={currentQuestionIndex === questions.length - 1}
+              isFirstInView={isFirstInView()}
+              isLastInView={isLastInView()}
+              showOnlyFlagged={showOnlyFlagged}
             />
           </div>
         </div>

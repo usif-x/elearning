@@ -95,6 +95,58 @@ const QuestionAttemptPage = () => {
       return newFlags;
     });
   };
+  const getFilteredQuestions = () => {
+    if (!showOnlyFlagged || !attempt) {
+      return attempt?.questions.map((q, index) => index) || [];
+    }
+    return attempt.questions
+      .map((q, index) => index)
+      .filter((index) => flaggedQuestions.has(index));
+  };
+
+  const handlePrevious = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      if (currentPos > 0) {
+        setCurrentQuestionIndex(filteredIndices[currentPos - 1]);
+      }
+    } else {
+      setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
+    }
+  };
+
+  const handleNext = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      if (currentPos < filteredIndices.length - 1) {
+        setCurrentQuestionIndex(filteredIndices[currentPos + 1]);
+      }
+    } else {
+      setCurrentQuestionIndex((prev) =>
+        Math.min(attempt.questions.length - 1, prev + 1)
+      );
+    }
+  };
+
+  const isLastInView = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      return currentPos === filteredIndices.length - 1;
+    }
+    return currentQuestionIndex === attempt?.questions.length - 1;
+  };
+
+  const isFirstInView = () => {
+    if (showOnlyFlagged) {
+      const filteredIndices = getFilteredQuestions();
+      const currentPos = filteredIndices.indexOf(currentQuestionIndex);
+      return currentPos === 0;
+    }
+    return currentQuestionIndex === 0;
+  };
 
   const handleSubmit = async () => {
     // Check if all questions are answered
@@ -265,20 +317,17 @@ const QuestionAttemptPage = () => {
               }
               onClearAnswer={() => handleClearAnswer(currentQuestionIndex)}
               onToggleFlag={() => handleToggleFlag(currentQuestionIndex)}
-              onPrevious={() =>
-                setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
-              }
-              onNext={() =>
-                setCurrentQuestionIndex((prev) =>
-                  Math.min(attempt.questions.length - 1, prev + 1)
-                )
-              }
+              onPrevious={handlePrevious}
+              onNext={handleNext}
               onSubmit={() => handleSubmit()}
               onContinueLater={() => handleContinueLater()}
               submitting={submitting}
               isLastQuestion={
                 currentQuestionIndex === attempt.questions.length - 1
               }
+              isFirstInView={isFirstInView()}
+              isLastInView={isLastInView()}
+              showOnlyFlagged={showOnlyFlagged}
             />
           </div>
         </div>

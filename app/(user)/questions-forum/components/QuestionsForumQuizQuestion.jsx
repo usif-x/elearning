@@ -15,6 +15,9 @@ const QuizQuestion = ({
   onContinueLater,
   submitting,
   isLastQuestion,
+  isFirstInView = false,
+  isLastInView = false,
+  showOnlyFlagged = false,
 }) => {
   // Helper to detect Arabic text
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
@@ -171,7 +174,7 @@ const QuizQuestion = ({
         <div className="flex items-center gap-3 w-full sm:w-auto">
         <button
   onClick={onPrevious}
-  disabled={currentQuestionIndex === 0}
+  disabled={isFirstInView}
   className="
     flex-1 sm:flex-none flex items-center justify-center gap-2
     px-6 py-3 rounded-xl font-bold transition-all
@@ -199,7 +202,7 @@ const QuizQuestion = ({
 
         {/* Bottom Button: Switch between Next (Sky) and Submit (Emerald) */}
         <div className="w-full sm:w-auto">
-          {isLastQuestion ? (
+          {isLastInView ? (
             <button
               onClick={onSubmit}
               disabled={submitting}
