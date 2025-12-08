@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  getContent,
-  getCourseById,
-  getCourseLectures,
-  getQuizAttempts,
+    getContent,
+    getCourseById,
+    getCourseLectures,
+    getQuizAttempts,
 } from "@/services/Courses";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
@@ -34,6 +34,9 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
   
   // Error state
   const [hasError, setHasError] = useState(false);
+  
+  // Loading state for mobile browsers
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -54,13 +57,30 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
       console.error('Audio loading error:', e);
       setHasError(true);
       setIsPlaying(false);
+      setIsLoading(false);
     };
+    
+    // Mobile browsers need these to keep UI in sync
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    
+    // Loading state handlers for mobile browsers
+    const handleLoadStart = () => setIsLoading(true);
+    const handleCanPlay = () => setIsLoading(false);
+    const handleWaiting = () => setIsLoading(true);
+    const handlePlaying = () => setIsLoading(false);
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", handleError);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("loadstart", handleLoadStart);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("waiting", handleWaiting);
+    audio.addEventListener("playing", handlePlaying);
 
     if (audio.readyState >= 1) updateDuration();
 
@@ -70,6 +90,12 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
       audio.removeEventListener("durationchange", updateDuration);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("error", handleError);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("loadstart", handleLoadStart);
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("waiting", handleWaiting);
+      audio.removeEventListener("playing", handlePlaying);
     };
   }, []);
 
@@ -79,23 +105,48 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
     if (audio) audio.playbackRate = playbackRate;
   }, [playbackRate]);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     const audio = audioRef.current;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
+    if (!audio) return;
+
+    try {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        // Mobile browsers require proper promise handling
+        await audio.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error('Playback error:', error);
+      setIsPlaying(false);
+      // Don't show error for user-initiated interruptions
+      if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ في التشغيل',
+          text: 'حدث خطأ أثناء تشغيل الملف الصوتي',
+          confirmButtonText: 'حسناً',
+        });
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
-  const handleRestart = () => {
+  const handleRestart = async () => {
     const audio = audioRef.current;
+    if (!audio) return;
+
     audio.currentTime = 0;
     setCurrentTime(0);
     if (!isPlaying) {
-      audio.play();
-      setIsPlaying(true);
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Restart playback error:', error);
+        setIsPlaying(false);
+      }
     }
   };
 
@@ -196,6 +247,8 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         src={audioUrl} 
         preload="auto"
         crossOrigin="anonymous"
+        playsInline
+        controlsList="nodownload"
       />
 
       {/* Main Card: Solid Colors */}
@@ -223,16 +276,21 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
           onMouseLeave={() => setHoverTime(null)}
           onClick={handleProgressClick}
           onTouchStart={(e) => {
+            e.preventDefault(); // Prevent scrolling while seeking
             const touch = e.touches[0];
             handleProgressClick({
               clientX: touch.clientX,
             });
           }}
           onTouchMove={(e) => {
+            e.preventDefault(); // Prevent scrolling while seeking
             const touch = e.touches[0];
             handleProgressClick({
               clientX: touch.clientX,
             });
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
           }}
         >
           {/* Hover Tooltip */}
@@ -293,11 +351,19 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
             <button
               onClick={togglePlay}
               className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-200 dark:shadow-none transition-transform active:scale-95"
+              disabled={isLoading && !isPlaying}
             >
-              <Icon
-                icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
-                className={`w-6 h-6 sm:w-7 sm:h-7 ${!isPlaying ? "ml-1" : ""}`}
-              />
+              {isLoading && isPlaying ? (
+                <Icon
+                  icon="svg-spinners:ring-resize"
+                  className="w-6 h-6 sm:w-7 sm:h-7"
+                />
+              ) : (
+                <Icon
+                  icon={isPlaying ? "solar:pause-bold" : "solar:play-bold"}
+                  className={`w-6 h-6 sm:w-7 sm:h-7 ${!isPlaying ? "ml-1" : ""}`}
+                />
+              )}
             </button>
 
             <button
