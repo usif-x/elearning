@@ -725,7 +725,6 @@ const Community = () => {
               منتدى الطلاب
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-              انضم إلى المجموعات وشارك أفكارك وخبراتك مع زملائك
             </p>
 
             {/* Search Bar */}
@@ -889,7 +888,6 @@ const Community = () => {
             منتدى الطلاب
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-            انضم إلى المجموعات وشارك أفكارك وخبراتك مع زملائك
           </p>
 
           {/* Search Bar */}
