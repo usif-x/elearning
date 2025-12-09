@@ -598,7 +598,16 @@ export default function AIExplainPage() {
                     </h3>
                   </div>
                   <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        strong: ({ children }) => (
+                          <strong className="text-indigo-700 dark:text-indigo-300 font-bold">
+                            {children}
+                          </strong>
+                        ),
+                      }}
+                    >
                       {item.explanation}
                     </ReactMarkdown>
                   </div>
