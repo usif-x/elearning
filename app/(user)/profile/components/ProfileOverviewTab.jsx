@@ -2,10 +2,9 @@ import { getData } from "@/libs/axios";
 import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 import {
-  Area,
+  Bar,
+  BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -401,7 +400,7 @@ const ActivityChart = () => {
           ) : (
             <div className="w-full h-full min-w-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
+                <BarChart
                   data={chartData}
                   margin={{ top: 10, right: 5, left: -15, bottom: 5 }}
                 >
@@ -413,8 +412,8 @@ const ActivityChart = () => {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.6} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -447,42 +446,16 @@ const ActivityChart = () => {
                   />
                   <Tooltip
                     content={<CustomTooltip />}
-                    cursor={{
-                      stroke: "#0ea5e9",
-                      strokeWidth: 2,
-                      strokeDasharray: "5 5",
-                    }}
+                    cursor={{ fill: "rgba(14, 165, 233, 0.1)" }}
                   />
-                  <Area
-                    type="monotone"
+                  <Bar
                     dataKey="minutes"
-                    stroke="none"
-                    fillOpacity={1}
                     fill="url(#colorMinutes)"
+                    radius={[8, 8, 0, 0]}
                     animationDuration={1500}
                     animationEasing="ease-out"
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="minutes"
-                    stroke="#0ea5e9"
-                    strokeWidth={3}
-                    dot={{
-                      fill: "#0ea5e9",
-                      strokeWidth: 2,
-                      r: 4,
-                      stroke: "#fff",
-                    }}
-                    activeDot={{
-                      r: 6,
-                      fill: "#0ea5e9",
-                      stroke: "#fff",
-                      strokeWidth: 2,
-                    }}
-                    animationDuration={1500}
-                    animationEasing="ease-out"
-                  />
-                </LineChart>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           )}
