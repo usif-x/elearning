@@ -89,14 +89,11 @@ const CoursesPage = () => {
               </p>
             </div>
           </div>
+          <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full">
+            <Icon icon="solar:user-check-bold" className="w-5 h-5" />
 
-          {!loading && courses.length > 0 && (
-            <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full">
-              <Icon icon="solar:user-check-bold" className="w-5 h-5" />
-
-              <span className="font-semibold">{total} كورس متاح</span>
-            </div>
-          )}
+            <span className="font-semibold">{total} كورس متاح</span>
+          </div>
         </div>
 
         {/* Loading State */}

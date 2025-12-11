@@ -857,39 +857,20 @@ const Community = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
             <Icon
               icon="solar:users-group-rounded-bold-duotone"
-              className="w-16 h-16 text-sky-500"
+              className="w-12 h-12 text-blue-500"
             />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            منتدى الطلاب
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6"></p>
-
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="ابحث عن مجموعة..."
-                className="w-full px-6 py-4 pr-14 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-sky-500 transition-colors"
-                dir="rtl"
-              />
-              <button
-                onClick={handleSearch}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-sky-500 hover:bg-sky-600 rounded-xl flex items-center justify-center transition-colors"
-              >
-                <Icon
-                  icon="solar:magnifer-bold"
-                  className="w-5 h-5 text-white"
-                />
-              </button>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                منتدى الطلاب
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                مكان للطلاب للتواصل والمشاركة في المحتوى التعليمي والمناقشات
+                المفيدة
+              </p>
             </div>
           </div>
         </div>

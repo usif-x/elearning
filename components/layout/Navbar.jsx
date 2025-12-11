@@ -741,7 +741,7 @@ const Navbar = ({ children }) => {
                         }`}
                       >
                         <Icon
-                          icon="solar:question-circle-bold-duotone"
+                          icon="mdi:frequently-asked-questions"
                           className="w-5 h-5"
                         />
                         <span>منتدي الأسئلة</span>
@@ -1027,10 +1027,7 @@ const Navbar = ({ children }) => {
               }`}
               title={!shouldShowExpanded ? "منتدي الأسئلة" : ""}
             >
-              <Icon
-                icon="solar:question-circle-bold-duotone"
-                className="w-6 h-6"
-              />
+              <Icon icon="mdi:frequently-asked-questions" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">منتدي الأسئلة</span>
               )}
