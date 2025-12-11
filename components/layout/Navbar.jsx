@@ -307,7 +307,11 @@ const Navbar = ({ children }) => {
       {/* --- Navbar (Fixed Position) --- */}
       <nav
         className={`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 smooth fixed top-0 left-0 right-0 z-30
-          ${isAuthenticated ? "border-b" : "w-[95%] m-auto mt-4 rounded-lg overflow-hidden"}`}
+          ${
+            isAuthenticated
+              ? "border-b"
+              : "w-[95%] m-auto mt-4 rounded-lg overflow-hidden"
+          }`}
       >
         <div className="max-w-[1440px] mx-auto">
           <div className="flex items-center justify-between">
@@ -339,7 +343,6 @@ const Navbar = ({ children }) => {
             <div className="hidden lg:flex items-center gap-3">
               {isAuthenticated ? (
                 <>
-
                   {/* Search Button */}
                   <button
                     onClick={toggleSearch}
@@ -679,7 +682,6 @@ const Navbar = ({ children }) => {
                       </div>
                     </div>
 
-
                     <div className="space-y-2">
                       {userType === "admin" ? (
                         <Link
@@ -746,6 +748,19 @@ const Navbar = ({ children }) => {
                       </Link>
 
                       <Link
+                        href="/ai-explain"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          pathname === "/ai-explain"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon icon="mdi:magic" className="w-5 h-5" />
+                        <span>شرح محتوى </span>
+                      </Link>
+
+                      <Link
                         href="/community"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -759,19 +774,6 @@ const Navbar = ({ children }) => {
                           className="w-5 h-5"
                         />
                         <span>منتدى الطلاب</span>
-                      </Link>
-
-                      <Link
-                        href="/ai-explain"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
-                          pathname === "/ai-explain"
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        <Icon icon="mdi:magic" className="w-5 h-5" />
-                        <span>شرح محتوى </span>
                       </Link>
 
                       <Link
@@ -1032,23 +1034,6 @@ const Navbar = ({ children }) => {
             </Link>
 
             <Link
-              href="/community"
-              className={`flex items-center w-full p-3 rounded-xl smooth ${
-                !shouldShowExpanded ? "justify-center" : "gap-3"
-              } ${
-                pathname === "/community"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-              title={!shouldShowExpanded ? "منتدى الطلاب" : ""}
-            >
-              <Icon icon="solar:users-group-rounded-bold" className="w-6 h-6" />
-              {shouldShowExpanded && (
-                <span className="font-medium">منتدى الطلاب</span>
-              )}
-            </Link>
-
-            <Link
               href="/ai-explain"
               className={`flex items-center w-full p-3 rounded-xl smooth ${
                 !shouldShowExpanded ? "justify-center" : "gap-3"
@@ -1062,6 +1047,23 @@ const Navbar = ({ children }) => {
               <Icon icon="mdi:magic" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">شرح محتوى </span>
+              )}
+            </Link>
+
+            <Link
+              href="/community"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/community"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "منتدى الطلاب" : ""}
+            >
+              <Icon icon="solar:users-group-rounded-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">منتدى الطلاب</span>
               )}
             </Link>
 

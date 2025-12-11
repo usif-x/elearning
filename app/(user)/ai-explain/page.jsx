@@ -185,7 +185,10 @@ export default function AIExplainPage() {
     try {
       const form = new FormData();
       form.append("include_examples", includeExamples ? "true" : "false");
-      form.append("detailed_explanation", detailedExplanation ? "true" : "false");
+      form.append(
+        "detailed_explanation",
+        detailedExplanation ? "true" : "false"
+      );
 
       let endpoint = "";
 
@@ -252,7 +255,10 @@ export default function AIExplainPage() {
       return (
         <div className="text-center py-20">
           <div className="inline-flex p-6 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full mb-6">
-            <Icon icon="solar:history-bold" className="w-16 h-16 text-blue-500" />
+            <Icon
+              icon="solar:history-bold"
+              className="w-16 h-16 text-blue-500"
+            />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             لا يوجد سجل شروحات
@@ -300,11 +306,19 @@ export default function AIExplainPage() {
 
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <Icon icon="solar:clock-circle-bold" className="w-4 h-4 text-gray-400" />
-                <span>{new Date(item.timestamp).toLocaleDateString("ar-EG")}</span>
+                <Icon
+                  icon="solar:clock-circle-bold"
+                  className="w-4 h-4 text-gray-400"
+                />
+                <span>
+                  {new Date(item.timestamp).toLocaleDateString("ar-EG")}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <Icon icon="solar:document-bold" className="w-4 h-4 text-purple-500" />
+                <Icon
+                  icon="solar:document-bold"
+                  className="w-4 h-4 text-purple-500"
+                />
                 <span>
                   {item.data.pages?.length || item.data.subjects?.length || 0}{" "}
                   {item.type === "pdf" ? "صفحة" : "موضوع فرعي"}
@@ -354,7 +368,9 @@ export default function AIExplainPage() {
               <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Icon
-                    icon={file ? "solar:file-check-bold" : "solar:cloud-upload-bold"}
+                    icon={
+                      file ? "solar:file-check-bold" : "solar:cloud-upload-bold"
+                    }
                     className={`w-12 h-12 mb-3 ${
                       file ? "text-green-500" : "text-gray-400"
                     }`}
@@ -367,11 +383,14 @@ export default function AIExplainPage() {
                       </span>
                     ) : (
                       <>
-                        <span className="font-semibold">اضغط لرفع الملف</span> أو اسحب وأفلت
+                        <span className="font-semibold">اضغط لرفع الملف</span>{" "}
+                        أو اسحب وأفلت
                       </>
                     )}
                   </p>
-                  <p className="text-xs text-gray-500">PDF فقط (حد أقصى 50MB)</p>
+                  <p className="text-xs text-gray-500">
+                    PDF فقط (حد أقصى 50MB)
+                  </p>
                 </div>
                 <input
                   ref={fileRef}
@@ -407,8 +426,13 @@ export default function AIExplainPage() {
             />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <Icon icon="solar:clipboard-list-bold" className="w-5 h-5 text-blue-600" />
-                <span className="font-medium text-gray-900 dark:text-white">إضافة أمثلة</span>
+                <Icon
+                  icon="solar:clipboard-list-bold"
+                  className="w-5 h-5 text-blue-600"
+                />
+                <span className="font-medium text-gray-900 dark:text-white">
+                  إضافة أمثلة
+                </span>
               </div>
             </div>
           </label>
@@ -422,8 +446,13 @@ export default function AIExplainPage() {
             />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <Icon icon="solar:book-2-bold" className="w-5 h-5 text-blue-600" />
-                <span className="font-medium text-gray-900 dark:text-white">شرح مفصّل</span>
+                <Icon
+                  icon="solar:book-2-bold"
+                  className="w-5 h-5 text-blue-600"
+                />
+                <span className="font-medium text-gray-900 dark:text-white">
+                  شرح مفصّل
+                </span>
               </div>
             </div>
           </label>
@@ -438,8 +467,13 @@ export default function AIExplainPage() {
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Icon icon="solar:layers-minimalistic-bold" className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-gray-900 dark:text-white">تقسيم الموضوعات</span>
+                  <Icon
+                    icon="solar:layers-minimalistic-bold"
+                    className="w-5 h-5 text-blue-600"
+                  />
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    تقسيم الموضوعات
+                  </span>
                 </div>
               </div>
             </label>
@@ -460,7 +494,9 @@ export default function AIExplainPage() {
             ) : (
               <>
                 <Icon icon="solar:magic-wand-bold" className="w-6 h-6" />
-                <span>{activeTab === "pdf" ? "اشرح الـ PDF" : "اشرح الموضوع"}</span>
+                <span>
+                  {activeTab === "pdf" ? "اشرح الـ PDF" : "اشرح الموضوع"}
+                </span>
               </>
             )}
           </button>
@@ -481,16 +517,14 @@ export default function AIExplainPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl shadow-lg">
-              <Icon icon="solar:magic-stick-3-bold-duotone" className="w-12 h-12 text-white" />
-            </div>
+          <div className="flex items-center gap-3 mb-4">
+            <Icon icon="ri:book-ai-fill" className="w-12 h-12 text-blue-500" />
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
                 شرح المحتوى
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                شرح باللهجة المصرية مع الحفاظ على المصطلحات الطبية
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                استخدم الذكاء الاصطناعي لشرح محتوى PDF أو موضوع طبي
               </p>
             </div>
           </div>
@@ -594,7 +628,9 @@ export default function AIExplainPage() {
                       {results.pages ? item.page_number : idx + 1}
                     </div>
                     <h3 className="font-bold text-lg text-gray-900 dark:text-white">
-                      {results.pages ? `الصفحة ${item.page_number}` : item.subject_title}
+                      {results.pages
+                        ? `الصفحة ${item.page_number}`
+                        : item.subject_title}
                     </h3>
                   </div>
                   <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">

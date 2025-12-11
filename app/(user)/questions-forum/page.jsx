@@ -465,20 +465,20 @@ const QuestionsForumPage = () => {
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-4 text-sky-600 rounded-2xl shadow-lg">
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
                 <Icon
-                  icon="solar:question-circle-bold-duotone"
-                  className="w-12 h-12 text-white"
+                  icon="mdi:frequently-asked-questions"
+                  className="w-12 h-12 text-blue-500"
                 />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                  منتدى الأسئلة
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  أنشئ وشارك أسئلة الاختبار مع المجتمع
-                </p>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                    منتدى الأسئلة
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    أنشئ وشارك أسئلة مع المجتمع
+                  </p>
+                </div>
               </div>
             </div>
             <Link
