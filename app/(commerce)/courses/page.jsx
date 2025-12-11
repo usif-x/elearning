@@ -9,6 +9,7 @@ const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const total = courses?.length || 0;
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -91,8 +92,9 @@ const CoursesPage = () => {
           </div>
           <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full">
             <Icon icon="solar:user-check-bold" className="w-5 h-5" />
-
-            <span className="font-semibold">{total} كورس متاح</span>
+            <span className="font-semibold">
+              {loading ? "..." : `${total} كورس متاح`}
+            </span>
           </div>
         </div>
 
