@@ -741,7 +741,7 @@ const Navbar = ({ children }) => {
                         }`}
                       >
                         <Icon
-                          icon="solar:question-circle-bold"
+                          icon="solar:question-circle-bold-duotone"
                           className="w-5 h-5"
                         />
                         <span>منتدي الأسئلة</span>
@@ -756,7 +756,7 @@ const Navbar = ({ children }) => {
                             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                         }`}
                       >
-                        <Icon icon="mdi:magic" className="w-5 h-5" />
+                        <Icon icon="ri:book-ai-fill" className="w-5 h-5" />
                         <span>شرح محتوى </span>
                       </Link>
 
@@ -1027,7 +1027,10 @@ const Navbar = ({ children }) => {
               }`}
               title={!shouldShowExpanded ? "منتدي الأسئلة" : ""}
             >
-              <Icon icon="solar:question-circle-bold" className="w-6 h-6" />
+              <Icon
+                icon="solar:question-circle-bold-duotone"
+                className="w-6 h-6"
+              />
               {shouldShowExpanded && (
                 <span className="font-medium">منتدي الأسئلة</span>
               )}
@@ -1044,7 +1047,7 @@ const Navbar = ({ children }) => {
               }`}
               title={!shouldShowExpanded ? "شرح محتوى " : ""}
             >
-              <Icon icon="mdi:magic" className="w-6 h-6" />
+              <Icon icon="ri:book-ai-fill" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">شرح محتوى </span>
               )}

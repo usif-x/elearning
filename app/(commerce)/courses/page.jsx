@@ -72,23 +72,29 @@ const CoursesPage = () => {
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen py-12 pt-24">
       <div className="container mx-auto px-4">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
             <Icon
               icon="solar:book-bookmark-bold-duotone"
-              className="w-16 h-16 text-sky-500"
+              className="w-12 h-12 text-blue-500"
             />
+
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                الكورسات المتاحة
+              </h1>
+
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                الكورسات المتاحه حاليا علي المنصة.
+              </p>
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800 dark:text-white">
-            الكورسات المتاحة
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            اكتشف مجموعة متنوعة من الكورسات التعليمية المميزة والمصممة خصيصاً لك
-          </p>
-          {!loading && !error && courses.length > 0 && (
-            <div className="mt-6 inline-flex items-center space-x-2 space-x-reverse bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 px-4 py-2 rounded-full">
-              <Icon icon="mdi:book-multiple" className="w-5 h-5" />
-              <span className="font-semibold">{courses.length} كورس متاح</span>
+
+          {!loading && courses.length > 0 && (
+            <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full">
+              <Icon icon="solar:user-check-bold" className="w-5 h-5" />
+
+              <span className="font-semibold">{total} كورس متاح</span>
             </div>
           )}
         </div>
