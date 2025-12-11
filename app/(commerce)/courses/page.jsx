@@ -70,8 +70,8 @@ const CoursesPage = () => {
   };
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen py-12 pt-24">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
