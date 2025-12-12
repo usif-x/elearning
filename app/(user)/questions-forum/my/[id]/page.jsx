@@ -272,7 +272,7 @@ const QuestionSetDetailPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-20">
             <LoadingSpinner />
           </div>
@@ -284,7 +284,7 @@ const QuestionSetDetailPage = () => {
   if (!questionSet) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <div className="inline-flex p-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full mb-6">
               <Icon
@@ -297,7 +297,7 @@ const QuestionSetDetailPage = () => {
             </h3>
             <Link
               href="/questions-forum"
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
+              className="inline-flex items-center gap-3 bg-sky-600 hover:bg-sky-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
             >
               <Icon icon="solar:arrow-right-bold" className="w-6 h-6" />
               <span>العودة إلى منتدى الأسئلة</span>
@@ -310,24 +310,33 @@ const QuestionSetDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-sky-600 rounded-2xl shadow-lg">
-              <Icon
-                icon="solar:document-bold-duotone"
-                className="w-12 h-12 text-white"
-              />
+          <div className="flex items-center justify-between">
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Icon
+                  icon="solar:document-bold-duotone"
+                  className="w-12 h-12 text-blue-500"
+                />
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                    تفاصيل مجموعة الأسئلة
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    إدارة ومراجعة أسئلتك
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                تفاصيل مجموعة الأسئلة
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                إدارة ومراجعة أسئلتك
-              </p>
-            </div>
+            <Link
+              href="/questions-forum"
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3"
+            >
+              <Icon icon="solar:arrow-right-bold" className="w-5 h-5" />
+              <span>العودة</span>
+            </Link>
           </div>
         </div>
 
@@ -599,7 +608,7 @@ const QuestionSetDetailPage = () => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleStartAttempt}
               disabled={startingAttempt}
@@ -616,7 +625,7 @@ const QuestionSetDetailPage = () => {
               <>
                 <Link
                   href={`/questions-forum/${questionSetId}/participants`}
-                  className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
+                  className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg"
                 >
                   <Icon icon="solar:cup-bold" className="w-6 h-6" />
                   <span>المشاركون</span>
@@ -625,11 +634,10 @@ const QuestionSetDetailPage = () => {
                   onClick={() => {
                     const url = `${window.location.origin}/questions-forum/${questionSetId}`;
                     navigator.clipboard.writeText(url).then(() => {
-                      // You could add a toast notification here
                       toast.success("تم نسخ الرابط!");
                     });
                   }}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-lg"
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg"
                 >
                   <Icon icon="solar:share-bold" className="w-6 h-6" />
                   <span>مشاركة</span>
@@ -1255,32 +1263,19 @@ const QuestionSetDetailPage = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-8 mb-8">
+          <div className="flex justify-center items-center gap-4 mt-12">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-2"
+              className="p-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
             >
-              <Icon icon="solar:alt-arrow-left-bold" className="w-5 h-5" />
-              <span>السابق</span>
+              <Icon icon="solar:alt-arrow-right-bold" className="w-5 h-5" />
             </button>
 
-            <div className="flex gap-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg ${
-                      page === currentPage
-                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white"
-                        : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-300 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600">
+                صفحة {currentPage} من {totalPages}
+              </span>
             </div>
 
             <button
@@ -1288,10 +1283,9 @@ const QuestionSetDetailPage = () => {
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-2"
+              className="p-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
             >
-              <span>التالي</span>
-              <Icon icon="solar:alt-arrow-right-bold" className="w-5 h-5" />
+              <Icon icon="solar:alt-arrow-left-bold" className="w-5 h-5" />
             </button>
           </div>
         )}
@@ -1300,7 +1294,7 @@ const QuestionSetDetailPage = () => {
         <div className="mt-12 text-center">
           <Link
             href={`/questions-forum/${questionSetId}/add-questions`}
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
+            className="inline-flex items-center gap-3 bg-sky-600 hover:bg-sky-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
           >
             <Icon icon="solar:add-circle-bold" className="w-6 h-6" />
             <span>إضافة المزيد من الأسئلة</span>

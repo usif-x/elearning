@@ -234,32 +234,41 @@ const ParticipantsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl shadow-lg">
-              <Icon
-                icon="solar:cup-bold-duotone"
-                className="w-12 h-12 text-white"
-              />
+          <div className="flex items-center justify-between">
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Icon
+                  icon="solar:cup-bold-duotone"
+                  className="w-12 h-12 text-yellow-500"
+                />
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                    لوحة الصدارة
+                  </h1>
+                  {questionSetInfo && (
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                      {questionSetInfo.title}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                لوحة الصدارة
-              </h1>
-              {questionSetInfo && (
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  {questionSetInfo.title}
-                </p>
-              )}
-            </div>
+            <Link
+              href="/questions-forum"
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3"
+            >
+              <Icon icon="solar:arrow-right-bold" className="w-5 h-5" />
+              <span>العودة</span>
+            </Link>
           </div>
         </div>
 
         {/* Stats Cards */}
         {questionSetInfo && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 text-center">
               <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl mb-4">
                 <Icon
@@ -499,17 +508,6 @@ const ParticipantsPage = () => {
             </button>
           </div>
         )}
-
-        {/* Back Button */}
-        <div className="mt-12 text-center">
-          <Link
-            href="/questions-forum"
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
-          >
-            <Icon icon="solar:home-bold" className="w-6 h-6" />
-            <span>العودة للمنتدى</span>
-          </Link>
-        </div>
       </div>
     </div>
   );

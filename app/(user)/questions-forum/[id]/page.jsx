@@ -319,192 +319,143 @@ const PublicQuestionSetPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
         <div className="mb-8">
-          <Link
-            href="/questions-forum"
-            className="inline-flex items-center gap-3 px-4 py-3 text-blue-600 hover:text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-800 rounded-xl hover:shadow-md transition-all duration-200 border border-blue-100 dark:border-gray-700 mb-6"
-          >
-            <Icon icon="solar:alt-arrow-right-bold" className="text-lg" />
-            <span className="font-medium">العودة للمنتدى</span>
-          </Link>
-
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
-              <Icon
-                icon="solar:document-text-bold"
-                className="text-3xl text-white"
-              />
+          <div className="flex items-center justify-between">
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Icon
+                  icon="solar:document-bold-duotone"
+                  className="w-12 h-12 text-blue-500"
+                />
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                    تفاصيل مجموعة الأسئلة
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    معلومات ومحتوى المجموعة
+                  </p>
+                </div>
+              </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-              {questionSet.title}
-            </h1>
-            {questionSet.description && (
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                {questionSet.description}
-              </p>
-            )}
+            <Link
+              href="/questions-forum"
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3"
+            >
+              <Icon icon="solar:arrow-right-bold" className="w-5 h-5" />
+              <span>العودة</span>
+            </Link>
           </div>
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden mb-8">
-          {/* Header with Gradient */}
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  {questionSet.title}
-                </h2>
-                {questionSet.topic && (
-                  <p className="text-purple-200 text-lg">
-                    الموضوع: {questionSet.topic}
-                  </p>
-                )}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 dark:border-gray-700">
+          {/* Title and Description */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              {questionSet.title}
+            </h2>
+            {questionSet.description && (
+              <p className="text-gray-600 dark:text-gray-300 text-lg">
+                {questionSet.description}
+              </p>
+            )}
+            {questionSet.topic && (
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                الموضوع: {questionSet.topic}
+              </p>
+            )}
+          </div>
+
+          {/* Metadata Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+            {/* Total Questions */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6 text-center border border-blue-200 dark:border-blue-700">
+              <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/50 rounded-xl mb-4">
+                <Icon
+                  icon="solar:question-circle-bold"
+                  className="w-8 h-8 text-blue-600"
+                />
               </div>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                {questionSet.total_questions}
+              </div>
+              <div className="text-sm text-blue-700 dark:text-blue-300 font-semibold">
+                عدد الأسئلة
+              </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                {questionSet.user_has_pending_attempt ? (
-                  <button
-                    onClick={handleResumeAttempt}
-                    disabled={resumingAttempt}
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-xl text-lg min-w-[200px]"
-                  >
-                    {resumingAttempt ? (
-                      <LoadingSpinner />
-                    ) : (
-                      <>
-                        <Icon
-                          icon="solar:play-circle-bold"
-                          className="w-6 h-6"
-                        />
-                        <span>استئناف المحاولة</span>
-                      </>
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStartAttempt}
-                    disabled={startingAttempt}
-                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-xl text-lg min-w-[200px]"
-                  >
-                    {startingAttempt ? (
-                      <LoadingSpinner />
-                    ) : (
-                      <>
-                        <Icon
-                          icon="solar:play-circle-bold"
-                          className="w-6 h-6"
-                        />
-                        <span>بدء المحاولة</span>
-                      </>
-                    )}
-                  </button>
-                )}
+            {/* Attempt Count */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl p-6 text-center border border-green-200 dark:border-green-700">
+              <div className="inline-flex p-3 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800/50 dark:to-green-700/50 rounded-xl mb-4">
+                <Icon
+                  icon="solar:users-group-two-rounded-bold"
+                  className="w-8 h-8 text-green-600"
+                />
+              </div>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
+                {questionSet.attempt_count}
+              </div>
+              <div className="text-sm text-green-700 dark:text-green-300 font-semibold">
+                عدد المحاولات
+              </div>
+            </div>
 
-                <Link
-                  href={`/questions-forum/${questionSetId}/participants`}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg min-w-[200px]"
-                >
-                  <Icon icon="solar:cup-bold" className="w-6 h-6" />
-                  <span>تصنيف المشاركين</span>
-                </Link>
+            {/* Difficulty */}
+            <div
+              className={`bg-gradient-to-br ${difficultyColors.bg} dark:${difficultyColors.dark.bg} rounded-2xl p-6 text-center border ${difficultyColors.border} dark:${difficultyColors.dark.border}`}
+            >
+              <div
+                className={`inline-flex p-3 bg-gradient-to-br ${difficultyColors.bg
+                  .replace("50", "100")
+                  .replace("100", "200")} dark:${difficultyColors.dark.bg
+                  .replace("900/30", "800/50")
+                  .replace("800/30", "700/50")} rounded-xl mb-4`}
+              >
+                <Icon
+                  icon="solar:chart-square-bold"
+                  className={`w-8 h-8 ${difficultyColors.text}`}
+                />
+              </div>
+              <div
+                className={`text-3xl font-bold ${difficultyColors.text} dark:${difficultyColors.dark.text} mb-1`}
+              >
+                {questionSet.difficulty === "easy"
+                  ? "سهل"
+                  : questionSet.difficulty === "medium"
+                  ? "متوسط"
+                  : "صعب"}
+              </div>
+              <div
+                className={`text-sm font-semibold ${difficultyColors.text.replace(
+                  "600",
+                  "700"
+                )} dark:${difficultyColors.dark.text.replace("400", "300")}`}
+              >
+                مستوى الصعوبة
+              </div>
+            </div>
+
+            {/* Question Type */}
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl p-6 text-center border border-purple-200 dark:border-purple-700">
+              <div className="inline-flex p-3 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800/50 dark:to-purple-700/50 rounded-xl mb-4">
+                <Icon
+                  icon="solar:document-text-bold"
+                  className="w-8 h-8 text-purple-600"
+                />
+              </div>
+              <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+                {getQuestionTypeText(questionSet.question_type)}
+              </div>
+              <div className="text-sm text-purple-700 dark:text-purple-300 font-semibold">
+                نوع الأسئلة
               </div>
             </div>
           </div>
 
-          {/* Content Section */}
-          <div className="p-8">
-            {/* Metadata Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Total Questions */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6 text-center border border-blue-200 dark:border-blue-700">
-                <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/50 rounded-xl mb-4">
-                  <Icon
-                    icon="solar:question-circle-bold"
-                    className="w-8 h-8 text-blue-600"
-                  />
-                </div>
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                  {questionSet.total_questions}
-                </div>
-                <div className="text-sm text-blue-700 dark:text-blue-300 font-semibold">
-                  عدد الأسئلة
-                </div>
-              </div>
-
-              {/* Attempt Count */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl p-6 text-center border border-green-200 dark:border-green-700">
-                <div className="inline-flex p-3 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800/50 dark:to-green-700/50 rounded-xl mb-4">
-                  <Icon
-                    icon="solar:users-group-two-rounded-bold"
-                    className="w-8 h-8 text-green-600"
-                  />
-                </div>
-                <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
-                  {questionSet.attempt_count}
-                </div>
-                <div className="text-sm text-green-700 dark:text-green-300 font-semibold">
-                  عدد المحاولات
-                </div>
-              </div>
-
-              {/* Difficulty */}
-              <div
-                className={`bg-gradient-to-br ${difficultyColors.bg} dark:${difficultyColors.dark.bg} rounded-2xl p-6 text-center border ${difficultyColors.border} dark:${difficultyColors.dark.border}`}
-              >
-                <div
-                  className={`inline-flex p-3 bg-gradient-to-br ${difficultyColors.bg
-                    .replace("50", "100")
-                    .replace("100", "200")} dark:${difficultyColors.dark.bg
-                    .replace("900/30", "800/50")
-                    .replace("800/30", "700/50")} rounded-xl mb-4`}
-                >
-                  <Icon
-                    icon="solar:chart-square-bold"
-                    className={`w-8 h-8 ${difficultyColors.text}`}
-                  />
-                </div>
-                <div
-                  className={`text-3xl font-bold ${difficultyColors.text} dark:${difficultyColors.dark.text} mb-1`}
-                >
-                  {questionSet.difficulty === "easy"
-                    ? "سهل"
-                    : questionSet.difficulty === "medium"
-                    ? "متوسط"
-                    : "صعب"}
-                </div>
-                <div
-                  className={`text-sm font-semibold ${difficultyColors.text.replace(
-                    "600",
-                    "700"
-                  )} dark:${difficultyColors.dark.text.replace("400", "300")}`}
-                >
-                  مستوى الصعوبة
-                </div>
-              </div>
-
-              {/* Question Type */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl p-6 text-center border border-purple-200 dark:border-purple-700">
-                <div className="inline-flex p-3 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800/50 dark:to-purple-700/50 rounded-xl mb-4">
-                  <Icon
-                    icon="solar:document-text-bold"
-                    className="w-8 h-8 text-purple-600"
-                  />
-                </div>
-                <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-1">
-                  {getQuestionTypeText(questionSet.question_type)}
-                </div>
-                <div className="text-sm text-purple-700 dark:text-purple-300 font-semibold">
-                  نوع الأسئلة
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Information */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Additional Information */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Creator Info */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
@@ -610,6 +561,62 @@ const PublicQuestionSetPage = () => {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              {questionSet.user_has_pending_attempt ? (
+                <button
+                  onClick={handleResumeAttempt}
+                  disabled={resumingAttempt}
+                  className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-xl text-lg"
+                >
+                  {resumingAttempt ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <>
+                      <Icon icon="solar:play-circle-bold" className="w-6 h-6" />
+                      <span>استئناف المحاولة</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={handleStartAttempt}
+                  disabled={startingAttempt}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-xl text-lg"
+                >
+                  {startingAttempt ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <>
+                      <Icon icon="solar:play-circle-bold" className="w-6 h-6" />
+                      <span>بدء المحاولة</span>
+                    </>
+                  )}
+                </button>
+              )}
+
+              <Link
+                href={`/questions-forum/${questionSetId}/participants`}
+                className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg"
+              >
+                <Icon icon="solar:cup-bold" className="w-6 h-6" />
+                <span>المشاركون</span>
+              </Link>
+
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/questions-forum/${questionSetId}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    toast.success("تم نسخ الرابط!");
+                  });
+                }}
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg"
+              >
+                <Icon icon="solar:share-bold" className="w-6 h-6" />
+                <span>مشاركة</span>
+              </button>
             </div>
 
             {/* Pending Attempt Notice */}
@@ -721,7 +728,6 @@ const PublicQuestionSetPage = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
