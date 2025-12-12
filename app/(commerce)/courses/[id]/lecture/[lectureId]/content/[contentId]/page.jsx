@@ -1,10 +1,10 @@
 "use client";
 
 import {
-    getContent,
-    getCourseById,
-    getCourseLectures,
-    getQuizAttempts,
+  getContent,
+  getCourseById,
+  getCourseLectures,
+  getQuizAttempts,
 } from "@/services/Courses";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
@@ -245,9 +245,10 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
       <audio 
         ref={audioRef} 
         src={audioUrl} 
-        preload="auto"
+        preload="metadata"
         crossOrigin="anonymous"
         playsInline
+        webkit-playsinline="true"
         controlsList="nodownload"
       />
 
@@ -271,26 +272,38 @@ const CustomAudioPlayer = ({ audioUrl, title }) => {
         {/* Progress Bar Container */}
         <div
           ref={progressBarRef}
-          className="relative h-8 sm:h-6 w-full mb-4 sm:mb-6 cursor-pointer group flex items-center touch-none"
+          className="relative h-8 sm:h-6 w-full mb-4 sm:mb-6 cursor-pointer group flex items-center"
           onMouseMove={handleProgressHover}
           onMouseLeave={() => setHoverTime(null)}
           onClick={handleProgressClick}
           onTouchStart={(e) => {
-            e.preventDefault(); // Prevent scrolling while seeking
+            // Don't prevent default on touchstart - let mobile handle it
             const touch = e.touches[0];
-            handleProgressClick({
-              clientX: touch.clientX,
-            });
+            const rect = progressBarRef.current?.getBoundingClientRect();
+            if (rect) {
+              const x = touch.clientX - rect.left;
+              const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+              const time = (percentage / 100) * duration;
+              if (isFinite(time) && audioRef.current) {
+                audioRef.current.currentTime = time;
+                setCurrentTime(time);
+              }
+            }
           }}
           onTouchMove={(e) => {
-            e.preventDefault(); // Prevent scrolling while seeking
-            const touch = e.touches[0];
-            handleProgressClick({
-              clientX: touch.clientX,
-            });
-          }}
-          onTouchEnd={(e) => {
+            // Prevent scrolling while seeking
             e.preventDefault();
+            const touch = e.touches[0];
+            const rect = progressBarRef.current?.getBoundingClientRect();
+            if (rect) {
+              const x = touch.clientX - rect.left;
+              const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+              const time = (percentage / 100) * duration;
+              if (isFinite(time) && audioRef.current) {
+                audioRef.current.currentTime = time;
+                setCurrentTime(time);
+              }
+            }
           }}
         >
           {/* Hover Tooltip */}
