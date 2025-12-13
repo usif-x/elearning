@@ -13,6 +13,9 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [topUsers, setTopUsers] = useState(null);
+  const [topUsersLoading, setTopUsersLoading] = useState(false);
+  const [activeTopUsersPeriod, setActiveTopUsersPeriod] = useState("today");
 
   const fetchAnalytics = async () => {
     try {
@@ -30,6 +33,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchTopUsers = async (period) => {
+    try {
+      setTopUsersLoading(true);
+      const data = await getData(`/usage/top/${period}`, false);
+      setTopUsers(data);
+    } catch (err) {
+      console.error("Failed to load top users:", err);
+    } finally {
+      setTopUsersLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/admin/login");
@@ -37,8 +52,15 @@ export default function AdminDashboard() {
       router.push("/profile");
     } else {
       fetchAnalytics();
+      fetchTopUsers("today");
     }
   }, [isAuthenticated, userType, router]);
+
+  useEffect(() => {
+    if (isAuthenticated && userType === "admin") {
+      fetchTopUsers(activeTopUsersPeriod);
+    }
+  }, [activeTopUsersPeriod]);
 
   if (!isAuthenticated || userType !== "admin") {
     return null;
@@ -123,6 +145,134 @@ export default function AdminDashboard() {
           isLoading={loading}
           className="shadow-lg shadow-blue-500/20"
         />
+      </div>
+
+      {/* Top Users Section */}
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 dark:border-zinc-800">
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+            <Icon
+              icon="solar:cup-star-bold-duotone"
+              className="w-8 h-8 text-amber-500"
+            />
+            أكثر المستخدمين نشاطاً
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400">
+            المستخدمون الذين يقضون أطول وقت على المنصة
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <div className="px-6 pt-6">
+          <div className="flex gap-2 border-b border-gray-100 dark:border-zinc-800">
+            {[
+              { id: "today", label: "اليوم", icon: "solar:calendar-bold" },
+              {
+                id: "week",
+                label: "هذا الأسبوع",
+                icon: "solar:calendar-mark-bold",
+              },
+              {
+                id: "month",
+                label: "هذا الشهر",
+                icon: "solar:calendar-minimalistic-bold",
+              },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTopUsersPeriod(tab.id)}
+                className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-all duration-300 border-b-2 ${
+                  activeTopUsersPeriod === tab.id
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                }`}
+              >
+                <Icon icon={tab.icon} className="w-5 h-5" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Users List */}
+        <div className="p-6">
+          {topUsersLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 bg-gray-100 dark:bg-zinc-800 rounded-xl animate-pulse"
+                />
+              ))}
+            </div>
+          ) : topUsers && topUsers.users && topUsers.users.length > 0 ? (
+            <div className="space-y-3">
+              {topUsers.users.map((user) => (
+                <div
+                  key={user.user_id}
+                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Rank Badge */}
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                        user.rank === 1
+                          ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+                          : user.rank === 2
+                          ? "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                          : user.rank === 3
+                          ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                          : "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                      }`}
+                    >
+                      {user.rank === 1 ? (
+                        <Icon icon="solar:cup-star-bold" className="w-5 h-5" />
+                      ) : (
+                        `#${user.rank}`
+                      )}
+                    </div>
+
+                    {/* User Info */}
+                    <div>
+                      <p className="font-bold text-gray-900 dark:text-white">
+                        {user.display_name}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                        <Icon
+                          icon="solar:clock-circle-bold"
+                          className="w-4 h-4"
+                        />
+                        {Math.floor(user.total_minutes / 60)} ساعة و{" "}
+                        {user.total_minutes % 60} دقيقة
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* View Profile Button */}
+                  <button
+                    onClick={() =>
+                      router.push(`/admin/dashboard/users/${user.user_id}`)
+                    }
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg"
+                  >
+                    <Icon icon="solar:eye-bold" className="w-4 h-4" />
+                    عرض الملف
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Icon
+                icon="solar:user-cross-bold-duotone"
+                className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4"
+              />
+              <p className="text-gray-500 dark:text-gray-400 font-medium">
+                لا توجد بيانات لهذه الفترة
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Error Message */}
