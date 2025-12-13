@@ -88,7 +88,7 @@ A modern, full-featured e-learning platform built with Next.js 14, offering comp
 1. **Clone the repository**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/usif-x/elearning
 cd frontend
 ```
 
