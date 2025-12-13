@@ -242,21 +242,19 @@ const CreateQuestionSetPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-sky-600 rounded-2xl shadow-lg">
-              <Icon
-                icon="solar:add-circle-bold-duotone"
-                className="w-12 h-12 text-white"
-              />
-            </div>
+          <div className="flex items-center gap-3 mb-4">
+            <Icon
+              icon="solar:add-circle-bold"
+              className="w-12 h-12 text-blue-500"
+            />
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
                 إنشاء مجموعة أسئلة جديدة
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 أنشئ أسئلة اختبار باستخدام الذكاء الاصطناعي
               </p>
             </div>
@@ -275,7 +273,7 @@ const CreateQuestionSetPage = () => {
                 disabled={loadingProgress.isLoading}
                 className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex-1 ${
                   activeTab === tab.id
-                    ? "bg-sky-600 text-white shadow-lg"
+                    ? "bg-blue-500 text-white shadow-lg"
                     : loadingProgress.isLoading
                     ? "text-gray-400 dark:text-gray-500 cursor-not-allowed"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -292,10 +290,10 @@ const CreateQuestionSetPage = () => {
         {loadingProgress.isLoading && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700 mb-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full mb-6">
                 <Icon
                   icon="solar:magic-stick-bold"
-                  className="w-8 h-8 text-white animate-pulse"
+                  className="w-10 h-10 text-white animate-pulse"
                 />
               </div>
 
@@ -303,19 +301,19 @@ const CreateQuestionSetPage = () => {
                 جاري إنشاء الأسئلة...
               </h3>
 
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
                 {loadingProgress.currentStep}
               </p>
 
               {/* Progress Bar */}
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4">
                 <div
-                  className="bg-sky-600 h-4 rounded-full transition-all duration-500 ease-out"
+                  className="bg-blue-500 h-4 rounded-full transition-all duration-500"
                   style={{ width: `${loadingProgress.progress}%` }}
                 ></div>
               </div>
 
-              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-6">
                 <span>{Math.round(loadingProgress.progress)}%</span>
                 <span>
                   {loadingProgress.estimatedTimeRemaining > 0
@@ -328,19 +326,19 @@ const CreateQuestionSetPage = () => {
 
               {/* Question Progress */}
               {loadingProgress.totalQuestions > 0 && (
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
                       الأسئلة المُنشأة:
                     </span>
-                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                       {loadingProgress.currentQuestion} /{" "}
                       {loadingProgress.totalQuestions}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3">
                     <div
-                      className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-green-500 h-3 rounded-full transition-all duration-300"
                       style={{
                         width: `${
                           (loadingProgress.currentQuestion /
@@ -353,8 +351,11 @@ const CreateQuestionSetPage = () => {
                 </div>
               )}
 
-              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <Icon icon="solar:clock-circle-bold" className="w-4 h-4" />
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-4 py-3 rounded-xl">
+                <Icon
+                  icon="solar:clock-circle-bold-duotone"
+                  className="w-5 h-5 text-sky-500"
+                />
                 <span>يرجى الانتظار، هذه العملية قد تستغرق بعض الوقت</span>
               </div>
             </div>
@@ -363,21 +364,25 @@ const CreateQuestionSetPage = () => {
 
         {/* Topic Generation Form */}
         {activeTab === "topic" && !loadingProgress.isLoading && (
-          <form onSubmit={handleTopicSubmit} className="space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl">
+          <form
+            onSubmit={handleTopicSubmit}
+            className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
+            <div className="bg-gradient-to-br from-white via-white to-blue-50/30 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 border-2 border-blue-200/60 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 via-transparent to-indigo-100/20 dark:from-blue-900/10 dark:to-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="flex items-center gap-3 mb-8 relative z-10">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                   <Icon
-                    icon="solar:document-text-bold"
-                    className="w-8 h-8 text-blue-500"
+                    icon="solar:document-text-bold-duotone"
+                    className="w-8 h-8 text-white"
                   />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-2xl font-black bg-gradient-to-r from-gray-900 to-blue-900 dark:from-white dark:to-blue-200 bg-clip-text text-transparent">
                   إنشاء أسئلة من موضوع
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     الموضوع *

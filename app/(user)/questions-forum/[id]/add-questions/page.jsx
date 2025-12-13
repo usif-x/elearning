@@ -149,44 +149,46 @@ const AddQuestionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
-      <div className="container mx-auto px-4 max-w-2xl">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">
-            <Icon
-              icon="solar:question-square-bold"
-              className="text-2xl text-blue-600 dark:text-blue-400"
-            />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <Icon
+                icon="solar:add-circle-bold"
+                className="w-12 h-12 text-blue-500"
+              />
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                  إضافة أسئلة جديدة
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  أضف المزيد من الأسئلة إلى مجموعتك باستخدام الذكاء الاصطناعي
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/questions-forum/my/${questionSetId}`}
+              className={`inline-flex items-center gap-3 px-6 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg font-semibold ${
+                loadingProgress.isLoading
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }`}
+            >
+              <Icon icon="solar:alt-arrow-right-bold" className="w-5 h-5" />
+              <span>العودة</span>
+            </Link>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            إضافة أسئلة جديدة
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-md mx-auto">
-            أضف المزيد من الأسئلة إلى مجموعتك باستخدام الذكاء الاصطناعي
-          </p>
-        </div>
-
-        {/* Back Button */}
-        <div className="mb-6">
-          <Link
-            href={`/questions-forum/my/${questionSetId}`}
-            className={`inline-flex items-center gap-3 px-4 py-3 text-blue-600 hover:text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-800 rounded-xl hover:shadow-md transition-all duration-200 border border-blue-100 dark:border-gray-700 ${
-              loadingProgress.isLoading ? "pointer-events-none opacity-50" : ""
-            }`}
-          >
-            <Icon icon="solar:alt-arrow-right-bold" className="text-lg" />
-            <span className="font-medium">العودة للتفاصيل</span>
-          </Link>
         </div>
 
         {/* Loading Progress */}
         {loadingProgress.isLoading && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700 mb-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full mb-6">
                 <Icon
-                  icon="solar:add-circle-bold"
-                  className="w-8 h-8 text-white animate-pulse"
+                  icon="solar:magic-stick-bold"
+                  className="w-10 h-10 text-white animate-pulse"
                 />
               </div>
 
@@ -194,19 +196,19 @@ const AddQuestionsPage = () => {
                 جاري إضافة الأسئلة...
               </h3>
 
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
                 {loadingProgress.currentStep}
               </p>
 
               {/* Progress Bar */}
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-indigo-500 h-4 rounded-full transition-all duration-500 ease-out"
+                  className="bg-blue-500 h-4 rounded-full transition-all duration-500"
                   style={{ width: `${loadingProgress.progress}%` }}
                 ></div>
               </div>
 
-              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-6">
                 <span>{Math.round(loadingProgress.progress)}%</span>
                 <span>
                   {loadingProgress.estimatedTimeRemaining > 0
@@ -219,19 +221,19 @@ const AddQuestionsPage = () => {
 
               {/* Question Progress */}
               {loadingProgress.totalQuestions > 0 && (
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
                       الأسئلة المُضافة:
                     </span>
-                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                       {loadingProgress.currentQuestion} /{" "}
                       {loadingProgress.totalQuestions}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3">
                     <div
-                      className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-green-500 h-3 rounded-full transition-all duration-300"
                       style={{
                         width: `${
                           (loadingProgress.currentQuestion /
@@ -257,10 +259,10 @@ const AddQuestionsPage = () => {
           className={`space-y-6 ${loadingProgress.isLoading ? "hidden" : ""}`}
         >
           {/* Main Form Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="bg-blue-500 p-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <Icon icon="solar:magic-stick-bold" className="text-xl" />
+                <Icon icon="solar:add-circle-bold" className="w-6 h-6" />
                 إضافة أسئلة إضافية
               </h2>
             </div>
@@ -351,19 +353,21 @@ const AddQuestionsPage = () => {
           </div>
 
           {/* Information Card */}
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl p-6 text-white shadow-lg">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
             <div className="flex items-start gap-4">
               <Icon
                 icon="solar:info-circle-bold"
-                className="text-2xl text-white mt-1 flex-shrink-0"
+                className="w-6 h-6 text-blue-500 mt-1 flex-shrink-0"
               />
               <div className="space-y-3">
-                <h3 className="font-bold text-lg">معلومات مهمة</h3>
-                <ul className="space-y-2 text-blue-50">
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white">
+                  معلومات مهمة
+                </h3>
+                <ul className="space-y-2 text-gray-700 dark:text-gray-300">
                   <li className="flex items-center gap-2">
                     <Icon
                       icon="solar:check-circle-bold"
-                      className="text-green-300"
+                      className="w-5 h-5 text-green-500"
                     />
                     سيتم إنشاء الأسئلة بنفس المستوى والنوع المحدد في المجموعة
                     الأصلية
@@ -371,21 +375,21 @@ const AddQuestionsPage = () => {
                   <li className="flex items-center gap-2">
                     <Icon
                       icon="solar:check-circle-bold"
-                      className="text-green-300"
+                      className="w-5 h-5 text-green-500"
                     />
                     لن يتم تكرار الأسئلة الموجودة بالفعل
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon
                       icon="solar:check-circle-bold"
-                      className="text-green-300"
+                      className="w-5 h-5 text-green-500"
                     />
                     قد يستغرق الأمر بضع دقائق حسب عدد الأسئلة المطلوبة
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon
                       icon="solar:check-circle-bold"
-                      className="text-green-300"
+                      className="w-5 h-5 text-green-500"
                     />
                     يمكنك تعديل أو حذف الأسئلة الجديدة لاحقاً
                   </li>
@@ -398,7 +402,7 @@ const AddQuestionsPage = () => {
           <div className="flex justify-end gap-4 pt-6">
             <Link
               href={`/questions-forum/my/${questionSetId}`}
-              className={`px-8 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 font-semibold hover:shadow-md ${
+              className={`px-8 py-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg ${
                 loadingProgress.isLoading
                   ? "pointer-events-none opacity-50"
                   : ""
@@ -409,15 +413,15 @@ const AddQuestionsPage = () => {
             <button
               type="submit"
               disabled={loadingProgress.isLoading}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 shadow-lg hover:shadow-xl"
             >
               {loadingProgress.isLoading ? (
                 <Icon
                   icon="solar:loading-bold"
-                  className="text-xl animate-spin"
+                  className="w-6 h-6 animate-spin"
                 />
               ) : (
-                <Icon icon="solar:add-circle-bold" className="text-xl" />
+                <Icon icon="solar:magic-stick-bold" className="w-6 h-6" />
               )}
               <span>إضافة الأسئلة الجديدة</span>
             </button>
