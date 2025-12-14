@@ -748,6 +748,22 @@ const Navbar = ({ children }) => {
                       </Link>
 
                       <Link
+                        href="/pdf-question-file"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          pathname === "/pdf-question-file"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:document-add-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>مولد الاختبارات PDF</span>
+                      </Link>
+
+                      <Link
                         href="/ai-explain"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -1030,6 +1046,23 @@ const Navbar = ({ children }) => {
               <Icon icon="mdi:frequently-asked-questions" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">منتدي الأسئلة</span>
+              )}
+            </Link>
+
+            <Link
+              href="/pdf-question-file"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/pdf-question-file"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "مولد الاختبارات PDF" : ""}
+            >
+              <Icon icon="solar:document-add-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">مولد الاختبارات PDF</span>
               )}
             </Link>
 
