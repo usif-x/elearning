@@ -1,10 +1,10 @@
 import SessionTracker from "@/components/client/SessionTracker";
+import SnowEffect from "@/components/client/SnowEffect";
 // import TokenValidator from "@/components/client/TokenValidator";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
-
 
 const IBMSans = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
@@ -150,6 +150,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           {/* <TokenValidator /> */}
           <SessionTracker />
+          <SnowEffect />
           {children}
           <ToastContainerWrapper />
         </ThemeProvider>
