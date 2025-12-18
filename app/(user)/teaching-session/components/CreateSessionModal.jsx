@@ -12,6 +12,7 @@ export default function CreateSessionModal({ onClose, onSessionCreated }) {
     title: "",
     content: "",
     language: "ar",
+    session_type: "asking",
     pdf_file: null,
   });
 
@@ -47,6 +48,7 @@ export default function CreateSessionModal({ onClose, onSessionCreated }) {
           title: formData.title,
           content: formData.content,
           language: formData.language,
+          session_type: formData.session_type,
         });
       } else {
         if (!formData.pdf_file) {
@@ -58,6 +60,7 @@ export default function CreateSessionModal({ onClose, onSessionCreated }) {
         const data = new FormData();
         data.append("title", formData.title);
         data.append("language", formData.language);
+        data.append("session_type", formData.session_type);
         data.append("pdf_file", formData.pdf_file);
 
         newSession = await createChatSessionFromPdf(data);
@@ -152,15 +155,106 @@ export default function CreateSessionModal({ onClose, onSessionCreated }) {
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               اللغة
             </label>
-            <select
-              name="language"
-              value={formData.language}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            >
-              <option value="ar">العربية</option>
-              <option value="en">English</option>
-            </select>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-1 border border-gray-200 dark:border-gray-700">
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, language: "ar" }))
+                  }
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 flex-1 ${
+                    formData.language === "ar"
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <Icon icon="circle-flags:sa" className="w-5 h-5" />
+                  <span>العربية</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, language: "en" }))
+                  }
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 flex-1 ${
+                    formData.language === "en"
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <Icon icon="circle-flags:us" className="w-5 h-5" />
+                  <span>English</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Session Type */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              نوع الجلسة
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, session_type: "asking" }))
+                }
+                className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all duration-300 ${
+                  formData.session_type === "asking"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700"
+                }`}
+              >
+                <Icon
+                  icon="solar:question-circle-bold"
+                  className={`w-6 h-6 mt-0.5 ${
+                    formData.session_type === "asking"
+                      ? "text-blue-500"
+                      : "text-gray-400"
+                  }`}
+                />
+                <div className="text-right">
+                  <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                    سؤال وجواب
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    المعلم يطرح أسئلة لاختبار فهمك
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    session_type: "explaining",
+                  }))
+                }
+                className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all duration-300 ${
+                  formData.session_type === "explaining"
+                    ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                    : "border-gray-300 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-700"
+                }`}
+              >
+                <Icon
+                  icon="solar:book-bold"
+                  className={`w-6 h-6 mt-0.5 ${
+                    formData.session_type === "explaining"
+                      ? "text-green-500"
+                      : "text-gray-400"
+                  }`}
+                />
+                <div className="text-right">
+                  <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                    شرح وتوضيح
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    المعلم يشرح المحتوى بالتفصيل
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Content */}
@@ -218,8 +312,9 @@ export default function CreateSessionModal({ onClose, onSessionCreated }) {
               <div className="text-sm text-gray-700 dark:text-gray-300">
                 <p className="font-semibold mb-1">نصيحة:</p>
                 <p>
-                  الذكاء الاصطناعي سيعمل كمعلم تفاعلي، يسأل أسئلة ويشرح المفاهيم
-                  بناءً على المحتوى المقدم.
+                  {formData.session_type === "asking"
+                    ? "في نوع السؤال والجواب، سيطرح المعلم أسئلة لاختبار فهمك ويتحقق من إجاباتك."
+                    : "في نوع الشرح والتوضيح، سيقوم المعلم بشرح المحتوى بالتفصيل والإجابة على أسئلتك."}
                 </p>
               </div>
             </div>

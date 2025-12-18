@@ -8,6 +8,7 @@ import { deleteData, getData, postData, putData } from "@/libs/axios";
  * @param {string} data.title - Session title
  * @param {string} data.content - Educational content
  * @param {string} data.language - Language ('en' or 'ar')
+ * @param {string} data.session_type - Session type ('asking' or 'explaining')
  * @returns {Promise<Object>} Created session
  */
 export const createChatSession = async (data) => {
@@ -16,7 +17,7 @@ export const createChatSession = async (data) => {
 
 /**
  * Create a new chat session from PDF file
- * @param {FormData} formData - Contains title, language, and pdf_file
+ * @param {FormData} formData - Contains title, language, session_type, and pdf_file
  * @returns {Promise<Object>} Created session
  */
 export const createChatSessionFromPdf = async (formData) => {
