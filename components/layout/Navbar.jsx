@@ -764,6 +764,22 @@ const Navbar = ({ children }) => {
                       </Link>
 
                       <Link
+                        href="/teaching-session"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                          pathname === "/teaching-session"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:chat-round-dots-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>جلسة تعليمية</span>
+                      </Link>
+
+                      <Link
                         href="/ai-explain"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
@@ -1063,6 +1079,23 @@ const Navbar = ({ children }) => {
               <Icon icon="solar:document-add-bold" className="w-6 h-6" />
               {shouldShowExpanded && (
                 <span className="font-medium">مولد الاختبارات PDF</span>
+              )}
+            </Link>
+
+            <Link
+              href="/teaching-session"
+              className={`flex items-center w-full p-3 rounded-xl smooth ${
+                !shouldShowExpanded ? "justify-center" : "gap-3"
+              } ${
+                pathname === "/teaching-session"
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title={!shouldShowExpanded ? "جلسة تعليمية" : ""}
+            >
+              <Icon icon="solar:chat-round-dots-bold" className="w-6 h-6" />
+              {shouldShowExpanded && (
+                <span className="font-medium">جلسة تعليمية</span>
               )}
             </Link>
 
