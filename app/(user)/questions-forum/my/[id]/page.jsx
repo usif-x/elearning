@@ -44,6 +44,30 @@ const QuestionSetDetailPage = () => {
     return "short_answer";
   };
 
+  // Helper to build data URL for base64 images
+  const getImageDataUrl = (base64) => {
+    if (!base64) return null;
+    const b64 = String(base64).trim();
+
+    // If already a data URL, return as-is
+    if (b64.startsWith("data:")) return b64;
+
+    // Detect image type from base64 signature
+    const isPng = b64.startsWith("iVBOR"); // PNG
+    const isGif = b64.startsWith("R0lGOD"); // GIF
+    const isJpeg = b64.startsWith("/9j/"); // JPEG
+
+    const mime = isPng
+      ? "image/png"
+      : isGif
+      ? "image/gif"
+      : isJpeg
+      ? "image/jpeg"
+      : "image/jpeg"; // Default to JPEG
+
+    return `data:${mime};base64,${b64}`;
+  };
+
   // Calculate pagination (only if questionSet exists)
   const indexOfLastQuestion = questionSet ? currentPage * questionsPerPage : 0;
   const indexOfFirstQuestion = questionSet
@@ -705,21 +729,31 @@ const QuestionSetDetailPage = () => {
 
                   <div className="flex items-center gap-2 ml-4">
                     {/* Question Type Badge */}
-                    <span
-                      className={`px-4 py-2 font-semibold text-sm rounded-full whitespace-nowrap ${
-                        getQuestionType(question) === "multiple_choice"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                          : getQuestionType(question) === "true_false"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                          : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                      }`}
-                    >
-                      {getQuestionType(question) === "multiple_choice"
+                    {(() => {
+                      const isImage =
+                        question?.question_type === "image" ||
+                        !!question?.image;
+                      const inferred = getQuestionType(question);
+                      const baseClass =
+                        "px-4 py-2 font-semibold text-sm rounded-full whitespace-nowrap";
+                      const cls = isImage
+                        ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300"
+                        : inferred === "multiple_choice"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                        : inferred === "true_false"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+                      const label = isImage
+                        ? "سؤال بصورة"
+                        : inferred === "multiple_choice"
                         ? "اختيار متعدد"
-                        : getQuestionType(question) === "true_false"
+                        : inferred === "true_false"
                         ? "صح أم خطأ"
-                        : "إجابة قصيرة"}
-                    </span>
+                        : "إجابة قصيرة";
+                      return (
+                        <span className={`${baseClass} ${cls}`}>{label}</span>
+                      );
+                    })()}
 
                     {/* Edit & Delete Buttons */}
                     {!isEditing && (
@@ -957,6 +991,25 @@ const QuestionSetDetailPage = () => {
                 ) : (
                   /* View Mode */
                   <>
+                    {/* Image for image-type question */}
+                    {(question?.question_type === "image" ||
+                      question?.image) && (
+                      <div className="mb-6">
+                        <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-700">
+                          <div className="w-full flex items-center justify-center p-4">
+                            {question.image ? (
+                              // Render base64 image
+                              <img
+                                src={getImageDataUrl(question.image)}
+                                alt="صورة السؤال"
+                                className="max-h-96 object-contain rounded-lg shadow"
+                              />
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Options for multiple choice */}
                     {getQuestionType(question) === "multiple_choice" &&
                       Array.isArray(question.options) &&

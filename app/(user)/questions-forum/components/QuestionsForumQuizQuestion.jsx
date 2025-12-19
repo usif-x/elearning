@@ -23,6 +23,30 @@ const QuizQuestion = ({
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
   const questionIsArabic = isArabic(currentQuestion.question);
 
+  // Helper to build data URL for base64 images
+  const getImageDataUrl = (base64) => {
+    if (!base64) return null;
+    const b64 = String(base64).trim();
+
+    // If already a data URL, return as-is
+    if (b64.startsWith("data:")) return b64;
+
+    // Detect image type from base64 signature
+    const isPng = b64.startsWith("iVBOR"); // PNG
+    const isGif = b64.startsWith("R0lGOD"); // GIF
+    const isJpeg = b64.startsWith("/9j/"); // JPEG
+
+    const mime = isPng
+      ? "image/png"
+      : isGif
+      ? "image/gif"
+      : isJpeg
+      ? "image/jpeg"
+      : "image/jpeg"; // Default to JPEG
+
+    return `data:${mime};base64,${b64}`;
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8 w-full max-w-6xl mx-auto">
       {/* --- HEADER SECTION --- */}
@@ -108,6 +132,24 @@ const QuizQuestion = ({
       </div>
       {/* --- END HEADER --- */}
 
+      {/* Question Image (if available) */}
+      {(currentQuestion?.question_type === "image" ||
+        currentQuestion?.image) && (
+        <div className="mb-6">
+          <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800">
+            <div className="w-full flex items-center justify-center p-4">
+              {currentQuestion.image ? (
+                <img
+                  src={getImageDataUrl(currentQuestion.image)}
+                  alt="صورة السؤال"
+                  className="max-h-96 object-contain rounded-lg shadow-md"
+                />
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Question Text */}
       <div className="mb-8">
         <p
@@ -172,10 +214,10 @@ const QuizQuestion = ({
       {/* Footer Navigation */}
       <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-        <button
-  onClick={onPrevious}
-  disabled={isFirstInView}
-  className="
+          <button
+            onClick={onPrevious}
+            disabled={isFirstInView}
+            className="
     flex-1 sm:flex-none flex items-center justify-center gap-2
     px-6 py-3 rounded-xl font-bold transition-all
     disabled:opacity-50 disabled:cursor-not-allowed
@@ -183,11 +225,10 @@ const QuizQuestion = ({
     bg-slate-100 text-slate-700 hover:bg-slate-200
     dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600
   "
->
-  <Icon icon="solar:arrow-right-linear" className="w-5 h-5" />
-  <span>السابق</span>
-</button>
-
+          >
+            <Icon icon="solar:arrow-right-linear" className="w-5 h-5" />
+            <span>السابق</span>
+          </button>
 
           {answer !== null && (
             <button

@@ -68,6 +68,7 @@ const AdminLectureContentPage = () => {
     topic: "",
     num_questions: 5,
     difficulty: "medium",
+    use_images: true,
     // Language removed
     quiz_duration: 10,
     max_attempts: 1,
@@ -84,6 +85,7 @@ const AdminLectureContentPage = () => {
     pdf_file: null,
     num_questions: 5,
     difficulty: "medium",
+    use_images: true,
     // Language removed
     quiz_duration: 10,
     max_attempts: 1,
@@ -300,6 +302,7 @@ const AdminLectureContentPage = () => {
         topic: topicForm.topic,
         count: parseInt(topicForm.num_questions),
         difficulty: topicForm.difficulty,
+        use_images: topicForm.use_images,
         // [UPDATED] Removed 'notes' completely as system prompt handles it
       };
       return await generateQuizFromTopic(courseId, payload);
@@ -339,6 +342,7 @@ const AdminLectureContentPage = () => {
         lecture_id: parseInt(lectureId),
         count: parseInt(pdfForm.num_questions),
         difficulty: pdfForm.difficulty,
+        use_images: pdfForm.use_images,
         // [UPDATED] Removed 'notes' completely as system prompt handles it
       };
       return await generateQuizFromPDF(courseId, pdfForm.pdf_file, params);
@@ -607,7 +611,10 @@ const AdminLectureContentPage = () => {
                         disabled={idx === 0}
                         className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       >
-                        <Icon icon="solar:alt-arrow-up-bold" className="w-5 h-5" />
+                        <Icon
+                          icon="solar:alt-arrow-up-bold"
+                          className="w-5 h-5"
+                        />
                       </button>
                       <span className="text-center text-sm font-bold text-gray-400 font-mono">
                         {c.position}
@@ -617,7 +624,10 @@ const AdminLectureContentPage = () => {
                         disabled={idx === displayedContents.length - 1}
                         className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       >
-                        <Icon icon="solar:alt-arrow-down-bold" className="w-5 h-5" />
+                        <Icon
+                          icon="solar:alt-arrow-down-bold"
+                          className="w-5 h-5"
+                        />
                       </button>
                     </div>
 
@@ -640,7 +650,10 @@ const AdminLectureContentPage = () => {
                         </span>
                         {c.quiz_duration > 0 && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium shrink-0 border border-emerald-200 dark:border-emerald-800">
-                            <Icon icon="solar:clock-circle-bold" className="w-3 h-3" />
+                            <Icon
+                              icon="solar:clock-circle-bold"
+                              className="w-3 h-3"
+                            />
                             {c.quiz_duration} دقيقة
                           </span>
                         )}
@@ -673,7 +686,10 @@ const AdminLectureContentPage = () => {
                         className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
                         title="حذف"
                       >
-                        <Icon icon="solar:trash-bin-trash-bold" className="w-5 h-5" />
+                        <Icon
+                          icon="solar:trash-bin-trash-bold"
+                          className="w-5 h-5"
+                        />
                       </button>
                     </div>
                   </div>
@@ -1017,6 +1033,26 @@ const AdminLectureContentPage = () => {
                                 </select>
                               </div>
                             </div>
+                            <div className="flex items-center p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-700">
+                              <input
+                                type="checkbox"
+                                id="use_images_topic"
+                                checked={topicForm.use_images}
+                                onChange={(e) =>
+                                  setTopicForm({
+                                    ...topicForm,
+                                    use_images: e.target.checked,
+                                  })
+                                }
+                                className="h-5 w-5 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                              />
+                              <label
+                                htmlFor="use_images_topic"
+                                className="mr-3 text-sm font-medium text-cyan-800 dark:text-cyan-200"
+                              >
+                                استخدام الصور المستخرجة (إذا توفرت) داخل الأسئلة
+                              </label>
+                            </div>
                             <button
                               onClick={handleGenerateFromTopic}
                               className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2"
@@ -1127,6 +1163,26 @@ const AdminLectureContentPage = () => {
                                   <option value="hard">صعب</option>
                                 </select>
                               </div>
+                            </div>
+                            <div className="flex items-center p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-700">
+                              <input
+                                type="checkbox"
+                                id="use_images_pdf"
+                                checked={pdfForm.use_images}
+                                onChange={(e) =>
+                                  setPdfForm({
+                                    ...pdfForm,
+                                    use_images: e.target.checked,
+                                  })
+                                }
+                                className="h-5 w-5 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                              />
+                              <label
+                                htmlFor="use_images_pdf"
+                                className="mr-3 text-sm font-medium text-cyan-800 dark:text-cyan-200"
+                              >
+                                استخدام الصور المستخرجة (إذا توفرت) داخل الأسئلة
+                              </label>
                             </div>
                             <button
                               onClick={handleGenerateFromPDF}

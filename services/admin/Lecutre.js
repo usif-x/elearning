@@ -248,15 +248,21 @@ export const deleteContent = async (courseId, lectureId, contentId) => {
  * @param {string} payload.topic - Topic for quiz generation
  * @param {string} payload.difficulty - Difficulty level: easy, medium, hard (default: medium)
  * @param {number} payload.count - Number of questions (1-20, default: 5)
+ * @param {boolean} payload.use_images - Generate image-based questions (default: true)
  * @param {string} payload.notes - Custom instructions (optional)
  * @param {array} payload.previous_questions - Previously generated questions to avoid (optional)
  */
 export const generateQuizFromTopic = async (courseId, payload) => {
   try {
+    // Set default use_images to true if not specified
+    const requestPayload = {
+      use_images: true,
+      ...payload,
+    };
     // Payload must include lecture_id inside the body as per Swagger
     const response = await postData(
       `/courses/${courseId}/lectures/ai/generate-quiz`,
-      payload,
+      requestPayload,
       true
     );
     return response;
@@ -274,6 +280,11 @@ export const generateQuizFromPDF = async (courseId, file, params) => {
     queryParams.append("lecture_id", params.lecture_id);
     if (params.difficulty) queryParams.append("difficulty", params.difficulty);
     if (params.count) queryParams.append("count", params.count);
+    // Default use_images to true if not specified
+    queryParams.append(
+      "use_images",
+      params.use_images !== undefined ? params.use_images : true
+    );
     if (params.notes) queryParams.append("notes", params.notes);
     if (params.previous_questions) {
       // Only append if it exists, API might expect comma separated or repeated keys depending on framework
@@ -309,6 +320,7 @@ export const generateQuizFromPDF = async (courseId, file, params) => {
  * @param {string} payload.topic - Topic for quiz generation
  * @param {string} payload.difficulty - Difficulty level: easy, medium, hard
  * @param {number} payload.count - Number of questions
+ * @param {boolean} payload.use_images - Generate image-based questions (default: true)
  * @param {string} payload.notes - Custom instructions (optional)
  * @param {number} payload.quiz_duration - Quiz duration in minutes
  * @param {number} payload.max_attempts - Maximum attempts
@@ -324,9 +336,14 @@ export const createQuizContentFromTopic = async (
   payload
 ) => {
   try {
+    // Set default use_images to true if not specified
+    const requestPayload = {
+      use_images: true,
+      ...payload,
+    };
     const response = await postData(
       `courses/${courseId}/lectures/${lectureId}/contents/create-with-ai`,
-      payload,
+      requestPayload,
       true
     );
     return response;
@@ -346,6 +363,7 @@ export const createQuizContentFromTopic = async (
  * @param {string} params.description - Content description
  * @param {string} params.difficulty - Difficulty level: easy, medium, hard
  * @param {number} params.count - Number of questions
+ * @param {boolean} params.use_images - Generate image-based questions (default: true)
  * @param {string} params.notes - Custom instructions (optional)
  * @param {number} params.quiz_duration - Quiz duration in minutes
  * @param {number} params.max_attempts - Maximum attempts
@@ -365,10 +383,19 @@ export const createQuizContentFromPDF = async (
     const formData = new FormData();
     formData.append("file", file);
 
+    // Set default use_images to true if not specified
+    const paramsWithDefaults = {
+      use_images: true,
+      ...params,
+    };
+
     // Add all parameters to formData
-    Object.keys(params).forEach((key) => {
-      if (params[key] !== null && params[key] !== undefined) {
-        formData.append(key, params[key]);
+    Object.keys(paramsWithDefaults).forEach((key) => {
+      if (
+        paramsWithDefaults[key] !== null &&
+        paramsWithDefaults[key] !== undefined
+      ) {
+        formData.append(key, paramsWithDefaults[key]);
       }
     });
 
@@ -474,6 +501,7 @@ export const deleteQuizQuestion = async (
  * @param {number} params.lecture_id - Lecture ID
  * @param {string} params.difficulty - Difficulty level: easy, medium, hard (default: medium)
  * @param {number} params.count - Number of questions (1-20, default: 5)
+ * @param {boolean} params.use_images - Generate image-based questions (default: true)
  * @param {string} params.notes - Custom instructions (optional)
  * @param {array} params.previous_questions - Previously generated questions to avoid (optional)
  */
@@ -492,6 +520,10 @@ export const generateMoreQuestionsFromSource = async (
     if (params.count) {
       url += `&count=${params.count}`;
     }
+    // Default use_images to true if not specified
+    const useImages =
+      params.use_images !== undefined ? params.use_images : true;
+    url += `&use_images=${useImages}`;
     if (params.notes) {
       url += `&notes=${encodeURIComponent(params.notes)}`;
     }

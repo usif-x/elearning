@@ -7,9 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-
 import { Fireworks } from "fireworks-js";
-
 
 const AttemptDetailPage = () => {
   const params = useParams();
@@ -23,6 +21,30 @@ const AttemptDetailPage = () => {
   const fireworksContainerRef = useRef(null);
   const [showFireworks, setShowFireworks] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
+
+  // Helper to build data URL for base64 images
+  const getImageDataUrl = (base64) => {
+    if (!base64) return null;
+    const b64 = String(base64).trim();
+
+    // If already a data URL, return as-is
+    if (b64.startsWith("data:")) return b64;
+
+    // Detect image type from base64 signature
+    const isPng = b64.startsWith("iVBOR"); // PNG
+    const isGif = b64.startsWith("R0lGOD"); // GIF
+    const isJpeg = b64.startsWith("/9j/"); // JPEG
+
+    const mime = isPng
+      ? "image/png"
+      : isGif
+      ? "image/gif"
+      : isJpeg
+      ? "image/jpeg"
+      : "image/jpeg"; // Default to JPEG
+
+    return `data:${mime};base64,${b64}`;
+  };
 
   const scoreMessages = {
     "0-10": [
@@ -239,45 +261,45 @@ const AttemptDetailPage = () => {
         explosion: 8,
         intensity: 30,
         flickering: 50,
-        lineStyle: 'round',
+        lineStyle: "round",
         hue: {
           min: 0,
-          max: 360
+          max: 360,
         },
         delay: {
           min: 30,
-          max: 60
+          max: 60,
         },
         rocketsPoint: {
           min: 50,
-          max: 50
+          max: 50,
         },
         lineWidth: {
           explosion: {
             min: 1,
-            max: 3
+            max: 3,
           },
           trace: {
             min: 1,
-            max: 2
-          }
+            max: 2,
+          },
         },
         brightness: {
           min: 50,
-          max: 80
+          max: 80,
         },
         decay: {
           min: 0.015,
-          max: 0.03
+          max: 0.03,
         },
         mouse: {
           click: false,
           move: false,
-          max: 1
+          max: 1,
         },
         sound: {
-          enabled: false
-        }
+          enabled: false,
+        },
       });
 
       // Start fireworks
@@ -352,7 +374,7 @@ const AttemptDetailPage = () => {
           style={{ width: "100%", height: "100%" }}
         />
       )}
-      
+
       <div className="container mx-auto px-4 max-w-5xl">
         {/* Breadcrumb */}
         <div
@@ -537,6 +559,24 @@ const AttemptDetailPage = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Question Image (if available) */}
+                  {(item.question?.question_type === "image" ||
+                    item.question?.image) && (
+                    <div className="mb-4 sm:mb-6">
+                      <div className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800">
+                        <div className="w-full flex items-center justify-center p-4">
+                          {item.question.image ? (
+                            <img
+                              src={getImageDataUrl(item.question.image)}
+                              alt="صورة السؤال"
+                              className="max-h-96 object-contain rounded-lg shadow-md"
+                            />
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Options */}
                   <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">

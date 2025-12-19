@@ -24,7 +24,7 @@ const CreateQuestionSetPage = () => {
 
   const simulateProgress = (questionCount) => {
     const steps = [
-      { text: "جاري تحليل المحتوى...", duration: 45000 }, // 45 seconds for processing content
+      { text: "جاري تحليل المحتوى...", duration: 15000 }, // 15 seconds for processing content
       { text: "إعداد الأسئلة...", duration: 1500 },
       { text: "توليد الأسئلة...", duration: questionCount * 15000 }, // 15 seconds per question
       { text: "تنسيق الإجابات...", duration: 2000 },
@@ -126,6 +126,7 @@ const CreateQuestionSetPage = () => {
     question_type: "multiple_choice",
     count: 5,
     is_public: false,
+    use_images: true,
     notes: "",
   });
 
@@ -200,6 +201,7 @@ const CreateQuestionSetPage = () => {
       formData.append("question_type", pdfData.question_type);
       formData.append("count", pdfData.count.toString());
       formData.append("is_public", pdfData.is_public.toString());
+      formData.append("use_images", pdfData.use_images.toString());
       if (pdfData.notes) formData.append("notes", pdfData.notes);
 
       const result = await generateQuestionsFromPdf(formData);
@@ -600,6 +602,27 @@ const CreateQuestionSetPage = () => {
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         الحد الأقصى: 50 ميجابايت • PDF فقط
                       </p>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Use images toggle */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center p-4 bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900/20 dark:to-sky-900/20 rounded-xl border border-cyan-200 dark:border-cyan-700">
+                    <input
+                      type="checkbox"
+                      id="use_images_pdf"
+                      checked={pdfData.use_images}
+                      onChange={(e) =>
+                        setPdfData({ ...pdfData, use_images: e.target.checked })
+                      }
+                      className="h-5 w-5 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="use_images_pdf"
+                      className="mr-3 text-sm font-medium text-cyan-800 dark:text-cyan-200"
+                    >
+                      استخدام الصور المستخرجة (إذا توفرت) داخل الأسئلة
                     </label>
                   </div>
                 </div>

@@ -60,7 +60,32 @@ const AdminContentDetailPage = () => {
     count: 5,
     difficulty: "medium",
     notes: "",
+    use_images: true,
   });
+
+  // Helper to build data URL for base64 images
+  const getImageDataUrl = (base64) => {
+    if (!base64) return null;
+    const b64 = String(base64).trim();
+
+    // If already a data URL, return as-is
+    if (b64.startsWith("data:")) return b64;
+
+    // Detect image type from base64 signature
+    const isPng = b64.startsWith("iVBOR"); // PNG
+    const isGif = b64.startsWith("R0lGOD"); // GIF
+    const isJpeg = b64.startsWith("/9j/"); // JPEG
+
+    const mime = isPng
+      ? "image/png"
+      : isGif
+      ? "image/gif"
+      : isJpeg
+      ? "image/jpeg"
+      : "image/jpeg"; // Default to JPEG
+
+    return `data:${mime};base64,${b64}`;
+  };
 
   const fetchContent = async () => {
     if (!courseId || !lectureId || !contentId) return;
@@ -305,6 +330,7 @@ const AdminContentDetailPage = () => {
           count: generateParams.count,
           notes: generateParams.notes,
           previous_questions: previousQuestions,
+          use_images: generateParams.use_images,
         }
       );
 
@@ -681,7 +707,8 @@ const AdminContentDetailPage = () => {
                         أسئلة الاختبار
                       </h2>
                       <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        إدارة وتحرير أسئلة الاختبار ({quizQuestions.length} سؤال)
+                        إدارة وتحرير أسئلة الاختبار ({quizQuestions.length}{" "}
+                        سؤال)
                       </p>
                     </div>
                   </div>
@@ -965,8 +992,10 @@ const AdminContentDetailPage = () => {
                                       سؤال {globalIndex + 1}
                                     </span>
                                     <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs">
-                                      {question.question_type ===
-                                      "multiple_choice"
+                                      {question.question_type === "image"
+                                        ? "صورة"
+                                        : question.question_type ===
+                                          "multiple_choice"
                                         ? "اختيار متعدد"
                                         : question.question_type ===
                                           "true_false"
@@ -977,6 +1006,27 @@ const AdminContentDetailPage = () => {
                                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                                     {question.question}
                                   </h3>
+
+                                  {/* Question Image (if available) */}
+                                  {(question?.question_type === "image" ||
+                                    question?.image) && (
+                                    <div className="mb-4">
+                                      <div className="rounded-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800">
+                                        <div className="w-full flex items-center justify-center p-4">
+                                          {question.image ? (
+                                            <img
+                                              src={getImageDataUrl(
+                                                question.image
+                                              )}
+                                              alt="صورة السؤال"
+                                              className="max-h-80 object-contain rounded-lg shadow-md"
+                                            />
+                                          ) : null}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
                                   {(question.question_type ===
                                     "multiple_choice" ||
                                     question.question_type ===
@@ -1287,6 +1337,29 @@ const AdminContentDetailPage = () => {
                   rows={3}
                   className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
+              </div>
+
+              <div className="p-4 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="use_images_generate"
+                    checked={generateParams.use_images}
+                    onChange={(e) =>
+                      setGenerateParams((prev) => ({
+                        ...prev,
+                        use_images: e.target.checked,
+                      }))
+                    }
+                    className="w-5 h-5 text-cyan-600 bg-white dark:bg-gray-700 border-cyan-300 dark:border-cyan-700 rounded focus:ring-cyan-500 dark:focus:ring-cyan-600 focus:ring-2 cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-cyan-800 dark:text-cyan-300">
+                    استخدام الصور المستخرجة (إذا توفرت) داخل الأسئلة
+                  </span>
+                </label>
+                <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-2 mr-8">
+                  إذا كان المصدر ملف PDF، سيتم استخراج الصور وإنشاء أسئلة بصرية
+                </p>
               </div>
             </div>
 
