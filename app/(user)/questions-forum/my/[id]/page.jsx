@@ -1180,6 +1180,9 @@ const QuestionSetDetailPage = () => {
                                       ? "حرج"
                                       : question.question_category === "linking"
                                       ? "ربط"
+                                      : question.question_category ===
+                                        "critical_thinking"
+                                      ? "تفكير نقدي"
                                       : question.question_category}
                                   </p>
                                 </div>
