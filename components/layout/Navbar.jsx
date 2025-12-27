@@ -376,7 +376,7 @@ const Navbar = ({ children }) => {
 
                     {/* Notification Dropdown Panel */}
                     <div
-                      className={`absolute top-full left-0 mt-2 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 transition-all transform origin-top-left ${
+                      className={`absolute top-full right-0 mt-2 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 transition-all transform origin-top-right ${
                         isNotifOpen
                           ? "duration-100 ease-out scale-100 opacity-100 visible"
                           : "duration-75 ease-in scale-95 opacity-0 invisible pointer-events-none"
@@ -502,7 +502,7 @@ const Navbar = ({ children }) => {
                 {isAuthenticated ? (
                   <button
                     onClick={toggleMobileMenu}
-                    className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500 hover:border-blue-600 smooth flex items-center justify-center relative"
+                    className="w-10 h-10 rounded-full overflow-hidden smooth flex items-center justify-center relative"
                   >
                     {user?.profile_picture ? (
                       <img
