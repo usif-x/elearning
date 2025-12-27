@@ -558,37 +558,32 @@ const Navbar = ({ children }) => {
 
                       {/* Mobile Notification Dropdown */}
                       <div
-                        className={`absolute top-full right-[-60px] xs:right-0 mt-2 w-[85vw] max-w-[320px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 transition-all transform origin-top-right ${
+                        className={`absolute top-full right-0 mt-2 w-72 bg-white dark:bg-[#0f172a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 transition-all transform origin-top-right ${
                           isNotifOpen
                             ? "duration-100 ease-out scale-100 opacity-100 visible"
                             : "duration-75 ease-in scale-95 opacity-0 invisible pointer-events-none"
                         }`}
                       >
-                        <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
-                          <h3 className="font-bold text-gray-800 dark:text-white text-sm">
+                        <div className="px-5 py-4 text-right border-b border-gray-100 dark:border-gray-800">
+                          <p className="text-gray-800 dark:text-white font-bold text-base">
                             الإشعارات
-                          </h3>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              fetchNotifications(true);
-                            }}
-                            className="text-xs text-blue-500"
-                          >
-                            تحديث
-                          </button>
+                          </p>
                         </div>
-                        <div className="max-h-[50vh] overflow-y-auto">
+                        <div className="py-2 flex flex-col max-h-[60vh] overflow-y-auto">
                           {notifications.length === 0 && !notifLoading ? (
-                            <div className="p-6 text-center text-gray-500">
+                            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                              <Icon
+                                icon="solar:bell-off-bold-duotone"
+                                className="w-12 h-12 mx-auto mb-2 opacity-50"
+                              />
                               <p className="text-sm">لا توجد إشعارات</p>
                             </div>
                           ) : (
-                            <div className="py-2">
+                            <>
                               {notifications.map((notif) => (
                                 <div
                                   key={notif.id}
-                                  className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+                                  className="flex items-start gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
                                 >
                                   <Icon
                                     icon={
@@ -607,28 +602,46 @@ const Navbar = ({ children }) => {
                                     }`}
                                   />
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                                    <h4 className="text-sm font-semibold mb-1">
                                       {notif.title}
                                     </h4>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-1.5">
+                                    <p className="text-xs line-clamp-2 mb-1.5 opacity-80">
                                       {notif.message}
                                     </p>
-                                    <span className="text-[10px] text-gray-500">
+                                    <span className="text-[10px] opacity-60">
                                       {formatDate(notif.created_at)}
                                     </span>
                                   </div>
                                 </div>
                               ))}
+                            </>
+                          )}
+                          {notifLoading && (
+                            <div className="p-4 text-center">
+                              <Icon
+                                icon="solar:loading-bold-duotone"
+                                className="w-6 h-6 animate-spin text-blue-500 mx-auto"
+                              />
                             </div>
                           )}
-                          {!notifLoading && hasMoreNotifs && (
-                            <button
-                              onClick={handleLoadMoreNotifs}
-                              className="w-full py-3 text-sm text-blue-600 border-t border-gray-100 dark:border-gray-700"
-                            >
-                              عرض المزيد
-                            </button>
-                          )}
+                          {!notifLoading &&
+                            hasMoreNotifs &&
+                            notifications.length > 0 && (
+                              <div className="mt-2 border-t border-gray-100 dark:border-gray-800 pt-2">
+                                <button
+                                  onClick={handleLoadMoreNotifs}
+                                  className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors w-full group"
+                                >
+                                  <Icon
+                                    icon="solar:refresh-bold"
+                                    className="w-5 h-5 text-blue-500 group-hover:text-blue-600 transition-colors"
+                                  />
+                                  <span className="font-medium">
+                                    عرض المزيد
+                                  </span>
+                                </button>
+                              </div>
+                            )}
                         </div>
                       </div>
                     </div>
