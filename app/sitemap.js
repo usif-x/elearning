@@ -1,4 +1,7 @@
-import { getFeaturedCourses } from "@/services/Courses";
+import {
+  getCourseLectures,
+  getFeaturedCourses,
+} from "@/services/CoursesServer";
 
 export default async function sitemap() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://yourdomain.com";
@@ -80,18 +83,63 @@ export default async function sitemap() {
   ];
 
   // Dynamic course routes
-  let courseRoutes = [];
+  let dynamicRoutes = [];
   try {
     const courses = await getFeaturedCourses();
-    courseRoutes = courses.map((course) => ({
-      url: `${baseUrl}/courses/${course.id}`,
-      lastModified: new Date(course.updated_at || course.created_at),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+
+    for (const course of courses) {
+      // Course page
+      dynamicRoutes.push({
+        url: `${baseUrl}/courses/${course.id}`,
+        lastModified: new Date(course.updated_at || course.created_at),
+        changeFrequency: "weekly",
+        priority: 0.8,
+      });
+
+      // Lecture list page
+      dynamicRoutes.push({
+        url: `${baseUrl}/courses/${course.id}/lecture`,
+        lastModified: new Date(course.updated_at || course.created_at),
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
+
+      // Fetch lectures
+      const lectures = await getCourseLectures(course.id);
+
+      for (const lecture of lectures) {
+        // Lecture detail page
+        dynamicRoutes.push({
+          url: `${baseUrl}/courses/${course.id}/lecture/${lecture.id}`,
+          lastModified: new Date(course.updated_at || course.created_at),
+          changeFrequency: "weekly",
+          priority: 0.7,
+        });
+
+        // Content list page
+        dynamicRoutes.push({
+          url: `${baseUrl}/courses/${course.id}/lecture/${lecture.id}/content`,
+          lastModified: new Date(course.updated_at || course.created_at),
+          changeFrequency: "weekly",
+          priority: 0.6,
+        });
+
+        // Contents
+        if (lecture.contents) {
+          for (const content of lecture.contents) {
+            dynamicRoutes.push({
+              url: `${baseUrl}/courses/${course.id}/lecture/${lecture.id}/content/${content.id}`,
+              lastModified: new Date(course.updated_at || course.created_at),
+              changeFrequency: "weekly",
+              priority: 0.6,
+            });
+          }
+        }
+      }
+    }
   } catch (error) {
     console.error("Error fetching courses for sitemap:", error);
   }
 
-  return [...staticRoutes, ...courseRoutes];
+  return [...staticRoutes, ...dynamicRoutes];
 }
