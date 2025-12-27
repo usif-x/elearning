@@ -36,6 +36,30 @@ export default async function sitemap() {
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/teaching-session`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/ai-explain`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/pdf-question-file`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/practice-quiz`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
+    {
       url: `${baseUrl}/profile`,
       lastModified: new Date(),
       changeFrequency: "weekly",

@@ -15,6 +15,19 @@ Allow: /pdf-question-file/
 Allow: /ai-explain/
 Allow: /teaching-session/
 
+
+Allow: /_next/static/
+Allow: /_next/image/
+
+# Optional: Block specific user pages that might be private
+# Disallow: /profile/
+# Uncomment above if you want to keep user profiles private
+
+# Allow important static files
+Allow: /favicon.ico
+Allow: /logo.png
+Allow: /image/
+
 # Disallow admin and private areas
 Disallow: /admin/
 Disallow: /api/
@@ -25,4 +38,4 @@ Disallow: /forgot-password
 Disallow: /academic/
 
 # Sitemap location
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://dahhehet-medical.app/sitemap.xml
