@@ -651,200 +651,190 @@ const Navbar = ({ children }) => {
           </div>
 
           {/* === MOBILE MENU DROPDOWN === */}
-          {isMobileMenuOpen && (
-            <div className="absolute top-[70px] rtl:right-4 ltr:left-4 w-72 bg-[#0f172a] rounded-xl shadow-2xl border border-gray-800 overflow-hidden z-50 lg:hidden flex flex-col animate-fade-in">
-              {/* Header: Home */}
-              <Link
-                href="/"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-between px-5 py-4 text-white hover:bg-white/5 border-b border-gray-800 transition-colors"
-              >
-                <span className="font-bold text-lg">الصفحة الرئيسية</span>
-                <Icon
-                  icon="solar:home-bold"
-                  className="w-6 h-6 text-teal-500"
-                />
-              </Link>
+          <div
+            className={`absolute top-[70px] rtl:right-4 ltr:left-4 w-72 bg-white dark:bg-[#0f172a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 lg:hidden flex flex-col transition-all transform origin-top-right ${
+              isMobileMenuOpen
+                ? "duration-100 ease-out scale-100 opacity-100 visible"
+                : "duration-75 ease-in scale-95 opacity-0 invisible pointer-events-none"
+            }`}
+          >
+            {/* User Greeting */}
+            {isAuthenticated && (
+              <div className="px-5 py-4 text-right border-b border-gray-100 dark:border-gray-800">
+                <p className="text-gray-800 dark:text-white font-bold text-base">
+                  أهلاً {user?.display_name || user?.full_name}
+                </p>
+              </div>
+            )}
 
-              {/* User Greeting */}
-              {isAuthenticated && (
-                <div className="px-5 py-4 text-right border-b border-gray-800">
-                  <p className="text-white font-bold text-base">
-                    أهلاً {user?.display_name || user?.full_name}
-                  </p>
-                </div>
-              )}
-
-              {/* Links List */}
-              <div className="py-2 flex flex-col max-h-[60vh] overflow-y-auto">
-                {isAuthenticated ? (
-                  <>
-                    {/* Admin */}
-                    {userType === "admin" && (
-                      <Link
-                        href="/admin/dashboard"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                      >
-                        <span className="font-medium">لوحة الإدارة</span>
-                        <Icon
-                          icon="solar:shield-user-bold"
-                          className="w-5 h-5 text-teal-500"
-                        />
-                      </Link>
-                    )}
-
-                    {/* Community */}
+            {/* Links List */}
+            <div className="py-2 flex flex-col max-h-[60vh] overflow-y-auto">
+              {isAuthenticated ? (
+                <>
+                  {/* Admin or Profile */}
+                  {userType === "admin" ? (
                     <Link
-                      href="/community"
+                      href="/admin/dashboard"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                     >
-                      <span className="font-medium">منتدى الطلبة</span>
                       <Icon
-                        icon="solar:users-group-rounded-bold"
-                        className="w-5 h-5 text-teal-500"
+                        icon="solar:shield-user-bold"
+                        className="w-5 h-5 text-blue-500"
                       />
+                      <span className="font-medium">لوحة الإدارة</span>
                     </Link>
-
-                    {/* Profile */}
+                  ) : (
                     <Link
                       href="/profile"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                     >
-                      <span className="font-medium">حسابي</span>
                       <Icon
                         icon="solar:user-circle-bold"
-                        className="w-5 h-5 text-teal-500"
+                        className="w-5 h-5 text-blue-500"
                       />
+                      <span className="font-medium">حسابي</span>
                     </Link>
+                  )}
 
-                    {/* Courses */}
-                    <Link
-                      href="/courses"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">كورساتي</span>
-                      <Icon
-                        icon="solar:book-bookmark-bold"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
+                  {/* Practice Quiz */}
+                  <Link
+                    href="/practice-quiz"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:clipboard-list-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">اختبارات تدريبية</span>
+                  </Link>
 
-                    {/* Practice Quiz */}
-                    <Link
-                      href="/practice-quiz"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">اختبارات تدريبية</span>
-                      <Icon
-                        icon="solar:clipboard-list-bold"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
+                  {/* Questions Forum */}
+                  <Link
+                    href="/questions-forum"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="mdi:frequently-asked-questions"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">منتدي الأسئلة</span>
+                  </Link>
 
-                    {/* Questions Forum */}
-                    <Link
-                      href="/questions-forum"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">منتدي الأسئلة</span>
-                      <Icon
-                        icon="mdi:frequently-asked-questions"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
+                  {/* PDF Generator */}
+                  <Link
+                    href="/pdf-question-file"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:document-add-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">مولد الاختبارات PDF</span>
+                  </Link>
 
-                    {/* PDF Generator */}
-                    <Link
-                      href="/pdf-question-file"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">مولد الاختبارات PDF</span>
-                      <Icon
-                        icon="solar:document-add-bold"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
+                  {/* Teaching Session */}
+                  <Link
+                    href="/teaching-session"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:chat-round-dots-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">جلسة تعليمية</span>
+                  </Link>
 
-                    {/* Teaching Session */}
-                    <Link
-                      href="/teaching-session"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">جلسة تعليمية</span>
-                      <Icon
-                        icon="solar:chat-round-dots-bold"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
+                  {/* AI Explain */}
+                  <Link
+                    href="/ai-explain"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="ri:book-ai-fill"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">شرح محتوى</span>
+                  </Link>
 
-                    {/* AI Explain */}
-                    <Link
-                      href="/ai-explain"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">شرح محتوى</span>
-                      <Icon
-                        icon="ri:book-ai-fill"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
+                  {/* Community */}
+                  <Link
+                    href="/community"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:users-group-rounded-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">منتدى الطلبة</span>
+                  </Link>
 
-                    {/* Logout */}
-                    <div className="mt-2 border-t border-gray-800 pt-2">
-                      <Link
-                        href="/logout"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between px-5 py-3 text-white hover:bg-red-500/10 transition-colors group"
-                      >
-                        <span className="font-medium group-hover:text-red-400 transition-colors">
-                          تسجيل خروج
-                        </span>
-                        <Icon
-                          icon="solar:logout-bold"
-                          className="w-5 h-5 text-teal-500 group-hover:text-red-400 transition-colors"
-                        />
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  // Guest links
-                  <>
+                  {/* Courses */}
+                  <Link
+                    href="/courses"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:book-bookmark-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">كورساتي</span>
+                  </Link>
+
+                  {/* Logout */}
+                  <div className="mt-2 border-t border-gray-100 dark:border-gray-800 pt-2">
                     <Link
-                      href="/login"
+                      href="/logout"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors group"
                     >
-                      <span className="font-medium">تسجيل الدخول</span>
                       <Icon
-                        icon="solar:login-3-bold"
-                        className="w-5 h-5 text-teal-500"
+                        icon="solar:logout-bold"
+                        className="w-5 h-5 text-blue-500 group-hover:text-red-500 transition-colors"
                       />
+                      <span className="font-medium group-hover:text-red-500 transition-colors">
+                        تسجيل خروج
+                      </span>
                     </Link>
-                    <Link
-                      href="/register"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-5 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <span className="font-medium">إنشاء حساب</span>
-                      <Icon
-                        icon="solar:user-plus-bold"
-                        className="w-5 h-5 text-teal-500"
-                      />
-                    </Link>
-                  </>
-                )}
-              </div>
+                  </div>
+                </>
+              ) : (
+                // Guest links
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:login-3-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">تسجيل الدخول</span>
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Icon
+                      icon="solar:user-plus-bold"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    <span className="font-medium">إنشاء حساب</span>
+                  </Link>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {!isAuthenticated && (
