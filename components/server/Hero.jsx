@@ -1,20 +1,22 @@
 "use client";
 
-import { IBM_Plex_Sans_Arabic, Lemonada } from "next/font/google";
+import { Almarai, Lemonada } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 
 const lemonada = Lemonada({ subsets: ["latin", "arabic"], weight: "400" });
-const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["latin", "arabic"],
-  weight: "400",
+const almarai = Almarai({
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "700", "800"],
+  variable: "--font-almarai",
+  display: "swap",
 });
 
 const Hero = () => {
   return (
     // Section container with the new blue theme and dark mode variant.
     <section
-      className={`bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 dark:from-blue-900 dark:via-blue-950 dark:to-slate-900 text-white transition-colors duration-300 min-h-screen relative overflow-hidden ${ibmPlexSansArabic.className}`}
+      className={`bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 dark:from-blue-900 dark:via-blue-950 dark:to-slate-900 text-white transition-colors duration-300 min-h-screen relative overflow-hidden ${almarai.className}`}
       dir="rtl"
     >
       {/* Decorative Background Elements */}

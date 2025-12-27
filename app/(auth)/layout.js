@@ -1,11 +1,13 @@
 import "@/app/globals.css";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Almarai } from "next/font/google";
 
-const IBMSans = IBM_Plex_Sans_Arabic({
+const almarai = Almarai({
   subsets: ["arabic", "latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  weight: ["300", "400", "700", "800"],
+  variable: "--font-almarai",
+  display: "swap",
 });
 
 export default function AuthLayout({ children }) {
@@ -33,7 +35,7 @@ export default function AuthLayout({ children }) {
         />
       </head>
       <body
-        className={`${IBMSans.className} bg-white dark:bg-zinc-950 smooth antialiased`}
+        className={`${almarai.className} bg-white dark:bg-zinc-950 smooth antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider>
