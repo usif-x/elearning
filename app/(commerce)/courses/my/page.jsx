@@ -213,14 +213,25 @@ const MyCourses = () => {
                       </div>
                       {/* Button */}
                       <div className="md:w-full w-1/2">
-                        <Link
-                          href={`/courses/${enrollment.course_id}`}
-                          className="w-full block"
-                        >
-                          <button className="border-2 transition-all duration-300 w-full rounded-xl px-4 py-2 bg-sky-500 border-sky-500 dark:bg-sky-500 dark:border-sky-500 text-white hover:bg-sky-600">
-                            متابعة التعلم
-                          </button>
-                        </Link>
+                        {enrollment.course_sellable === false ? (
+                          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-xl px-3 py-2 text-center">
+                            <p
+                              className="text-sm font-bold text-red-600 dark:text-red-400"
+                              dir="rtl"
+                            >
+                              الكورس غير متاح حالياً
+                            </p>
+                          </div>
+                        ) : (
+                          <Link
+                            href={`/courses/${enrollment.course_id}`}
+                            className="w-full block"
+                          >
+                            <button className="border-2 transition-all duration-300 w-full rounded-xl px-4 py-2 bg-sky-500 border-sky-500 dark:bg-sky-500 dark:border-sky-500 text-white hover:bg-sky-600">
+                              متابعة التعلم
+                            </button>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
