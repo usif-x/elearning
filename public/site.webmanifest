@@ -1,19 +1,57 @@
 {
-  "name": "E-Learning Platform",
-  "short_name": "E-Learning",
+  "name": "دحيحة ميديكال - منصة التعلم الإلكتروني",
+  "short_name": "دحيحة ميديكال",
+  "description": "منصة تعليمية شاملة تقدم دورات تدريبية متنوعة في مجال الطب والعلوم الصحية",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "dir": "rtl",
+  "lang": "ar",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  "categories": ["education", "medical", "learning"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "الكورسات",
+      "short_name": "الكورسات",
+      "description": "تصفح جميع الكورسات المتاحة",
+      "url": "/courses",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "ملفي الشخصي",
+      "short_name": "الملف الشخصي",
+      "description": "عرض ملفك الشخصي",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
 }

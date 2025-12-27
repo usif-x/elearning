@@ -1,3 +1,4 @@
+import ServiceWorkerRegistration from "@/components/client/ServiceWorkerRegistration";
 import SessionTracker from "@/components/client/SessionTracker";
 import SnowEffect from "@/components/client/SnowEffect";
 // import TokenValidator from "@/components/client/TokenValidator";
@@ -123,6 +124,17 @@ export default function RootLayout({ children }) {
         />
         <meta name="theme-color" content="#3B82F6" />
         <meta name="msapplication-TileColor" content="#3B82F6" />
+
+        {/* PWA Meta Tags */}
+        <meta name="application-name" content="دحيحة ميديكال" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="دحيحة ميديكال" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+        <meta name="msapplication-tap-highlight" content="no" />
+
         <link
           rel="apple-touch-icon"
           sizes="180x180"
@@ -172,6 +184,7 @@ export default function RootLayout({ children }) {
       >
         <ThemeProvider>
           {/* <TokenValidator /> */}
+          <ServiceWorkerRegistration />
           <SessionTracker />
           <SnowEffect />
           {children}
