@@ -649,171 +649,47 @@ const Navbar = ({ children }) => {
               </div>
             </div>
           </div>
-          {/* === MOBILE MENU (Sliding Sidebar) === */}
-          {/* Backdrop/Overlay */}
-          <div
-            className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
-              isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          {/* Sliding Sidebar */}
-          <div
-            className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl z-50 lg:hidden overflow-y-auto transition-all duration-300 ease-out ${
-              isMobileMenuOpen
-                ? "translate-x-0 opacity-100"
-                : "translate-x-full opacity-0"
-            }`}
-          >
-            {/* Close Button */}
-            <div className="sticky top-0 right-0 p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 z-10">
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 smooth flex items-center justify-center ml-auto"
-              >
-                <Icon
-                  icon="solar:close-circle-bold"
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400"
-                />
-              </button>
-            </div>
 
-            <div className="p-5 space-y-4">
-              {isAuthenticated ? (
-                <>
-                  {/* User Profile Card */}
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 px-5 py-6 rounded-2xl shadow-lg mb-6 transform transition-all duration-300 hover:scale-[1.02]">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-white/20 backdrop-blur-sm border-3 border-white/30 flex items-center justify-center ring-4 ring-blue-400/30">
-                        {user?.profile_picture ? (
-                          <img
-                            src={user.profile_picture}
-                            alt={user.full_name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Icon
-                            icon="solar:user-bold"
-                            className="w-8 h-8 text-white"
-                          />
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-bold text-white text-base truncate">
-                            أهلاً {user?.display_name || user?.full_name}
-                          </p>
-                          {getVerificationBadge()}
-                        </div>
-
-                        {user?.phone_number && (
-                          <p className="text-sm text-blue-100 flex items-center gap-1">
-                            <Icon
-                              icon="solar:phone-bold"
-                              className="w-3.5 h-3.5"
-                            />
-                            {user.phone_number}
-                          </p>
-                        )}
-
-                        {user?.telegram_username && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <Icon
-                              icon="bxl:telegram"
-                              className="w-4 h-4 text-blue-100"
-                            />
-                            <p className="text-sm text-blue-100 truncate">
-                              @{user.telegram_username}
-                            </p>
-                            {getTelegramVerificationBadge()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Navigation Links with Animation */}
-                  <div className="space-y-1.5">
-                    {/* Home Link */}
-                    <Link
-                      href="/"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                        pathname === "/"
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          pathname === "/"
-                            ? "bg-white/20"
-                            : "bg-blue-100 dark:bg-blue-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:home-bold-duotone"
-                          className={`w-5 h-5 ${
-                            pathname === "/"
-                              ? "text-white"
-                              : "text-blue-600 dark:text-blue-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">الصفحة الرئيسية</span>
-                    </Link>
-
+          {/* === MOBILE MENU DROPDOWN === */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="space-y-2">
+                {isAuthenticated ? (
+                  <>
                     {userType === "admin" ? (
                       <Link
                         href="/admin/dashboard"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] bg-red-500 text-white shadow-lg shadow-red-500/30 hover:bg-red-600"
+                        className="flex items-center gap-3 w-full p-3 rounded-md smooth bg-red-500 text-white hover:bg-red-600"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                          <Icon
-                            icon="solar:shield-user-bold"
-                            className="w-5 h-5 text-white"
-                          />
-                        </div>
-                        <span className="font-semibold">لوحة الإدارة</span>
+                        <Icon
+                          icon="solar:shield-user-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>لوحة الإدارة</span>
                       </Link>
                     ) : (
-                      <>
-                        <Link
-                          href="/profile"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                            isProfileDropdownActive()
-                              ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                          }`}
-                        >
-                          <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isProfileDropdownActive()
-                                ? "bg-white/20"
-                                : "bg-blue-100 dark:bg-blue-900/30"
-                            }`}
-                          >
-                            <Icon
-                              icon="solar:user-circle-bold-duotone"
-                              className={`w-5 h-5 ${
-                                isProfileDropdownActive()
-                                  ? "text-white"
-                                  : "text-blue-600 dark:text-blue-400"
-                              }`}
-                            />
-                          </div>
-                          <span className="font-semibold">حسابي</span>
-                        </Link>
-                      </>
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
+                          isProfileDropdownActive()
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <Icon
+                          icon="solar:user-circle-bold"
+                          className="w-5 h-5"
+                        />
+                        <span>ملفي الشخصي</span>
+                      </Link>
                     )}
 
                     <Link
                       href="/practice-quiz"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3 rounded-xl smooth ${
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
                         pathname === "/practice-quiz"
                           ? "bg-blue-500 text-white"
                           : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -829,259 +705,130 @@ const Navbar = ({ children }) => {
                     <Link
                       href="/questions-forum"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
                         pathname === "/questions-forum"
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          pathname === "/questions-forum"
-                            ? "bg-white/20"
-                            : "bg-green-100 dark:bg-green-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:chat-square-like-bold-duotone"
-                          className={`w-5 h-5 ${
-                            pathname === "/questions-forum"
-                              ? "text-white"
-                              : "text-green-600 dark:text-green-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">منتدى الأسئلة</span>
-                    </Link>
-
-                    <Link
-                      href="/community"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                        isCommunityActive()
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          isCommunityActive()
-                            ? "bg-white/20"
-                            : "bg-cyan-100 dark:bg-cyan-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:users-group-rounded-bold-duotone"
-                          className={`w-5 h-5 ${
-                            isCommunityActive()
-                              ? "text-white"
-                              : "text-cyan-600 dark:text-cyan-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">منتدى الطلاب</span>
-                    </Link>
-
-                    <Link
-                      href="/courses"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                        isCoursesDropdownActive()
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          isCoursesDropdownActive()
-                            ? "bg-white/20"
-                            : "bg-orange-100 dark:bg-orange-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:book-bookmark-bold-duotone"
-                          className={`w-5 h-5 ${
-                            isCoursesDropdownActive()
-                              ? "text-white"
-                              : "text-orange-600 dark:text-orange-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">كورساتي</span>
-                    </Link>
-
-                    <Link
-                      href="/teaching-session"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                        pathname === "/teaching-session"
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          pathname === "/teaching-session"
-                            ? "bg-white/20"
-                            : "bg-indigo-100 dark:bg-indigo-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:chat-round-dots-bold-duotone"
-                          className={`w-5 h-5 ${
-                            pathname === "/teaching-session"
-                              ? "text-white"
-                              : "text-indigo-600 dark:text-indigo-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">جلسة تعليمية</span>
-                    </Link>
-
-                    <Link
-                      href="/ai-explain"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                        pathname === "/ai-explain"
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          pathname === "/ai-explain"
-                            ? "bg-white/20"
-                            : "bg-pink-100 dark:bg-pink-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:stars-bold-duotone"
-                          className={`w-5 h-5 ${
-                            pathname === "/ai-explain"
-                              ? "text-white"
-                              : "text-pink-600 dark:text-pink-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">شرح محتوى AI</span>
+                      <Icon
+                        icon="mdi:frequently-asked-questions"
+                        className="w-5 h-5"
+                      />
+                      <span>منتدي الأسئلة</span>
                     </Link>
 
                     <Link
                       href="/pdf-question-file"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
                         pathname === "/pdf-question-file"
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          pathname === "/pdf-question-file"
-                            ? "bg-white/20"
-                            : "bg-teal-100 dark:bg-teal-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:document-add-bold-duotone"
-                          className={`w-5 h-5 ${
-                            pathname === "/pdf-question-file"
-                              ? "text-white"
-                              : "text-teal-600 dark:text-teal-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">مولد اختبارات PDF</span>
+                      <Icon
+                        icon="solar:document-add-bold"
+                        className="w-5 h-5"
+                      />
+                      <span>مولد الاختبارات PDF</span>
                     </Link>
 
                     <Link
-                      href="/practice-quiz"
+                      href="/teaching-session"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] ${
-                        pathname === "/practice-quiz"
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
+                        pathname === "/teaching-session"
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          pathname === "/practice-quiz"
-                            ? "bg-white/20"
-                            : "bg-purple-100 dark:bg-purple-900/30"
-                        }`}
-                      >
-                        <Icon
-                          icon="solar:clipboard-list-bold-duotone"
-                          className={`w-5 h-5 ${
-                            pathname === "/practice-quiz"
-                              ? "text-white"
-                              : "text-purple-600 dark:text-purple-400"
-                          }`}
-                        />
-                      </div>
-                      <span className="font-semibold">اختبارات تدريبية</span>
+                      <Icon
+                        icon="solar:chat-round-dots-bold"
+                        className="w-5 h-5"
+                      />
+                      <span>جلسة تعليمية</span>
                     </Link>
-                  </div>
 
-                  {/* Logout Button */}
-                  <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                    <Link
+                      href="/ai-explain"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
+                        pathname === "/ai-explain"
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <Icon icon="ri:book-ai-fill" className="w-5 h-5" />
+                      <span>شرح محتوى</span>
+                    </Link>
+
+                    <Link
+                      href="/community"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
+                        isCommunityActive()
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <Icon
+                        icon="solar:users-group-rounded-bold"
+                        className="w-5 h-5"
+                      />
+                      <span>منتدى الطلاب</span>
+                    </Link>
+
+                    <Link
+                      href="/courses"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 w-full p-3 rounded-md smooth ${
+                        isCoursesDropdownActive()
+                          ? "bg-blue-500 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <Icon
+                        icon="solar:book-bookmark-bold"
+                        className="w-5 h-5"
+                      />
+                      <span>الكورسات</span>
+                    </Link>
+
                     <Link
                       href="/logout"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 w-full p-3.5 rounded-xl smooth transform transition-all duration-200 hover:scale-[1.02] bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/30 hover:from-red-600 hover:to-rose-600"
+                      className="flex items-center gap-3 w-full p-3 rounded-md smooth text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-800 hover:bg-rose-200 dark:hover:bg-rose-700"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                        <Icon
-                          icon="solar:logout-2-bold-duotone"
-                          className="w-5 h-5 text-white"
-                        />
-                      </div>
-                      <span className="font-semibold">تسجيل خروج</span>
+                      <Icon icon="solar:logout-bold" className="w-5 h-5" />
+                      <span>تسجيل الخروج</span>
+                    </Link>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <Link
+                      href={"/login"}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-3 w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md smooth"
+                    >
+                      <Icon icon="solar:login-3-bold" className="w-5 h-5" />
+                      تسجيل الدخول
+                    </Link>
+                    <Link
+                      href={"/register"}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-3 w-full p-3 bg-blue-500 text-white hover:bg-blue-600 rounded-md smooth"
+                    >
+                      <Icon icon="solar:user-plus-bold" className="w-5 h-5" />
+                      إنشاء حساب
                     </Link>
                   </div>
-                </>
-              ) : (
-                <div className="space-y-3 pt-10">
-                  <div className="text-center mb-6">
-                    <Icon
-                      icon="solar:user-circle-bold-duotone"
-                      className="w-20 h-20 mx-auto text-gray-400 dark:text-gray-600 mb-3"
-                    />
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">
-                      مرحباً بك
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      سجل دخولك للوصول لجميع الميزات
-                    </p>
-                  </div>
-
-                  <Link
-                    href={"/login"}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-3 w-full p-4 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl smooth font-semibold border-2 border-blue-200 dark:border-blue-800 transform transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    <Icon
-                      icon="solar:login-3-bold-duotone"
-                      className="w-5 h-5"
-                    />
-                    تسجيل الدخول
-                  </Link>
-                  <Link
-                    href={"/register"}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-3 w-full p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-xl smooth font-semibold shadow-lg shadow-blue-500/30 transform transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    <Icon
-                      icon="solar:user-plus-bold-duotone"
-                      className="w-5 h-5"
-                    />
-                    إنشاء حساب جديد
-                  </Link>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
+
         {!isAuthenticated && (
           <div
             dir="ltr"
