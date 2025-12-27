@@ -376,7 +376,7 @@ const Navbar = ({ children }) => {
 
                     {/* Notification Dropdown Panel */}
                     <div
-                      className={`absolute top-full right-0 mt-2 w-80 md:w-96 bg-white dark:bg-[#0f172a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 transition-all transform origin-top-right ${
+                      className={`absolute top-full left-0 mt-2 w-80 md:w-96 bg-white dark:bg-[#0f172a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 transition-all transform origin-top-right ${
                         isNotifOpen
                           ? "duration-100 ease-out scale-100 opacity-100 visible"
                           : "duration-75 ease-in scale-95 opacity-0 invisible pointer-events-none"
