@@ -375,90 +375,94 @@ const Navbar = ({ children }) => {
                     </button>
 
                     {/* Notification Dropdown Panel */}
-                    {isNotifOpen && (
-                      <div className="absolute top-full left-0 mt-2 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-fade-in origin-top-left">
-                        {/* Header */}
-                        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
-                          <h3 className="font-bold text-gray-800 dark:text-white">
-                            الإشعارات
-                          </h3>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              fetchNotifications(true);
-                            }}
-                            className="text-xs text-blue-500 hover:underline flex items-center gap-1"
-                          >
-                            <Icon icon="solar:refresh-bold" /> تحديث
-                          </button>
-                        </div>
-
-                        {/* List */}
-                        <div className="max-h-[60vh] overflow-y-auto">
-                          {notifications.length === 0 && !notifLoading ? (
-                            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                              <Icon
-                                icon="solar:bell-off-bold-duotone"
-                                className="w-12 h-12 mx-auto mb-2 opacity-50"
-                              />
-                              <p>لا توجد إشعارات حالياً</p>
-                            </div>
-                          ) : (
-                            <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                              {notifications.map((notif) => (
-                                <div
-                                  key={notif.id}
-                                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex gap-3"
-                                >
-                                  <div
-                                    className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                                      notif.type === "error"
-                                        ? "bg-red-500"
-                                        : notif.type === "success"
-                                        ? "bg-green-500"
-                                        : "bg-blue-500"
-                                    }`}
-                                  ></div>
-                                  <div className="flex-1">
-                                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-0.5">
-                                      {notif.title}
-                                    </h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-2">
-                                      {notif.message}
-                                    </p>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                                      {formatDate(notif.created_at)}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Loading State */}
-                          {notifLoading && (
-                            <div className="p-4 text-center">
-                              <Icon
-                                icon="solar:loading-bold-duotone"
-                                className="w-6 h-6 animate-spin text-blue-500 mx-auto"
-                              />
-                            </div>
-                          )}
-
-                          {/* Load More Button */}
-                          {!notifLoading &&
-                            hasMoreNotifs &&
-                            notifications.length > 0 && (
-                              <button
-                                onClick={handleLoadMoreNotifs}
-                                className="w-full py-3 text-sm text-center text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 font-medium border-t border-gray-100 dark:border-gray-700 transition-colors"
-                              >
-                                عرض المزيد
-                              </button>
-                            )}
-                        </div>
+                    <div
+                      className={`absolute top-full left-0 mt-2 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 transition-all transform origin-top-left ${
+                        isNotifOpen
+                          ? "duration-100 ease-out scale-100 opacity-100 visible"
+                          : "duration-75 ease-in scale-95 opacity-0 invisible pointer-events-none"
+                      }`}
+                    >
+                      {/* Header */}
+                      <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+                        <h3 className="font-bold text-gray-800 dark:text-white">
+                          الإشعارات
+                        </h3>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fetchNotifications(true);
+                          }}
+                          className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                        >
+                          <Icon icon="solar:refresh-bold" /> تحديث
+                        </button>
                       </div>
-                    )}
+
+                      {/* List */}
+                      <div className="max-h-[60vh] overflow-y-auto">
+                        {notifications.length === 0 && !notifLoading ? (
+                          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                            <Icon
+                              icon="solar:bell-off-bold-duotone"
+                              className="w-12 h-12 mx-auto mb-2 opacity-50"
+                            />
+                            <p>لا توجد إشعارات حالياً</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {notifications.map((notif) => (
+                              <div
+                                key={notif.id}
+                                className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex gap-3"
+                              >
+                                <div
+                                  className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                                    notif.type === "error"
+                                      ? "bg-red-500"
+                                      : notif.type === "success"
+                                      ? "bg-green-500"
+                                      : "bg-blue-500"
+                                  }`}
+                                ></div>
+                                <div className="flex-1">
+                                  <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-0.5">
+                                    {notif.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-2">
+                                    {notif.message}
+                                  </p>
+                                  <span className="text-[10px] text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                                    {formatDate(notif.created_at)}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Loading State */}
+                        {notifLoading && (
+                          <div className="p-4 text-center">
+                            <Icon
+                              icon="solar:loading-bold-duotone"
+                              className="w-6 h-6 animate-spin text-blue-500 mx-auto"
+                            />
+                          </div>
+                        )}
+
+                        {/* Load More Button */}
+                        {!notifLoading &&
+                          hasMoreNotifs &&
+                          notifications.length > 0 && (
+                            <button
+                              onClick={handleLoadMoreNotifs}
+                              className="w-full py-3 text-sm text-center text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 font-medium border-t border-gray-100 dark:border-gray-700 transition-colors"
+                            >
+                              عرض المزيد
+                            </button>
+                          )}
+                      </div>
+                    </div>
                   </div>
                 </>
               ) : (
@@ -518,67 +522,71 @@ const Navbar = ({ children }) => {
                       </button>
 
                       {/* Mobile Notification Dropdown */}
-                      {isNotifOpen && (
-                        <div className="absolute top-full right-[-60px] xs:right-0 mt-2 w-[85vw] max-w-[320px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-fade-in">
-                          <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
-                            <h3 className="font-bold text-gray-800 dark:text-white text-sm">
-                              الإشعارات
-                            </h3>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                fetchNotifications(true);
-                              }}
-                              className="text-xs text-blue-500"
-                            >
-                              تحديث
-                            </button>
-                          </div>
-                          <div className="max-h-[50vh] overflow-y-auto">
-                            {notifications.length === 0 && !notifLoading ? (
-                              <div className="p-6 text-center text-gray-500">
-                                <p className="text-sm">لا توجد إشعارات</p>
-                              </div>
-                            ) : (
-                              <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {notifications.map((notif) => (
-                                  <div
-                                    key={notif.id}
-                                    className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 text-right"
-                                  >
-                                    <div
-                                      className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                                        notif.type === "error"
-                                          ? "bg-red-500"
-                                          : "bg-blue-500"
-                                      }`}
-                                    ></div>
-                                    <div className="flex-1">
-                                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                        {notif.title}
-                                      </h4>
-                                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 my-1">
-                                        {notif.message}
-                                      </p>
-                                      <span className="text-[10px] text-gray-400">
-                                        {formatDate(notif.created_at)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {!notifLoading && hasMoreNotifs && (
-                              <button
-                                onClick={handleLoadMoreNotifs}
-                                className="w-full py-3 text-sm text-blue-600 border-t border-gray-100 dark:border-gray-700"
-                              >
-                                عرض المزيد
-                              </button>
-                            )}
-                          </div>
+                      <div
+                        className={`absolute top-full right-[-60px] xs:right-0 mt-2 w-[85vw] max-w-[320px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 transition-all transform origin-top-right ${
+                          isNotifOpen
+                            ? "duration-100 ease-out scale-100 opacity-100 visible"
+                            : "duration-75 ease-in scale-95 opacity-0 invisible pointer-events-none"
+                        }`}
+                      >
+                        <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+                          <h3 className="font-bold text-gray-800 dark:text-white text-sm">
+                            الإشعارات
+                          </h3>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchNotifications(true);
+                            }}
+                            className="text-xs text-blue-500"
+                          >
+                            تحديث
+                          </button>
                         </div>
-                      )}
+                        <div className="max-h-[50vh] overflow-y-auto">
+                          {notifications.length === 0 && !notifLoading ? (
+                            <div className="p-6 text-center text-gray-500">
+                              <p className="text-sm">لا توجد إشعارات</p>
+                            </div>
+                          ) : (
+                            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                              {notifications.map((notif) => (
+                                <div
+                                  key={notif.id}
+                                  className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 text-right"
+                                >
+                                  <div
+                                    className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                                      notif.type === "error"
+                                        ? "bg-red-500"
+                                        : "bg-blue-500"
+                                    }`}
+                                  ></div>
+                                  <div className="flex-1">
+                                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                      {notif.title}
+                                    </h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 my-1">
+                                      {notif.message}
+                                    </p>
+                                    <span className="text-[10px] text-gray-400">
+                                      {formatDate(notif.created_at)}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {!notifLoading && hasMoreNotifs && (
+                            <button
+                              onClick={handleLoadMoreNotifs}
+                              className="w-full py-3 text-sm text-blue-600 border-t border-gray-100 dark:border-gray-700"
+                            >
+                              عرض المزيد
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </>
                 )}
@@ -1243,13 +1251,6 @@ const Navbar = ({ children }) => {
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                 />
-                <button
-                  type="submit"
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  disabled={!searchQuery.trim()}
-                >
-                  <Icon icon="material-symbols:search" className="w-6 h-6" />
-                </button>
               </div>
               {showSuggestions && autocompleteSuggestions.length > 0 && (
                 <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-64 overflow-y-auto">
