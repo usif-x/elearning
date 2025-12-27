@@ -26,6 +26,8 @@ const CoursesPage = () => {
           price_before_discount: course.price_before_discount || 0,
           is_free: course.is_free,
           is_subscribed: course.is_subscribed,
+          is_pinned: course.is_pinned || false,
+          sellable: course.sellable !== undefined ? course.sellable : true,
           created_at: course.created_at,
         }));
         setCourses(formattedCourses);
@@ -55,6 +57,8 @@ const CoursesPage = () => {
           price_before_discount: course.price_before_discount || 0,
           is_free: course.is_free,
           is_subscribed: course.is_subscribed,
+          is_pinned: course.is_pinned || false,
+          sellable: course.sellable !== undefined ? course.sellable : true,
           created_at: course.created_at,
         }));
         setCourses(formattedCourses);

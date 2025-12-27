@@ -81,6 +81,8 @@ const CourseCard = ({ courses = [] }) => {
           created_at = "",
           is_subscribed = false,
           is_free = false,
+          is_pinned = false,
+          sellable = true,
           onSubscribeClick = () => {},
         }) => (
           <div key={id} className="group relative h-full">
@@ -103,6 +105,13 @@ const CourseCard = ({ courses = [] }) => {
                   loading="lazy"
                   className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover"
                 />
+                {/* Pinned Badge */}
+                {is_pinned && (
+                  <div className="absolute top-2 right-2 bg-amber-500 dark:bg-amber-600 text-white px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 animate-pulse">
+                    <Icon icon="mdi:pin" className="w-4 h-4" />
+                    <span className="text-xs sm:text-sm font-bold">مثبت</span>
+                  </div>
+                )}
               </div>
 
               {/* Content Container */}
@@ -190,27 +199,42 @@ const CourseCard = ({ courses = [] }) => {
 
                 {/* Buttons Container */}
                 <div className="w-full sm:w-auto flex-1 flex flex-col space-y-2">
-                  <Link
-                    href={isAuthenticated ? `/courses/${id}` : `/courses/${id}`}
-                    className="w-full"
-                  >
-                    <button
-                      className={`border-2 transition-all duration-300 w-full rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium ${
-                        is_subscribed
-                          ? "bg-sky-500 border-sky-500 dark:bg-sky-500 dark:border-sky-500 text-white hover:bg-sky-600 active:bg-sky-700"
-                          : "bg-transparent border-sky-500 dark:border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white active:bg-sky-600"
-                      }`}
-                    >
-                      الدخول للكورس
-                    </button>
-                  </Link>
-                  {!is_subscribed && price != 0 && (
-                    <button
-                      className="border-2 transition-all duration-300 w-full rounded-lg sm:rounded-xl bg-sky-500 border-sky-500 dark:bg-sky-600 dark:border-sky-600 hover:bg-sky-600 active:bg-sky-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium"
-                      onClick={onSubscribeClick}
-                    >
-                      الإشتراك في الكورس !
-                    </button>
+                  {!sellable ? (
+                    <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-center">
+                      <p
+                        className="text-sm sm:text-base font-bold text-red-600 dark:text-red-400"
+                        dir="rtl"
+                      >
+                        الكورس غير متاح للبيع حالياً
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <Link
+                        href={
+                          isAuthenticated ? `/courses/${id}` : `/courses/${id}`
+                        }
+                        className="w-full"
+                      >
+                        <button
+                          className={`border-2 transition-all duration-300 w-full rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium ${
+                            is_subscribed
+                              ? "bg-sky-500 border-sky-500 dark:bg-sky-500 dark:border-sky-500 text-white hover:bg-sky-600 active:bg-sky-700"
+                              : "bg-transparent border-sky-500 dark:border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white active:bg-sky-600"
+                          }`}
+                        >
+                          الدخول للكورس
+                        </button>
+                      </Link>
+                      {!is_subscribed && price != 0 && (
+                        <button
+                          className="border-2 transition-all duration-300 w-full rounded-lg sm:rounded-xl bg-sky-500 border-sky-500 dark:bg-sky-600 dark:border-sky-600 hover:bg-sky-600 active:bg-sky-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium"
+                          onClick={onSubscribeClick}
+                        >
+                          الإشتراك في الكورس !
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

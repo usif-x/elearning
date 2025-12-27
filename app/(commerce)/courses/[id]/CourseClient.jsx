@@ -71,6 +71,70 @@ const CourseData = ({ initialCourse, initialLectures }) => {
     );
   }
 
+  // Check if course is not sellable
+  const isSellable = course.sellable !== undefined ? course.sellable : true;
+
+  if (!isSellable) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 pb-12">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            {/* Course Image */}
+            <div className="relative h-64">
+              <Image
+                src={
+                  course.image
+                    ? `${apiUrl}/storage/${course.image}`
+                    : "/placeholder.jpg"
+                }
+                alt={course.name}
+                fill
+                loading="lazy"
+                className="object-cover"
+              />
+            </div>
+
+            {/* Course Info */}
+            <div className="p-8">
+              <h1
+                className="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center"
+                dir="rtl"
+              >
+                {course.name}
+              </h1>
+
+              {/* Not Sellable Message */}
+              <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-xl p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <Icon
+                    icon="mdi:alert-circle"
+                    className="w-16 h-16 text-red-500"
+                  />
+                </div>
+                <h2
+                  className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2"
+                  dir="rtl"
+                >
+                  الكورس غير متاح للبيع حالياً
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4" dir="rtl">
+                  عذراً، لا يمكن عرض محتوى هذا الكورس في الوقت الحالي
+                </p>
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300"
+                >
+                  <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                  <span>العودة للكورسات</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     return `${mins} دقيقة`;
