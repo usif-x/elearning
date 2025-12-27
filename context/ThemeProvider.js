@@ -1,4 +1,5 @@
 "use client";
+import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext(undefined);
@@ -6,13 +7,26 @@ const ThemeContext = createContext(undefined);
 export function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Sync with the theme that was already applied by the script
-    const isDark = document.documentElement.classList.contains("dark");
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const isDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+
+    // Ensure the class is correct based on storage/preference
+    // We run this on mount and on path change to handle layout transitions
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
     setIsDarkMode(isDark);
     setMounted(true);
-  }, []);
+  }, [pathname]);
 
   const toggleDarkMode = () => {
     const html = document.documentElement;
