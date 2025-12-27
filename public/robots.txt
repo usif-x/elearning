@@ -1,0 +1,28 @@
+# robots.txt for دحيحة ميديكال E-Learning Platform
+
+# Allow all bots to index public content
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /courses
+Allow: /guest-questions-forum
+Allow: /profile/
+Allow: /community/
+Allow: /questions-forum/
+Allow: /practice-quiz/
+Allow: /pdf-question-file/
+Allow: /ai-explain/
+Allow: /teaching-session/
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+
+# Disallow auth-specific paths
+Disallow: /logout
+Disallow: /forgot-password
+Disallow: /academic/
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml

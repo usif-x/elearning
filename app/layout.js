@@ -3,6 +3,10 @@ import SnowEffect from "@/components/client/SnowEffect";
 // import TokenValidator from "@/components/client/TokenValidator";
 import { ToastContainerWrapper } from "@/components/ui/ToastContainerWrapper";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import {
+  generateOrganizationSchema,
+  generateWebsiteSchema,
+} from "@/libs/seo-config";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 
@@ -75,13 +79,17 @@ export const metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "your-google-site-verification-code",
-    yandex: "your-yandex-verification-code",
-    yahoo: "your-yahoo-verification-code",
-  },
+  // TODO: Replace with actual verification codes from Google Search Console, Yandex, etc.
+  // verification: {
+  //   google: "your-google-site-verification-code",
+  //   yandex: "your-yandex-verification-code",
+  //   yahoo: "your-yahoo-verification-code",
+  // },
   category: "education",
   classification: "Educational Platform",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://yourdomain.com"
+  ),
 };
 
 export default function RootLayout({ children }) {
@@ -141,6 +149,19 @@ export default function RootLayout({ children }) {
           defer
           src="https://umami.usif.space/script.js"
           data-website-id="b66544ae-16df-4ce3-b059-42ea1899f394"
+        />
+        {/* Structured Data for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateOrganizationSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateWebsiteSchema()),
+          }}
         />
       </head>
       <body
